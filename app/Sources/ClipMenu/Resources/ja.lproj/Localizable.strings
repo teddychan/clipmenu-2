@@ -1,0 +1,248 @@
+/* ClipMenu UI strings — Japanese (issue #19). Best-effort; review by a native
+   speaker recommended before public release. */
+
+/* General preferences */
+"Launch on Login" = "ログイン時に起動";
+"Automatically check for updates" = "アップデートを自動的に確認";
+"Check for Updates Now…" = "今すぐアップデートを確認…";
+"Input \"⌘ + V\" after menu item selection" = "メニュー項目選択後に「⌘ + V」を入力";
+"Sort history order by:" = "履歴の並び順：";
+"Date created" = "作成日";
+"Date last used" = "最終使用日";
+"Max clipboard history size:" = "クリップボード履歴の最大数：";
+"items" = "項目";
+"Time interval to observe the clipboard:" = "クリップボードを監視する間隔：";
+"Time interval" = "時間間隔";
+"Save clipboard history on quit" = "終了時にクリップボード履歴を保存";
+"Status Bar icon style:" = "ステータスバーアイコンのスタイル：";
+"None" = "なし";
+"Show" = "表示";
+"Exclude Applications" = "除外するアプリケーション";
+"Define Exclude Options…" = "除外オプションを設定…";
+"Export clipboard history as:" = "クリップボード履歴の書き出し形式：";
+"Single file" = "単一ファイル";
+"Multiple files" = "複数ファイル";
+"separator:" = "区切り文字：";
+"New Line" = "改行";
+"Carriage Return and New Line" = "復帰と改行";
+"Carriage Return" = "復帰";
+"Tab" = "タブ";
+"Space" = "スペース";
+"Export…" = "書き出す…";
+
+/* Exclude-applications sheet */
+"Exclude these applications:" = "以下のアプリケーションを除外：";
+"Other…" = "その他…";
+"Done" = "完了";
+
+/* Menu preferences */
+"Clipboard History" = "クリップボード履歴";
+"Number of items place inline:" = "インライン表示する項目数：";
+"Number of items place inside a folder:" = "フォルダ内に表示する項目数：";
+"Number of characters in the menu:" = "メニュー内の文字数：";
+"Mark menu items with numbers" = "メニュー項目に番号を付ける";
+"Add key equivalents to numeric keys" = "数字キーにショートカットを割り当てる";
+"Show labels to indicate item types" = "項目の種類を示すラベルを表示";
+"Add a menu item to clear clipboard history" = "クリップボード履歴を消去するメニュー項目を追加";
+"Show alert panel before clear history" = "履歴を消去する前に警告パネルを表示";
+"Show tool tip on a menu item" = "メニュー項目にツールチップを表示";
+"Max length of tool tip string:" = "ツールチップ文字列の最大長：";
+"Appearance" = "外観";
+"Change font size in the menu" = "メニューのフォントサイズを変更";
+"Font size:" = "フォントサイズ：";
+"Fit to the icon size" = "アイコンサイズに合わせる";
+"Select" = "選択";
+"Size:" = "サイズ：";
+"Icon" = "アイコン";
+"Show Icon in the Menu" = "メニューにアイコンを表示";
+"Icon size:" = "アイコンサイズ：";
+"Show Image" = "画像を表示";
+"Width:" = "幅：";
+"Height:" = "高さ：";
+"Snippets' position:" = "スニペットの位置：";
+"Above the clipboard history" = "クリップボード履歴の上";
+"Below the clipboard history" = "クリップボード履歴の下";
+
+/* Type preferences */
+"Select clipboard types to store:" = "保存するクリップボードの種類を選択：";
+"Plain Text" = "プレーンテキスト";
+"Rich Text Format (RTF)" = "リッチテキスト形式 (RTF)";
+"Filenames" = "ファイル名";
+"TIFF Image" = "TIFF 画像";
+"Rich Text Format Directory (RTFD)" = "リッチテキスト形式ディレクトリ (RTFD)";
+
+/* Action preferences */
+"Enable Action" = "アクションを有効にする";
+"Invoke the first action immediately if there is only one action" = "アクションが1つだけの場合は最初のアクションをすぐに実行";
+"Click behavior" = "クリック動作";
+"Control-click / right-click:" = "Control クリック／右クリック：";
+"Shift-click:" = "Shift クリック：";
+"Option-click:" = "Option クリック：";
+"Command-click:" = "Command クリック：";
+"Pop up Action Menu" = "アクションメニューを表示";
+"Actions" = "アクション";
+"Built-in" = "組み込み";
+"Script" = "スクリプト";
+"User Script" = "ユーザスクリプト";
+
+/* Settings window / tabs */
+"%@ Settings" = "%@ 設定";
+"General" = "一般";
+"Menu" = "メニュー";
+"Type" = "種類";
+"Action" = "アクション";
+"Shortcuts" = "ショートカット";
+"Backup" = "バックアップ";
+"Subscription" = "サブスクリプション";
+"Free trial active" = "無料トライアル中";
+"Subscription active" = "サブスクリプション有効";
+"Renews %@" = "更新日 %@";
+"Main Menu:" = "メインメニュー：";
+"History Menu:" = "履歴メニュー：";
+"Snippets Menu:" = "スニペットメニュー：";
+"Type shortcut…" = "ショートカットを入力…";
+
+/* Main menu items */
+"Clear History" = "履歴を消去";
+"Edit Snippets…" = "スニペットを編集…";
+"Preferences…" = "環境設定…";
+"Quit ClipMenu" = "ClipMenu を終了";
+"Snippets" = "スニペット";
+"History" = "履歴";
+"(Image)" = "（画像）";
+"(PDF)" = "（PDF）";
+"(Filenames)" = "（ファイル名）";
+
+/* Clear-history confirmation */
+"Are you sure you want to clear your clipboard history?" = "クリップボード履歴を消去してもよろしいですか？";
+"Cancel" = "キャンセル";
+"OK" = "OK";
+
+/* Built-in action tool tips */
+"Remove the clip from the clipboard history" = "クリップボード履歴からこのクリップを削除";
+"Paste the clip as Plain Text" = "クリップをプレーンテキストとして貼り付け";
+"Paste the clip as POSIX File Path" = "クリップを POSIX ファイルパスとして貼り付け";
+
+/* Edit menu */
+"Edit" = "編集";
+"Undo" = "取り消す";
+"Redo" = "やり直す";
+"Cut" = "カット";
+"Copy" = "コピー";
+"Paste" = "ペースト";
+"Select All" = "すべてを選択";
+
+/* Login-item prompt */
+"Launch ClipMenu on system startup?" = "システム起動時に ClipMenu を起動しますか？";
+"You can change this setting in the Preferences if you want." = "この設定は後で環境設定で変更できます。";
+"Launch on system startup" = "システム起動時に起動";
+"Don't Launch" = "起動しない";
+
+/* Snippet editor */
+"Import…" = "読み込む…";
+"No Folder Selected" = "フォルダが選択されていません";
+"untitled folder" = "名称未設定フォルダ";
+"untitled snippet" = "名称未設定スニペット";
+
+/* iCloud sync (General preferences) */
+"iCloud" = "iCloud";
+"Sync settings and snippets via iCloud" = "設定とスニペットを iCloud で同期";
+"Restart ClipMenu to apply iCloud sync changes." = "iCloud 同期の変更を適用するには ClipMenu を再起動してください。";
+"Syncing via iCloud" = "iCloud で同期中";
+"iCloud unavailable — using local storage only" = "iCloud を利用できません — ローカルストレージのみ使用";
+
+/* iCloud sync status (Backup preferences, v2.6.2) */
+"Last synced: %@" = "最終同期: %@";
+"Waiting for first sync…" = "最初の同期を待っています…";
+"%d snippet" = "%d 個のスニペット";
+"%d snippets" = "%d 個のスニペット";
+"%d folder" = "%d 個のフォルダ";
+"%d folders" = "%d 個のフォルダ";
+"%1$@, %2$@ synced" = "%1$@、%2$@ を同期しました";
+"No snippets synced yet" = "まだ同期されたスニペットはありません";
+
+/* About pane */
+"About" = "情報";
+"Version %@" = "バージョン %@";
+"Version %@ (%@)" = "バージョン %@ (%@)";
+"This application is open source and can be found on GitHub:" = "このアプリケーションはオープンソースで、GitHub で公開されています:";
+"Released under the MIT License." = "MIT ライセンスの下で公開されています。";
+"Contributors" = "貢献者";
+"Creator" = "作者";
+"Original ClipMenu" = "オリジナルの ClipMenu";
+/* Language selection (General preferences) */
+"Language" = "言語";
+"Restart ClipMenu to apply the language change." = "言語の変更を適用するには ClipMenu を再起動してください。";
+
+/* Snippet editor — new keys (issue #31) */
+"Folders" = "フォルダ";
+"Sort folders by" = "フォルダの並べ替え";
+"Sort snippets in \"%@\"" = "「%@」のスニペットを並べ替え";
+"Manual (drag)" = "手動（ドラッグ）";
+"Name (A → Z)" = "名前（A → Z）";
+"Name (Z → A)" = "名前（Z → A）";
+"New Folder" = "新規フォルダ";
+"New Snippet" = "新規スニペット";
+"Delete" = "削除";
+"Label" = "ラベル";
+"Content" = "内容";
+"No Snippet Selected" = "スニペットが選択されていません";
+"Restart Now" = "今すぐ再起動";
+"Rename" = "名前を変更";
+
+/* Auto-paste info popover (App Store build) */
+"About automatic paste" = "自動ペーストについて";
+"When you pick a clip, this version copies it to the clipboard. Mac App Store apps run in a sandbox and aren't allowed to paste into other apps for you, so you press ⌘V yourself." = "クリップを選ぶと、このバージョンはそれをクリップボードにコピーします。Mac App Store のアプリはサンドボックスで動作し、他のアプリへ代わりにペーストすることが許可されていないため、⌘V はご自身で押してください。";
+"To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "クリップを選択した後に自動でペーストするには、GitHub から ClipMenu をダウンロードするか、Homebrew でインストールしてください。";
+"Download ClipMenu" = "ClipMenu をダウンロード";
+
+/* iCloud subscription paywall (App Store build, v2.6.0) */
+"iCloud sync is available in the Mac App Store edition of ClipMenu." = "iCloud 同期は Mac App Store 版の ClipMenu でご利用いただけます。";
+"iCloud Sync" = "iCloud 同期";
+"Sync your snippets and settings across all your Macs." = "スニペットと設定をすべての Mac で同期します。";
+"Subscribe — %@ / year" = "登録 — %@／年";
+"Restore Purchases" = "購入を復元";
+"Manage Subscription…" = "サブスクリプションを管理…";
+"Terms of Use" = "利用規約";
+"Privacy Policy" = "プライバシーポリシー";
+"Not Now" = "あとで";
+
+/* Paywall gate (App Store build, whole-app subscription) */
+"Your full clipboard manager, with iCloud sync for snippets and settings." = "スニペットと設定を iCloud 同期できる、フル機能のクリップボードマネージャー。";
+"Includes a 1-month free trial" = "1 か月の無料トライアル付き";
+"Start Free Trial" = "無料トライアルを開始";
+"%@ / year" = "%@／年";
+"Subscribe" = "登録する";
+"Auto-renewing subscription. Your Apple ID is charged at purchase confirmation and renews each year unless cancelled at least 24 hours before the period ends. Manage anytime in App Store settings." = "自動更新サブスクリプションです。購入確定時に Apple ID へ課金され、期間終了の 24 時間以上前に解約しない限り毎年自動更新されます。App Store の設定でいつでも管理できます。";
+"Couldn't reach the App Store. Check your connection and try again." = "App Store に接続できませんでした。接続を確認して、もう一度お試しください。";
+"Try Again" = "再試行";
+"Get ClipMenu on the Mac App Store to use iCloud sync" = "iCloud 同期を使うには、Mac App Store 版の ClipMenu をダウンロードしてください";
+"No active subscription found for this Apple ID." = "この Apple ID で有効なサブスクリプションが見つかりませんでした。";
+"Couldn't restore purchases. Check your connection and try again." = "購入を復元できませんでした。接続を確認してもう一度お試しください。";
+
+/* iCloud snippet backup & restore (v2.8.0) */
+"Snippet Versions in iCloud" = "iCloud のスニペットバージョン";
+"Clipboard History Export" = "クリップボード履歴の書き出し";
+"Back up now" = "今すぐバックアップ";
+"Restore from iCloud…" = "iCloud から復元…";
+"Restore from iCloud" = "iCloud から復元";
+"Restoring…" = "復元中…";
+"Restore" = "復元";
+"ClipMenu keeps your last 20 backups of your snippets and folders in your private iCloud. You can restore any version; your current data is backed up first." = "ClipMenu はスニペットとフォルダの最新 20 件のバックアップを、あなたのプライベート iCloud に保存します。どのバージョンでも復元でき、復元前に現在のデータがバックアップされます。";
+"Backups use your private iCloud (encrypted in transit and at rest). Turn on Advanced Data Protection for end-to-end encryption." = "バックアップはプライベート iCloud を使用します（通信時・保存時とも暗号化）。エンドツーエンド暗号化には「高度なデータ保護」を有効にしてください。";
+"Backup saved." = "バックアップを保存しました。";
+"No changes since the last backup." = "前回のバックアップから変更はありません。";
+"iCloud backup failed. Try again later." = "iCloud バックアップに失敗しました。後でもう一度お試しください。";
+"No backups yet." = "まだバックアップがありません。";
+"Restore this backup?" = "このバックアップを復元しますか？";
+"This replaces all your current snippets and folders. Your current snippets are backed up first." = "現在のすべてのスニペットとフォルダを置き換えます。現在のスニペットは先にバックアップされます。";
+"folders" = "フォルダ";
+"snippets" = "スニペット";
+"Automatic" = "自動";
+"Manual" = "手動";
+"Before restore" = "復元前";
+"Couldn't load backups from iCloud." = "iCloud からバックアップを読み込めませんでした。";
+"Couldn't save a safety backup, so the restore was cancelled." = "安全のためのバックアップを保存できなかったため、復元を中止しました。";
+"This version was made on a newer app version and can't be restored." = "このバージョンは新しいバージョンのアプリで作成されたため、復元できません。";
+"Restore failed. Your current data was not changed." = "復元に失敗しました。現在のデータは変更されていません。";
+"iCloud & Backup" = "iCloud とバックアップ";

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Developer ID / Homebrew (direct, non-sandboxed) build entitlements.
+
+  iCloud is intentionally ABSENT as of 2.6.0: iCloud sync is a Mac App Store feature
+  sold as a $9.99/yr StoreKit subscription (see ClipMenu-AppStore.entitlements +
+  PremiumStore). StoreKit in-app purchase only works in App Store builds, so the
+  direct build ships without iCloud. At runtime DistributionChannel reports `.direct`
+  and the Backup pane shows "available in the Mac App Store edition" instead of the
+  sync toggle, so no CloudKit or key-value-store APIs are ever called in this build.
+-->
+<plist version="1.0">
+<dict/>
+</plist>

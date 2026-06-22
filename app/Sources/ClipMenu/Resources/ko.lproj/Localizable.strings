@@ -1,0 +1,248 @@
+/* ClipMenu UI strings — Korean (issue #19). Best-effort; review by a native
+   speaker recommended before public release. */
+
+/* General preferences */
+"Launch on Login" = "로그인 시 실행";
+"Automatically check for updates" = "자동으로 업데이트 확인";
+"Check for Updates Now…" = "지금 업데이트 확인…";
+"Input \"⌘ + V\" after menu item selection" = "메뉴 항목 선택 후 \"⌘ + V\" 입력";
+"Sort history order by:" = "기록 정렬 기준:";
+"Date created" = "생성 날짜";
+"Date last used" = "마지막 사용 날짜";
+"Max clipboard history size:" = "최대 클립보드 기록 수:";
+"items" = "개";
+"Time interval to observe the clipboard:" = "클립보드를 관찰하는 시간 간격:";
+"Time interval" = "시간 간격";
+"Save clipboard history on quit" = "종료 시 클립보드 기록 저장";
+"Status Bar icon style:" = "상태 막대 아이콘 스타일:";
+"None" = "없음";
+"Show" = "표시";
+"Exclude Applications" = "제외할 응용 프로그램";
+"Define Exclude Options…" = "제외 옵션 설정…";
+"Export clipboard history as:" = "클립보드 기록 내보내기 형식:";
+"Single file" = "단일 파일";
+"Multiple files" = "여러 파일";
+"separator:" = "구분자:";
+"New Line" = "줄 바꿈";
+"Carriage Return and New Line" = "캐리지 리턴 및 줄 바꿈";
+"Carriage Return" = "캐리지 리턴";
+"Tab" = "탭";
+"Space" = "공백";
+"Export…" = "내보내기…";
+
+/* Exclude-applications sheet */
+"Exclude these applications:" = "다음 응용 프로그램 제외:";
+"Other…" = "기타…";
+"Done" = "완료";
+
+/* Menu preferences */
+"Clipboard History" = "클립보드 기록";
+"Number of items place inline:" = "인라인으로 표시할 항목 수:";
+"Number of items place inside a folder:" = "폴더 안에 표시할 항목 수:";
+"Number of characters in the menu:" = "메뉴의 문자 수:";
+"Mark menu items with numbers" = "메뉴 항목에 번호 표시";
+"Add key equivalents to numeric keys" = "숫자 키에 단축키 추가";
+"Show labels to indicate item types" = "항목 유형을 나타내는 레이블 표시";
+"Add a menu item to clear clipboard history" = "클립보드 기록을 지우는 메뉴 항목 추가";
+"Show alert panel before clear history" = "기록을 지우기 전에 경고 패널 표시";
+"Show tool tip on a menu item" = "메뉴 항목에 도구 설명 표시";
+"Max length of tool tip string:" = "도구 설명 문자열의 최대 길이:";
+"Appearance" = "외관";
+"Change font size in the menu" = "메뉴의 글꼴 크기 변경";
+"Font size:" = "글꼴 크기:";
+"Fit to the icon size" = "아이콘 크기에 맞추기";
+"Select" = "선택";
+"Size:" = "크기:";
+"Icon" = "아이콘";
+"Show Icon in the Menu" = "메뉴에 아이콘 표시";
+"Icon size:" = "아이콘 크기:";
+"Show Image" = "이미지 표시";
+"Width:" = "너비:";
+"Height:" = "높이:";
+"Snippets' position:" = "스니펫 위치:";
+"Above the clipboard history" = "클립보드 기록 위";
+"Below the clipboard history" = "클립보드 기록 아래";
+
+/* Type preferences */
+"Select clipboard types to store:" = "저장할 클립보드 유형 선택:";
+"Plain Text" = "일반 텍스트";
+"Rich Text Format (RTF)" = "서식 있는 텍스트 형식 (RTF)";
+"Filenames" = "파일 이름";
+"TIFF Image" = "TIFF 이미지";
+"Rich Text Format Directory (RTFD)" = "서식 있는 텍스트 형식 디렉터리 (RTFD)";
+
+/* Action preferences */
+"Enable Action" = "동작 활성화";
+"Invoke the first action immediately if there is only one action" = "동작이 하나만 있으면 첫 번째 동작을 즉시 실행";
+"Click behavior" = "클릭 동작";
+"Control-click / right-click:" = "Control 클릭 / 오른쪽 클릭:";
+"Shift-click:" = "Shift 클릭:";
+"Option-click:" = "Option 클릭:";
+"Command-click:" = "Command 클릭:";
+"Pop up Action Menu" = "동작 메뉴 표시";
+"Actions" = "동작";
+"Built-in" = "기본 제공";
+"Script" = "스크립트";
+"User Script" = "사용자 스크립트";
+
+/* Settings window / tabs */
+"%@ Settings" = "%@ 설정";
+"General" = "일반";
+"Menu" = "메뉴";
+"Type" = "유형";
+"Action" = "동작";
+"Shortcuts" = "단축키";
+"Backup" = "백업";
+"Subscription" = "구독";
+"Free trial active" = "무료 체험 사용 중";
+"Subscription active" = "구독 사용 중";
+"Renews %@" = "%@에 갱신";
+"Main Menu:" = "메인 메뉴:";
+"History Menu:" = "기록 메뉴:";
+"Snippets Menu:" = "스니펫 메뉴:";
+"Type shortcut…" = "단축키 입력…";
+
+/* Main menu items */
+"Clear History" = "기록 지우기";
+"Edit Snippets…" = "스니펫 편집…";
+"Preferences…" = "환경설정…";
+"Quit ClipMenu" = "ClipMenu 종료";
+"Snippets" = "스니펫";
+"History" = "기록";
+"(Image)" = "(이미지)";
+"(PDF)" = "(PDF)";
+"(Filenames)" = "(파일 이름)";
+
+/* Clear-history confirmation */
+"Are you sure you want to clear your clipboard history?" = "클립보드 기록을 지우시겠습니까?";
+"Cancel" = "취소";
+"OK" = "확인";
+
+/* Built-in action tool tips */
+"Remove the clip from the clipboard history" = "클립보드 기록에서 이 클립 제거";
+"Paste the clip as Plain Text" = "클립을 일반 텍스트로 붙여넣기";
+"Paste the clip as POSIX File Path" = "클립을 POSIX 파일 경로로 붙여넣기";
+
+/* Edit menu */
+"Edit" = "편집";
+"Undo" = "실행 취소";
+"Redo" = "다시 실행";
+"Cut" = "오려두기";
+"Copy" = "복사하기";
+"Paste" = "붙여넣기";
+"Select All" = "전체 선택";
+
+/* Login-item prompt */
+"Launch ClipMenu on system startup?" = "시스템 시작 시 ClipMenu를 실행하시겠습니까?";
+"You can change this setting in the Preferences if you want." = "이 설정은 나중에 환경설정에서 변경할 수 있습니다.";
+"Launch on system startup" = "시스템 시작 시 실행";
+"Don't Launch" = "실행 안 함";
+
+/* Snippet editor */
+"Import…" = "가져오기…";
+"No Folder Selected" = "선택된 폴더 없음";
+"untitled folder" = "제목 없는 폴더";
+"untitled snippet" = "제목 없는 스니펫";
+
+/* iCloud sync (General preferences) */
+"iCloud" = "iCloud";
+"Sync settings and snippets via iCloud" = "iCloud로 설정 및 스니펫 동기화";
+"Restart ClipMenu to apply iCloud sync changes." = "iCloud 동기화 변경 사항을 적용하려면 ClipMenu를 다시 시작하십시오.";
+"Syncing via iCloud" = "iCloud로 동기화 중";
+"iCloud unavailable — using local storage only" = "iCloud를 사용할 수 없음 — 로컬 저장소만 사용";
+
+/* iCloud sync status (Backup preferences, v2.6.2) */
+"Last synced: %@" = "마지막 동기화: %@";
+"Waiting for first sync…" = "첫 동기화를 기다리는 중…";
+"%d snippet" = "스니펫 %d개";
+"%d snippets" = "스니펫 %d개";
+"%d folder" = "폴더 %d개";
+"%d folders" = "폴더 %d개";
+"%1$@, %2$@ synced" = "%1$@, %2$@ 동기화됨";
+"No snippets synced yet" = "아직 동기화된 스니펫이 없습니다";
+
+/* About pane */
+"About" = "정보";
+"Version %@" = "버전 %@";
+"Version %@ (%@)" = "버전 %@ (%@)";
+"This application is open source and can be found on GitHub:" = "이 애플리케이션은 오픈 소스이며 GitHub에서 확인할 수 있습니다:";
+"Released under the MIT License." = "MIT 라이선스로 배포됩니다.";
+"Contributors" = "기여자";
+"Creator" = "제작자";
+"Original ClipMenu" = "오리지널 ClipMenu";
+/* Language selection (General preferences) */
+"Language" = "언어";
+"Restart ClipMenu to apply the language change." = "언어 변경 사항을 적용하려면 ClipMenu를 다시 시작하십시오.";
+
+/* Snippet editor — new keys (issue #31) */
+"Folders" = "폴더";
+"Sort folders by" = "폴더 정렬 기준";
+"Sort snippets in \"%@\"" = "\"%@\"의 스니펫 정렬";
+"Manual (drag)" = "수동(드래그)";
+"Name (A → Z)" = "이름(A → Z)";
+"Name (Z → A)" = "이름(Z → A)";
+"New Folder" = "새 폴더";
+"New Snippet" = "새 스니펫";
+"Delete" = "삭제";
+"Label" = "레이블";
+"Content" = "내용";
+"No Snippet Selected" = "선택된 스니펫 없음";
+"Restart Now" = "지금 다시 시작";
+"Rename" = "이름 변경";
+
+/* Auto-paste info popover (App Store build) */
+"About automatic paste" = "자동 붙여넣기 정보";
+"When you pick a clip, this version copies it to the clipboard. Mac App Store apps run in a sandbox and aren't allowed to paste into other apps for you, so you press ⌘V yourself." = "항목을 선택하면 이 버전은 클립보드에 복사합니다. Mac App Store 앱은 샌드박스에서 실행되어 다른 앱에 대신 붙여넣을 수 없으므로 ⌘V를 직접 누르세요.";
+"To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "항목을 선택한 후 자동으로 붙여넣으려면 GitHub에서 ClipMenu를 다운로드하거나 Homebrew로 설치하세요.";
+"Download ClipMenu" = "ClipMenu 다운로드";
+
+/* iCloud subscription paywall (App Store build, v2.6.0) */
+"iCloud sync is available in the Mac App Store edition of ClipMenu." = "iCloud 동기화는 Mac App Store 버전의 ClipMenu에서 사용할 수 있습니다.";
+"iCloud Sync" = "iCloud 동기화";
+"Sync your snippets and settings across all your Macs." = "스니펫과 설정을 모든 Mac에서 동기화하세요.";
+"Subscribe — %@ / year" = "구독 — %@ / 년";
+"Restore Purchases" = "구입 복원";
+"Manage Subscription…" = "구독 관리…";
+"Terms of Use" = "이용 약관";
+"Privacy Policy" = "개인정보 처리방침";
+"Not Now" = "나중에";
+
+/* Paywall gate (App Store build, whole-app subscription) */
+"Your full clipboard manager, with iCloud sync for snippets and settings." = "스니펫과 설정을 iCloud로 동기화하는 완전한 클립보드 관리자.";
+"Includes a 1-month free trial" = "1개월 무료 체험 포함";
+"Start Free Trial" = "무료 체험 시작";
+"%@ / year" = "%@ / 년";
+"Subscribe" = "구독";
+"Auto-renewing subscription. Your Apple ID is charged at purchase confirmation and renews each year unless cancelled at least 24 hours before the period ends. Manage anytime in App Store settings." = "자동 갱신 구독입니다. 구매 확정 시 Apple ID로 결제되며, 기간 종료 24시간 전까지 취소하지 않으면 매년 자동으로 갱신됩니다. App Store 설정에서 언제든지 관리할 수 있습니다.";
+"Couldn't reach the App Store. Check your connection and try again." = "App Store에 연결할 수 없습니다. 연결을 확인한 후 다시 시도하세요.";
+"Try Again" = "다시 시도";
+"Get ClipMenu on the Mac App Store to use iCloud sync" = "iCloud 동기화를 사용하려면 Mac App Store에서 ClipMenu를 다운로드하세요";
+"No active subscription found for this Apple ID." = "이 Apple ID에 대한 활성 구독을 찾을 수 없습니다.";
+"Couldn't restore purchases. Check your connection and try again." = "구매를 복원할 수 없습니다. 연결을 확인한 후 다시 시도하세요.";
+
+/* iCloud snippet backup & restore (v2.8.0) */
+"Snippet Versions in iCloud" = "iCloud의 스니펫 버전";
+"Clipboard History Export" = "클립보드 기록 내보내기";
+"Back up now" = "지금 백업";
+"Restore from iCloud…" = "iCloud에서 복원…";
+"Restore from iCloud" = "iCloud에서 복원";
+"Restoring…" = "복원 중…";
+"Restore" = "복원";
+"ClipMenu keeps your last 20 backups of your snippets and folders in your private iCloud. You can restore any version; your current data is backed up first." = "ClipMenu는 스니펫과 폴더의 최근 백업 20개를 개인 iCloud에 보관합니다. 어떤 버전이든 복원할 수 있으며, 복원 전에 현재 데이터가 먼저 백업됩니다.";
+"Backups use your private iCloud (encrypted in transit and at rest). Turn on Advanced Data Protection for end-to-end encryption." = "백업은 개인 iCloud를 사용합니다(전송 및 저장 시 암호화). 종단 간 암호화를 사용하려면 고급 데이터 보호를 켜십시오.";
+"Backup saved." = "백업이 저장되었습니다.";
+"No changes since the last backup." = "마지막 백업 이후 변경 사항이 없습니다.";
+"iCloud backup failed. Try again later." = "iCloud 백업에 실패했습니다. 나중에 다시 시도해 주세요.";
+"No backups yet." = "아직 백업이 없습니다.";
+"Restore this backup?" = "이 백업을 복원하시겠습니까?";
+"This replaces all your current snippets and folders. Your current snippets are backed up first." = "현재의 모든 스니펫과 폴더를 대체합니다. 현재 스니펫은 먼저 백업됩니다.";
+"folders" = "폴더";
+"snippets" = "스니펫";
+"Automatic" = "자동";
+"Manual" = "수동";
+"Before restore" = "복원 전";
+"Couldn't load backups from iCloud." = "iCloud에서 백업을 불러올 수 없습니다.";
+"Couldn't save a safety backup, so the restore was cancelled." = "안전 백업을 저장하지 못해 복원이 취소되었습니다.";
+"This version was made on a newer app version and can't be restored." = "이 버전은 최신 버전의 앱에서 만들어져 복원할 수 없습니다.";
+"Restore failed. Your current data was not changed." = "복원에 실패했습니다. 현재 데이터는 변경되지 않았습니다.";
+"iCloud & Backup" = "iCloud 및 백업";

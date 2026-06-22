@@ -1,0 +1,248 @@
+/* ClipMenu UI strings — French (issue #19). Best-effort; review by a native
+   speaker recommended before public release. */
+
+/* General preferences */
+"Launch on Login" = "Ouvrir à l'ouverture de session";
+"Automatically check for updates" = "Rechercher automatiquement les mises à jour";
+"Check for Updates Now…" = "Rechercher les mises à jour maintenant…";
+"Input \"⌘ + V\" after menu item selection" = "Saisir « ⌘ + V » après la sélection d'un élément de menu";
+"Sort history order by:" = "Trier l'historique par :";
+"Date created" = "Date de création";
+"Date last used" = "Date de dernière utilisation";
+"Max clipboard history size:" = "Taille maximale de l'historique du presse-papiers :";
+"items" = "éléments";
+"Time interval to observe the clipboard:" = "Intervalle d'observation du presse-papiers :";
+"Time interval" = "Intervalle de temps";
+"Save clipboard history on quit" = "Enregistrer l'historique du presse-papiers en quittant";
+"Status Bar icon style:" = "Style de l'icône de la barre d'état :";
+"None" = "Aucun";
+"Show" = "Afficher";
+"Exclude Applications" = "Exclure des applications";
+"Define Exclude Options…" = "Définir les options d'exclusion…";
+"Export clipboard history as:" = "Exporter l'historique du presse-papiers comme :";
+"Single file" = "Fichier unique";
+"Multiple files" = "Plusieurs fichiers";
+"separator:" = "séparateur :";
+"New Line" = "Saut de ligne";
+"Carriage Return and New Line" = "Retour chariot et saut de ligne";
+"Carriage Return" = "Retour chariot";
+"Tab" = "Tabulation";
+"Space" = "Espace";
+"Export…" = "Exporter…";
+
+/* Exclude-applications sheet */
+"Exclude these applications:" = "Exclure ces applications :";
+"Other…" = "Autre…";
+"Done" = "Terminé";
+
+/* Menu preferences */
+"Clipboard History" = "Historique du presse-papiers";
+"Number of items place inline:" = "Nombre d'éléments en ligne :";
+"Number of items place inside a folder:" = "Nombre d'éléments par dossier :";
+"Number of characters in the menu:" = "Nombre de caractères dans le menu :";
+"Mark menu items with numbers" = "Numéroter les éléments du menu";
+"Add key equivalents to numeric keys" = "Ajouter des raccourcis aux touches numériques";
+"Show labels to indicate item types" = "Afficher des étiquettes pour indiquer le type d'élément";
+"Add a menu item to clear clipboard history" = "Ajouter un élément de menu pour effacer l'historique";
+"Show alert panel before clear history" = "Afficher une alerte avant d'effacer l'historique";
+"Show tool tip on a menu item" = "Afficher une infobulle sur les éléments de menu";
+"Max length of tool tip string:" = "Longueur maximale de l'infobulle :";
+"Appearance" = "Apparence";
+"Change font size in the menu" = "Modifier la taille de police du menu";
+"Font size:" = "Taille de police :";
+"Fit to the icon size" = "Adapter à la taille de l'icône";
+"Select" = "Sélectionner";
+"Size:" = "Taille :";
+"Icon" = "Icône";
+"Show Icon in the Menu" = "Afficher l'icône dans le menu";
+"Icon size:" = "Taille de l'icône :";
+"Show Image" = "Afficher l'image";
+"Width:" = "Largeur :";
+"Height:" = "Hauteur :";
+"Snippets' position:" = "Position des fragments :";
+"Above the clipboard history" = "Au-dessus de l'historique du presse-papiers";
+"Below the clipboard history" = "En dessous de l'historique du presse-papiers";
+
+/* Type preferences */
+"Select clipboard types to store:" = "Sélectionner les types de presse-papiers à conserver :";
+"Plain Text" = "Texte brut";
+"Rich Text Format (RTF)" = "Format de texte enrichi (RTF)";
+"Filenames" = "Noms de fichiers";
+"TIFF Image" = "Image TIFF";
+"Rich Text Format Directory (RTFD)" = "Répertoire de format de texte enrichi (RTFD)";
+
+/* Action preferences */
+"Enable Action" = "Activer les actions";
+"Invoke the first action immediately if there is only one action" = "Exécuter immédiatement la première action s'il n'y en a qu'une";
+"Click behavior" = "Comportement du clic";
+"Control-click / right-click:" = "Clic en maintenant Control / clic droit :";
+"Shift-click:" = "Clic en maintenant Maj :";
+"Option-click:" = "Clic en maintenant Option :";
+"Command-click:" = "Clic en maintenant Commande :";
+"Pop up Action Menu" = "Afficher le menu d'actions";
+"Actions" = "Actions";
+"Built-in" = "Intégré";
+"Script" = "Script";
+"User Script" = "Script utilisateur";
+
+/* Settings window / tabs */
+"%@ Settings" = "Réglages de %@";
+"General" = "Général";
+"Menu" = "Menu";
+"Type" = "Type";
+"Action" = "Action";
+"Shortcuts" = "Raccourcis";
+"Backup" = "Sauvegarde";
+"Subscription" = "Abonnement";
+"Free trial active" = "Essai gratuit actif";
+"Subscription active" = "Abonnement actif";
+"Renews %@" = "Renouvellement le %@";
+"Main Menu:" = "Menu principal :";
+"History Menu:" = "Menu d'historique :";
+"Snippets Menu:" = "Menu des fragments :";
+"Type shortcut…" = "Saisissez le raccourci…";
+
+/* Main menu items */
+"Clear History" = "Effacer l'historique";
+"Edit Snippets…" = "Modifier les fragments…";
+"Preferences…" = "Préférences…";
+"Quit ClipMenu" = "Quitter ClipMenu";
+"Snippets" = "Fragments";
+"History" = "Historique";
+"(Image)" = "(Image)";
+"(PDF)" = "(PDF)";
+"(Filenames)" = "(Noms de fichiers)";
+
+/* Clear-history confirmation */
+"Are you sure you want to clear your clipboard history?" = "Voulez-vous vraiment effacer l'historique du presse-papiers ?";
+"Cancel" = "Annuler";
+"OK" = "OK";
+
+/* Built-in action tool tips */
+"Remove the clip from the clipboard history" = "Retirer l'élément de l'historique du presse-papiers";
+"Paste the clip as Plain Text" = "Coller l'élément en texte brut";
+"Paste the clip as POSIX File Path" = "Coller l'élément comme chemin de fichier POSIX";
+
+/* Edit menu */
+"Edit" = "Édition";
+"Undo" = "Annuler";
+"Redo" = "Rétablir";
+"Cut" = "Couper";
+"Copy" = "Copier";
+"Paste" = "Coller";
+"Select All" = "Tout sélectionner";
+
+/* Login-item prompt */
+"Launch ClipMenu on system startup?" = "Ouvrir ClipMenu au démarrage du système ?";
+"You can change this setting in the Preferences if you want." = "Vous pourrez modifier ce réglage plus tard dans les Préférences.";
+"Launch on system startup" = "Ouvrir au démarrage du système";
+"Don't Launch" = "Ne pas ouvrir";
+
+/* Snippet editor */
+"Import…" = "Importer…";
+"No Folder Selected" = "Aucun dossier sélectionné";
+"untitled folder" = "dossier sans titre";
+"untitled snippet" = "fragment sans titre";
+
+/* iCloud sync (General preferences) */
+"iCloud" = "iCloud";
+"Sync settings and snippets via iCloud" = "Synchroniser les réglages et les extraits via iCloud";
+"Restart ClipMenu to apply iCloud sync changes." = "Redémarrez ClipMenu pour appliquer les modifications de synchronisation iCloud.";
+"Syncing via iCloud" = "Synchronisation via iCloud";
+"iCloud unavailable — using local storage only" = "iCloud indisponible — stockage local uniquement";
+
+/* iCloud sync status (Backup preferences, v2.6.2) */
+"Last synced: %@" = "Dernière synchronisation : %@";
+"Waiting for first sync…" = "En attente de la première synchronisation…";
+"%d snippet" = "%d fragment";
+"%d snippets" = "%d fragments";
+"%d folder" = "%d dossier";
+"%d folders" = "%d dossiers";
+"%1$@, %2$@ synced" = "%1$@, %2$@ synchronisés";
+"No snippets synced yet" = "Aucun fragment synchronisé pour l’instant";
+
+/* About pane */
+"About" = "À propos";
+"Version %@" = "Version %@";
+"Version %@ (%@)" = "Version %@ (%@)";
+"This application is open source and can be found on GitHub:" = "Cette application est open source et disponible sur GitHub :";
+"Released under the MIT License." = "Distribué sous licence MIT.";
+"Contributors" = "Contributeurs";
+"Creator" = "Créateur";
+"Original ClipMenu" = "ClipMenu original";
+/* Language selection (General preferences) */
+"Language" = "Langue";
+"Restart ClipMenu to apply the language change." = "Redémarrez ClipMenu pour appliquer le changement de langue.";
+
+/* Snippet editor — new keys (issue #31) */
+"Folders" = "Dossiers";
+"Sort folders by" = "Trier les dossiers par";
+"Sort snippets in \"%@\"" = "Trier les extraits dans « %@ »";
+"Manual (drag)" = "Manuel (glisser)";
+"Name (A → Z)" = "Nom (A → Z)";
+"Name (Z → A)" = "Nom (Z → A)";
+"New Folder" = "Nouveau dossier";
+"New Snippet" = "Nouvel extrait";
+"Delete" = "Supprimer";
+"Label" = "Libellé";
+"Content" = "Contenu";
+"No Snippet Selected" = "Aucun extrait sélectionné";
+"Restart Now" = "Redémarrer maintenant";
+"Rename" = "Renommer";
+
+/* Auto-paste info popover (App Store build) */
+"About automatic paste" = "À propos du collage automatique";
+"When you pick a clip, this version copies it to the clipboard. Mac App Store apps run in a sandbox and aren't allowed to paste into other apps for you, so you press ⌘V yourself." = "Lorsque vous choisissez un élément, cette version le copie dans le presse-papiers. Les apps du Mac App Store s'exécutent dans un bac à sable et ne sont pas autorisées à coller dans d'autres apps à votre place : vous appuyez donc vous-même sur ⌘V.";
+"To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "Pour coller automatiquement après avoir sélectionné un élément, téléchargez ClipMenu depuis GitHub ou installez-le avec Homebrew.";
+"Download ClipMenu" = "Télécharger ClipMenu";
+
+/* iCloud subscription paywall (App Store build, v2.6.0) */
+"iCloud sync is available in the Mac App Store edition of ClipMenu." = "La synchronisation iCloud est disponible dans l’édition Mac App Store de ClipMenu.";
+"iCloud Sync" = "Synchronisation iCloud";
+"Sync your snippets and settings across all your Macs." = "Synchronisez vos extraits et vos réglages sur tous vos Mac.";
+"Subscribe — %@ / year" = "S’abonner — %@/an";
+"Restore Purchases" = "Restaurer les achats";
+"Manage Subscription…" = "Gérer l’abonnement…";
+"Terms of Use" = "Conditions d’utilisation";
+"Privacy Policy" = "Politique de confidentialité";
+"Not Now" = "Plus tard";
+
+/* Paywall gate (App Store build, whole-app subscription) */
+"Your full clipboard manager, with iCloud sync for snippets and settings." = "Votre gestionnaire de presse-papiers complet, avec synchronisation iCloud pour les extraits et les réglages.";
+"Includes a 1-month free trial" = "Inclut un essai gratuit d’un mois";
+"Start Free Trial" = "Commencer l’essai gratuit";
+"%@ / year" = "%@/an";
+"Subscribe" = "S’abonner";
+"Auto-renewing subscription. Your Apple ID is charged at purchase confirmation and renews each year unless cancelled at least 24 hours before the period ends. Manage anytime in App Store settings." = "Abonnement à renouvellement automatique. Votre identifiant Apple est débité à la confirmation de l’achat et il se renouvelle chaque année, sauf annulation au moins 24 heures avant la fin de la période. Gérez-le à tout moment dans les réglages de l’App Store.";
+"Couldn't reach the App Store. Check your connection and try again." = "Impossible de joindre l’App Store. Vérifiez votre connexion et réessayez.";
+"Try Again" = "Réessayer";
+"Get ClipMenu on the Mac App Store to use iCloud sync" = "Téléchargez ClipMenu sur le Mac App Store pour utiliser la synchronisation iCloud";
+"No active subscription found for this Apple ID." = "Aucun abonnement actif trouvé pour cet identifiant Apple.";
+"Couldn't restore purchases. Check your connection and try again." = "Impossible de restaurer les achats. Vérifiez votre connexion et réessayez.";
+
+/* iCloud snippet backup & restore (v2.8.0) */
+"Snippet Versions in iCloud" = "Versions des extraits dans iCloud";
+"Clipboard History Export" = "Exporter l'historique du presse-papiers";
+"Back up now" = "Sauvegarder maintenant";
+"Restore from iCloud…" = "Restaurer depuis iCloud…";
+"Restore from iCloud" = "Restaurer depuis iCloud";
+"Restoring…" = "Restauration…";
+"Restore" = "Restaurer";
+"ClipMenu keeps your last 20 backups of your snippets and folders in your private iCloud. You can restore any version; your current data is backed up first." = "ClipMenu conserve vos 20 dernières sauvegardes de vos extraits et dossiers dans votre iCloud privé. Vous pouvez restaurer n'importe quelle version ; vos données actuelles sont d'abord sauvegardées.";
+"Backups use your private iCloud (encrypted in transit and at rest). Turn on Advanced Data Protection for end-to-end encryption." = "Les sauvegardes utilisent votre iCloud privé (chiffré en transit et au repos). Activez la Protection avancée des données pour un chiffrement de bout en bout.";
+"Backup saved." = "Sauvegarde enregistrée.";
+"No changes since the last backup." = "Aucune modification depuis la dernière sauvegarde.";
+"iCloud backup failed. Try again later." = "La sauvegarde iCloud a échoué. Réessayez plus tard.";
+"No backups yet." = "Aucune sauvegarde pour l'instant.";
+"Restore this backup?" = "Restaurer cette sauvegarde ?";
+"This replaces all your current snippets and folders. Your current snippets are backed up first." = "Cela remplace tous vos extraits et dossiers actuels. Vos extraits actuels sont d'abord sauvegardés.";
+"folders" = "dossiers";
+"snippets" = "extraits";
+"Automatic" = "Automatique";
+"Manual" = "Manuelle";
+"Before restore" = "Avant restauration";
+"Couldn't load backups from iCloud." = "Impossible de charger les sauvegardes depuis iCloud.";
+"Couldn't save a safety backup, so the restore was cancelled." = "Impossible d'enregistrer une sauvegarde de sécurité ; la restauration a été annulée.";
+"This version was made on a newer app version and can't be restored." = "Cette version a été créée avec une version plus récente de l'app et ne peut pas être restaurée.";
+"Restore failed. Your current data was not changed." = "Échec de la restauration. Vos données actuelles n'ont pas été modifiées.";
+"iCloud & Backup" = "iCloud et sauvegarde";

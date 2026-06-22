@@ -1,0 +1,59 @@
+THIRD-PARTY NOTICES
+===================
+
+ClipMenu bundles the following third-party JavaScript libraries, used by the
+built-in "Actions" text transforms (app/Sources/ClipMenu/Resources/script/lib/).
+Each is distributed under a permissive (MIT- or BSD-style) license that permits
+commercial use and redistribution, provided its copyright and permission notice
+is retained. Those notices are reproduced below.
+
+
+-------------------------------------------------------------------------------
+showdown.js — JavaScript port of Markdown
+-------------------------------------------------------------------------------
+Copyright (c) 2007 John Fraser. <http://www.attacklab.net/>
+Original Markdown Copyright (c) 2004-2005 John Gruber
+<http://daringfireball.net/projects/markdown/>
+
+Redistributable under a BSD-style open source license.
+
+
+-------------------------------------------------------------------------------
+inflection.js
+-------------------------------------------------------------------------------
+Copyright (c) 2007 Ryan Schuft (ryan.schuft@gmail.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+
+-------------------------------------------------------------------------------
+fhconvert.js — Fullwidth/Halfwidth & kana converter
+-------------------------------------------------------------------------------
+fhconvert.js ver1.1.4 <http://distraid.co.jp/demo/js_codeconv.html>
+copyright (c) 2008 distraid Inc. <http://distraid.co.jp/>
+This script is freely distributable under the terms of an MIT-style license.
+
+
+-------------------------------------------------------------------------------
+v8cgi/util.js — MD5 and SHA routines
+-------------------------------------------------------------------------------
+MD5 and SHA routines, along with their supplemental sub-routines are
+Copyright (C) Paul Johnston 1999 - 2002.
+Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet, Ondrej Zara
+Distributed under the BSD License.

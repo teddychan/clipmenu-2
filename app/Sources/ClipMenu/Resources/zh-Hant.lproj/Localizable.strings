@@ -1,0 +1,248 @@
+/* ClipMenu UI strings — Traditional Chinese (issue #19). Best-effort; review by a
+   native speaker recommended before public release. */
+
+/* General preferences */
+"Launch on Login" = "登入時啟動";
+"Automatically check for updates" = "自動檢查更新";
+"Check for Updates Now…" = "立即檢查更新…";
+"Input \"⌘ + V\" after menu item selection" = "選擇選單項目後輸入「⌘ + V」";
+"Sort history order by:" = "歷史記錄排序方式：";
+"Date created" = "建立日期";
+"Date last used" = "最近使用日期";
+"Max clipboard history size:" = "最大剪貼簿歷史數量：";
+"items" = "項";
+"Time interval to observe the clipboard:" = "監看剪貼簿的時間間隔：";
+"Time interval" = "時間間隔";
+"Save clipboard history on quit" = "結束時儲存剪貼簿歷史";
+"Status Bar icon style:" = "狀態列圖示樣式：";
+"None" = "無";
+"Show" = "顯示";
+"Exclude Applications" = "排除的應用程式";
+"Define Exclude Options…" = "設定排除選項…";
+"Export clipboard history as:" = "匯出剪貼簿歷史為：";
+"Single file" = "單一檔案";
+"Multiple files" = "多個檔案";
+"separator:" = "分隔符號：";
+"New Line" = "換行符號";
+"Carriage Return and New Line" = "歸位字元和換行符號";
+"Carriage Return" = "歸位字元";
+"Tab" = "定位字元";
+"Space" = "空格";
+"Export…" = "匯出…";
+
+/* Exclude-applications sheet */
+"Exclude these applications:" = "排除以下應用程式：";
+"Other…" = "其他…";
+"Done" = "完成";
+
+/* Menu preferences */
+"Clipboard History" = "剪貼簿歷史";
+"Number of items place inline:" = "內嵌顯示的項目數：";
+"Number of items place inside a folder:" = "每個資料夾內的項目數：";
+"Number of characters in the menu:" = "選單中的字元數：";
+"Mark menu items with numbers" = "以數字標記選單項目";
+"Add key equivalents to numeric keys" = "為數字鍵加入快速鍵";
+"Show labels to indicate item types" = "顯示標籤以指示項目類型";
+"Add a menu item to clear clipboard history" = "加入用於清除剪貼簿歷史的選單項目";
+"Show alert panel before clear history" = "清除歷史前顯示警告面板";
+"Show tool tip on a menu item" = "在選單項目上顯示工具提示";
+"Max length of tool tip string:" = "工具提示字串的最大長度：";
+"Appearance" = "外觀";
+"Change font size in the menu" = "變更選單中的字型大小";
+"Font size:" = "字型大小：";
+"Fit to the icon size" = "符合圖示大小";
+"Select" = "選擇";
+"Size:" = "大小：";
+"Icon" = "圖示";
+"Show Icon in the Menu" = "在選單中顯示圖示";
+"Icon size:" = "圖示大小：";
+"Show Image" = "顯示圖片";
+"Width:" = "寬度：";
+"Height:" = "高度：";
+"Snippets' position:" = "片段的位置：";
+"Above the clipboard history" = "在剪貼簿歷史上方";
+"Below the clipboard history" = "在剪貼簿歷史下方";
+
+/* Type preferences */
+"Select clipboard types to store:" = "選擇要儲存的剪貼簿類型：";
+"Plain Text" = "純文字";
+"Rich Text Format (RTF)" = "富文字格式 (RTF)";
+"Filenames" = "檔案名稱";
+"TIFF Image" = "TIFF 圖片";
+"Rich Text Format Directory (RTFD)" = "富文字格式目錄 (RTFD)";
+
+/* Action preferences */
+"Enable Action" = "啟用動作";
+"Invoke the first action immediately if there is only one action" = "若只有一個動作則立即執行第一個動作";
+"Click behavior" = "點按行為";
+"Control-click / right-click:" = "Control 點按／右鍵點按：";
+"Shift-click:" = "Shift 點按：";
+"Option-click:" = "Option 點按：";
+"Command-click:" = "Command 點按：";
+"Pop up Action Menu" = "彈出動作選單";
+"Actions" = "動作";
+"Built-in" = "內建";
+"Script" = "指令稿";
+"User Script" = "使用者指令稿";
+
+/* Settings window / tabs */
+"%@ Settings" = "%@ 設定";
+"General" = "一般";
+"Menu" = "選單";
+"Type" = "類型";
+"Action" = "動作";
+"Shortcuts" = "快速鍵";
+"Backup" = "備份";
+"Subscription" = "訂閱";
+"Free trial active" = "免費試用中";
+"Subscription active" = "訂閱已啟用";
+"Renews %@" = "%@ 續訂";
+"Main Menu:" = "主選單：";
+"History Menu:" = "歷史選單：";
+"Snippets Menu:" = "片段選單：";
+"Type shortcut…" = "輸入快速鍵…";
+
+/* Main menu items */
+"Clear History" = "清除歷史";
+"Edit Snippets…" = "編輯片段…";
+"Preferences…" = "偏好設定…";
+"Quit ClipMenu" = "結束 ClipMenu";
+"Snippets" = "片段";
+"History" = "歷史";
+"(Image)" = "（圖片）";
+"(PDF)" = "（PDF）";
+"(Filenames)" = "（檔案名稱）";
+
+/* Clear-history confirmation */
+"Are you sure you want to clear your clipboard history?" = "確定要清除剪貼簿歷史嗎？";
+"Cancel" = "取消";
+"OK" = "好";
+
+/* Built-in action tool tips */
+"Remove the clip from the clipboard history" = "從剪貼簿歷史中移除此剪貼";
+"Paste the clip as Plain Text" = "以純文字貼上此剪貼";
+"Paste the clip as POSIX File Path" = "以 POSIX 檔案路徑貼上此剪貼";
+
+/* Edit menu */
+"Edit" = "編輯";
+"Undo" = "還原";
+"Redo" = "重做";
+"Cut" = "剪下";
+"Copy" = "拷貝";
+"Paste" = "貼上";
+"Select All" = "全選";
+
+/* Login-item prompt */
+"Launch ClipMenu on system startup?" = "在系統啟動時啟動 ClipMenu？";
+"You can change this setting in the Preferences if you want." = "您可以稍後在偏好設定中變更此設定。";
+"Launch on system startup" = "在系統啟動時啟動";
+"Don't Launch" = "不要啟動";
+
+/* Snippet editor */
+"Import…" = "匯入…";
+"No Folder Selected" = "未選擇資料夾";
+"untitled folder" = "未命名資料夾";
+"untitled snippet" = "未命名片段";
+
+/* iCloud sync (General preferences) */
+"iCloud" = "iCloud";
+"Sync settings and snippets via iCloud" = "透過 iCloud 同步設定與片段";
+"Restart ClipMenu to apply iCloud sync changes." = "重新啟動 ClipMenu 以套用 iCloud 同步變更。";
+"Syncing via iCloud" = "正在透過 iCloud 同步";
+"iCloud unavailable — using local storage only" = "iCloud 無法使用——僅使用本機儲存";
+
+/* iCloud sync status (Backup preferences, v2.6.2) */
+"Last synced: %@" = "上次同步：%@";
+"Waiting for first sync…" = "正在等待首次同步…";
+"%d snippet" = "%d 個片段";
+"%d snippets" = "%d 個片段";
+"%d folder" = "%d 個資料夾";
+"%d folders" = "%d 個資料夾";
+"%1$@, %2$@ synced" = "已同步 %1$@、%2$@";
+"No snippets synced yet" = "尚未同步任何片段";
+
+/* About pane */
+"About" = "關於";
+"Version %@" = "版本 %@";
+"Version %@ (%@)" = "版本 %@ (%@)";
+"This application is open source and can be found on GitHub:" = "本應用程式為開源軟體，可在 GitHub 上找到：";
+"Released under the MIT License." = "依 MIT 授權條款發佈。";
+"Contributors" = "貢獻者";
+"Creator" = "作者";
+"Original ClipMenu" = "原始 ClipMenu";
+/* Language selection (General preferences) */
+"Language" = "語言";
+"Restart ClipMenu to apply the language change." = "重新啟動 ClipMenu 以套用語言變更。";
+
+/* Snippet editor — new keys (issue #31) */
+"Folders" = "資料夾";
+"Sort folders by" = "資料夾排序方式";
+"Sort snippets in \"%@\"" = "排序「%@」中的片段";
+"Manual (drag)" = "手動（拖動）";
+"Name (A → Z)" = "名稱（A → Z）";
+"Name (Z → A)" = "名稱（Z → A）";
+"New Folder" = "新增資料夾";
+"New Snippet" = "新增片段";
+"Delete" = "刪除";
+"Label" = "標籤";
+"Content" = "內容";
+"No Snippet Selected" = "未選擇片段";
+"Restart Now" = "立即重新啟動";
+"Rename" = "重新命名";
+
+/* Auto-paste info popover (App Store build) */
+"About automatic paste" = "關於自動貼上";
+"When you pick a clip, this version copies it to the clipboard. Mac App Store apps run in a sandbox and aren't allowed to paste into other apps for you, so you press ⌘V yourself." = "選擇一個項目時，此版本會將其複製到剪貼簿。Mac App Store 應用程式在沙盒中執行，無法替你貼上到其他應用程式，因此請自行按 ⌘V。";
+"To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "若要在選擇項目後自動貼上，請從 GitHub 下載 ClipMenu 或使用 Homebrew 安裝。";
+"Download ClipMenu" = "下載 ClipMenu";
+
+/* iCloud subscription paywall (App Store build, v2.6.0) */
+"iCloud sync is available in the Mac App Store edition of ClipMenu." = "iCloud 同步功能可在 Mac App Store 版本的 ClipMenu 中使用。";
+"iCloud Sync" = "iCloud 同步";
+"Sync your snippets and settings across all your Macs." = "在你所有的 Mac 之間同步程式碼片段與設定。";
+"Subscribe — %@ / year" = "訂閱 — %@/年";
+"Restore Purchases" = "回復購買項目";
+"Manage Subscription…" = "管理訂閱…";
+"Terms of Use" = "使用條款";
+"Privacy Policy" = "隱私權政策";
+"Not Now" = "暫不";
+
+/* Paywall gate (App Store build, whole-app subscription) */
+"Your full clipboard manager, with iCloud sync for snippets and settings." = "功能完整的剪貼簿管理器，可透過 iCloud 同步程式碼片段與設定。";
+"Includes a 1-month free trial" = "包含 1 個月免費試用";
+"Start Free Trial" = "開始免費試用";
+"%@ / year" = "%@/年";
+"Subscribe" = "訂閱";
+"Auto-renewing subscription. Your Apple ID is charged at purchase confirmation and renews each year unless cancelled at least 24 hours before the period ends. Manage anytime in App Store settings." = "自動續訂訂閱。在確認購買時向你的 Apple ID 收費，除非在目前週期結束前至少 24 小時取消，否則每年自動續訂。可隨時在 App Store 設定中管理。";
+"Couldn't reach the App Store. Check your connection and try again." = "無法連線 App Store。請檢查網路後再試一次。";
+"Try Again" = "重試";
+"Get ClipMenu on the Mac App Store to use iCloud sync" = "前往 Mac App Store 下載 ClipMenu 以使用 iCloud 同步";
+"No active subscription found for this Apple ID." = "找不到此 Apple ID 的有效訂閱。";
+"Couldn't restore purchases. Check your connection and try again." = "無法恢復購買。請檢查網路連線後重試。";
+
+/* iCloud snippet backup & restore (v2.8.0) */
+"Snippet Versions in iCloud" = "iCloud 中的片段版本";
+"Clipboard History Export" = "剪貼簿歷史匯出";
+"Back up now" = "立即備份";
+"Restore from iCloud…" = "從 iCloud 還原…";
+"Restore from iCloud" = "從 iCloud 還原";
+"Restoring…" = "正在還原…";
+"Restore" = "還原";
+"ClipMenu keeps your last 20 backups of your snippets and folders in your private iCloud. You can restore any version; your current data is backed up first." = "ClipMenu 會在你的私人 iCloud 中保留你最近的 20 個片段與資料夾備份。你可以還原任一版本；還原前會先備份目前的資料。";
+"Backups use your private iCloud (encrypted in transit and at rest). Turn on Advanced Data Protection for end-to-end encryption." = "備份使用你的私人 iCloud（傳輸與儲存皆加密）。開啟「進階資料保護」可達成端對端加密。";
+"Backup saved." = "備份已儲存。";
+"No changes since the last backup." = "自上次備份以來沒有變更。";
+"iCloud backup failed. Try again later." = "iCloud 備份失敗，請稍後再試。";
+"No backups yet." = "尚無備份。";
+"Restore this backup?" = "要還原此備份嗎？";
+"This replaces all your current snippets and folders. Your current snippets are backed up first." = "這會取代您目前所有的片段與資料夾。您目前的片段會先備份。";
+"folders" = "個資料夾";
+"snippets" = "個片段";
+"Automatic" = "自動";
+"Manual" = "手動";
+"Before restore" = "還原前";
+"Couldn't load backups from iCloud." = "無法從 iCloud 載入備份。";
+"Couldn't save a safety backup, so the restore was cancelled." = "無法儲存安全備份，已取消還原。";
+"This version was made on a newer app version and can't be restored." = "此版本由較新版本的應用程式建立，無法還原。";
+"Restore failed. Your current data was not changed." = "還原失敗。你目前的資料未被變更。";
+"iCloud & Backup" = "iCloud 與備份";

@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# Swift Package Manager / build artifacts
+app/.build/
+.build/
+*.swiftpm
+.swiftpm/
+
+# Xcode (when an .xcodeproj is added later)
+*.xcuserstate
+xcuserdata/
+DerivedData/
+
+# Legacy reference checkout (read-only source of truth; has its own git history)
+legacy/
+
+# Release zips and local build logs
+*.zip
+/log.txt
