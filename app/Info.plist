@@ -6,47 +6,32 @@
 	<string>en</string>
 	<key>CFBundleExecutable</key>
 	<string>ClipMenu</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.dragonapp.clipmenu-2</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>ClipMenu</string>
-	<!-- App icon: AppIcon.icns is copied into Contents/Resources by scripts/run.sh.
-	     Even as an LSUIElement agent (no Dock icon) the icon still shows in Finder,
-	     System Settings ▸ Login Items, the Gatekeeper prompt, and the About box. -->
-	<key>CFBundleIconFile</key>
-	<string>AppIcon</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.8.1</string>
+	<string>2.8.2</string>
 	<key>CFBundleVersion</key>
-	<string>2.8.1</string>
-	<!-- Agent app: no Dock icon, no menu bar; mirrors legacy LSUIElement (Info.plist:40-41). -->
-	<key>LSUIElement</key>
-	<true/>
-	<key>LSMinimumSystemVersion</key>
-	<string>26.0</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
-	<key>NSHumanReadableCopyright</key>
-	<string>ClipMenu modern rewrite.</string>
-	<!-- App uses only OS/HTTPS encryption (iCloud) — exempt from export
-	     compliance. Declaring this here skips the per-upload prompt in
-	     App Store Connect. -->
+	<string>2.8.2</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
-	<!-- Required for Mac App Store submission: a valid app category UTI. -->
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.productivity</string>
-	<!-- Sparkle auto-update (direct / Developer ID build only; issue #62). These
-	     keys are dormant in the Mac App Store build, which does not compile in
-	     Sparkle. SUFeedURL is the appcast published to GitHub Pages on the public
-	     repo; SUPublicEDKey is the EdDSA public key Sparkle uses to verify each
-	     update's signature. The matching private key lives in the maintainer's
-	     keychain and as the SPARKLE_EDDSA_PRIVATE_KEY Actions secret (used by
-	     release.yml to sign each update's appcast). -->
+	<key>LSMinimumSystemVersion</key>
+	<string>26.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>ClipMenu modern rewrite.</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
 	<key>SUFeedURL</key>
 	<string>https://teddychan.github.io/ClipMenu-2/appcast.xml</string>
 	<key>SUPublicEDKey</key>
