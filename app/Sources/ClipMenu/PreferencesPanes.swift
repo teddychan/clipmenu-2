@@ -672,7 +672,7 @@ struct ExcludeAppsView: View {
 /// About pane: app icon, name, version, the open-source/GitHub link, license,
 /// and credits. Static product info — nothing here is persisted.
 struct AboutPreferencesView: View {
-    private static let githubURL = URL(string: "https://github.com/teddychan/ClipMenu-2")!
+    private static let githubURL = URL(string: "https://github.com/teddychan/clipmenu-2")!
 
     var body: some View {
         ScrollView {
@@ -689,7 +689,7 @@ struct AboutPreferencesView: View {
 
                 VStack(spacing: 6) {
                     Text(L("This application is open source and can be found on GitHub:"))
-                    Link("github.com/teddychan/ClipMenu-2", destination: Self.githubURL)
+                    Link("github.com/teddychan/clipmenu-2", destination: Self.githubURL)
                 }
                 .multilineTextAlignment(.center)
 
@@ -1013,7 +1013,7 @@ struct ActionTreeEditorView: View {
 /// Explains why the App Store build can't auto-paste and links to the
 /// direct/Homebrew build that can. Shown from the disabled paste toggle's ⓘ.
 private struct AutoPasteInfoPopover: View {
-    private static let downloadURL = URL(string: "https://github.com/teddychan/ClipMenu-2/releases")!
+    private static let downloadURL = URL(string: "https://github.com/teddychan/clipmenu-2/releases")!
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
