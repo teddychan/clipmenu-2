@@ -63,6 +63,7 @@
 "Snippets' position:" = "Snippets' position:";
 "Above the clipboard history" = "Above the clipboard history";
 "Below the clipboard history" = "Below the clipboard history";
+"Group snippets under one menu" = "Group snippets under one menu";
 
 /* Type preferences */
 "Select clipboard types to store:" = "Select clipboard types to store:";
@@ -94,10 +95,6 @@
 "Action" = "Action";
 "Shortcuts" = "Shortcuts";
 "Backup" = "Backup";
-"Subscription" = "Subscription";
-"Free trial active" = "Free trial active";
-"Subscription active" = "Subscription active";
-"Renews %@" = "Renews %@";
 "Main Menu:" = "Main Menu:";
 "History Menu:" = "History Menu:";
 "Snippets Menu:" = "Snippets Menu:";
@@ -197,28 +194,15 @@
 "To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew.";
 "Download ClipMenu" = "Download ClipMenu";
 
-/* iCloud subscription paywall (App Store build, v2.6.0) */
-"iCloud sync is available in the Mac App Store edition of ClipMenu." = "iCloud sync is available in the Mac App Store edition of ClipMenu.";
+/* iCloud sync purchase (App Store build) — one-time $9.99 non-consumable */
 "iCloud Sync" = "iCloud Sync";
-"Sync your snippets and settings across all your Macs." = "Sync your snippets and settings across all your Macs.";
-"Subscribe — %@ / year" = "Subscribe — %@ / year";
+"iCloud Sync unlocked" = "iCloud Sync unlocked";
+"Unlock iCloud sync for your snippets, folders, and settings, plus your last 20 snippet backups. One-time purchase." = "Unlock iCloud sync for your snippets, folders, and settings, plus your last 20 snippet backups. One-time purchase.";
+"%@ one-time purchase" = "%@ one-time purchase";
+"Buy" = "Buy";
 "Restore Purchases" = "Restore Purchases";
-"Manage Subscription…" = "Manage Subscription…";
-"Terms of Use" = "Terms of Use";
-"Privacy Policy" = "Privacy Policy";
-"Not Now" = "Not Now";
-
-/* Paywall gate (App Store build, whole-app subscription) */
-"Your full clipboard manager, with iCloud sync for snippets and settings." = "Your full clipboard manager, with iCloud sync for snippets and settings.";
-"Includes a 1-month free trial" = "Includes a 1-month free trial";
-"Start Free Trial" = "Start Free Trial";
-"%@ / year" = "%@ / year";
-"Subscribe" = "Subscribe";
-"Auto-renewing subscription. Your Apple ID is charged at purchase confirmation and renews each year unless cancelled at least 24 hours before the period ends. Manage anytime in App Store settings." = "Auto-renewing subscription. Your Apple ID is charged at purchase confirmation and renews each year unless cancelled at least 24 hours before the period ends. Manage anytime in App Store settings.";
-"Couldn't reach the App Store. Check your connection and try again." = "Couldn't reach the App Store. Check your connection and try again.";
-"Try Again" = "Try Again";
 "Get ClipMenu on the Mac App Store to use iCloud sync" = "Get ClipMenu on the Mac App Store to use iCloud sync";
-"No active subscription found for this Apple ID." = "No active subscription found for this Apple ID.";
+"No previous purchase found for this Apple ID." = "No previous purchase found for this Apple ID.";
 "Couldn't restore purchases. Check your connection and try again." = "Couldn't restore purchases. Check your connection and try again.";
 
 /* iCloud snippet backup & restore (v2.8.0) */

@@ -89,6 +89,7 @@ final class MainMenuController: NSObject, NSMenuDelegate {
         var thumbnailHeight = 32
         var maxToolTipLength = 200
         var maxTitleLength = 20
+        var groupSnippetsInFolder = true
 
         static func current() -> MenuPrefs {
             let d = UserDefaults.standard
@@ -103,6 +104,7 @@ final class MainMenuController: NSObject, NSMenuDelegate {
             p.thumbnailHeight = d.object(forKey: PreferenceKeys.thumbnailHeight) as? Int ?? 32
             p.maxToolTipLength = d.object(forKey: PreferenceKeys.maxLengthOfToolTipKey) as? Int ?? 200
             p.maxTitleLength = d.object(forKey: PreferenceKeys.maxMenuItemTitleLength) as? Int ?? 20
+            p.groupSnippetsInFolder = d.object(forKey: PreferenceKeys.groupSnippetsInFolder) as? Bool ?? true
             return p
         }
     }
@@ -325,25 +327,44 @@ final class MainMenuController: NSObject, NSMenuDelegate {
 
         if position == .below { menu.addItem(.separator()) }
 
-        let showLabelsInMenu = menuPrefs.showLabels
-        if showLabelsInMenu {
-            let label = NSMenuItem(title: L("Snippets"),
-                                   action: nil, keyEquivalent: "")
-            label.isEnabled = false
-            menu.addItem(label)
+        if menuPrefs.groupSnippetsInFolder {
+            // Grouped: a single "Snippets" item whose submenu holds every folder,
+            // keeping the menu compact. The item itself is the label, so the
+            // separate "Snippets" header is redundant and omitted here.
+            let snippetsItem = NSMenuItem(title: L("Snippets"), action: nil, keyEquivalent: "")
+            let submenu = NSMenu(title: L("Snippets"))
+            submenu.autoenablesItems = false
+            snippetsItem.submenu = submenu
+            if showsMenuIcons { snippetsItem.image = iconCache.folderIcon }
+            menu.addItem(snippetsItem)
+            addFolderItems(folders, to: submenu)
+        } else {
+            // Flattened: each folder is a top-level submenu, with an optional
+            // disabled "Snippets" header when showLabelsInMenu is on.
+            if menuPrefs.showLabels {
+                let label = NSMenuItem(title: L("Snippets"),
+                                       action: nil, keyEquivalent: "")
+                label.isEnabled = false
+                menu.addItem(label)
+            }
+            addFolderItems(folders, to: menu)
         }
 
+        if position == .above { menu.addItem(.separator()) }
+    }
+
+    /// Append one submenu per folder (index asc) to `target`, each containing the
+    /// folder's snippets (index asc). Snippets are numbered per folder from 1 with
+    /// a trimmed title; marking honors menuItemsAreMarkedWithNumbers.
+    private func addFolderItems(_ folders: [Folder], to target: NSMenu) {
         for folder in folders {
             let folderItem = NSMenuItem(title: folder.title, action: nil, keyEquivalent: "")
             let submenu = NSMenu(title: folder.title)
             submenu.autoenablesItems = false
             folderItem.submenu = submenu
             if showsMenuIcons { folderItem.image = iconCache.folderIcon }
-            menu.addItem(folderItem)
+            target.addItem(folderItem)
 
-            // Snippets are numbered per folder with a plain increment starting
-            // at 1, and the title is trimmed. Marking honors
-            // menuItemsAreMarkedWithNumbers.
             var number = 1
             let snippets = (folder.snippets ?? [])
                 .sorted { $0.index < $1.index }
@@ -359,8 +380,6 @@ final class MainMenuController: NSObject, NSMenuDelegate {
                 number += 1
             }
         }
-
-        if position == .above { menu.addItem(.separator()) }
     }
 
     /// Fetch snippet folders sorted by `index` ascending

@@ -62,6 +62,7 @@
 "Snippets' position:" = "スニペットの位置：";
 "Above the clipboard history" = "クリップボード履歴の上";
 "Below the clipboard history" = "クリップボード履歴の下";
+"Group snippets under one menu" = "スニペットを1つのメニューにまとめる";
 
 /* Type preferences */
 "Select clipboard types to store:" = "保存するクリップボードの種類を選択：";
@@ -93,10 +94,6 @@
 "Action" = "アクション";
 "Shortcuts" = "ショートカット";
 "Backup" = "バックアップ";
-"Subscription" = "サブスクリプション";
-"Free trial active" = "無料トライアル中";
-"Subscription active" = "サブスクリプション有効";
-"Renews %@" = "更新日 %@";
 "Main Menu:" = "メインメニュー：";
 "History Menu:" = "履歴メニュー：";
 "Snippets Menu:" = "スニペットメニュー：";
@@ -196,28 +193,15 @@
 "To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "クリップを選択した後に自動でペーストするには、GitHub から ClipMenu をダウンロードするか、Homebrew でインストールしてください。";
 "Download ClipMenu" = "ClipMenu をダウンロード";
 
-/* iCloud subscription paywall (App Store build, v2.6.0) */
-"iCloud sync is available in the Mac App Store edition of ClipMenu." = "iCloud 同期は Mac App Store 版の ClipMenu でご利用いただけます。";
+/* iCloud sync purchase (App Store build) — one-time $9.99 non-consumable */
 "iCloud Sync" = "iCloud 同期";
-"Sync your snippets and settings across all your Macs." = "スニペットと設定をすべての Mac で同期します。";
-"Subscribe — %@ / year" = "登録 — %@／年";
 "Restore Purchases" = "購入を復元";
-"Manage Subscription…" = "サブスクリプションを管理…";
-"Terms of Use" = "利用規約";
-"Privacy Policy" = "プライバシーポリシー";
-"Not Now" = "あとで";
-
-/* Paywall gate (App Store build, whole-app subscription) */
-"Your full clipboard manager, with iCloud sync for snippets and settings." = "スニペットと設定を iCloud 同期できる、フル機能のクリップボードマネージャー。";
-"Includes a 1-month free trial" = "1 か月の無料トライアル付き";
-"Start Free Trial" = "無料トライアルを開始";
-"%@ / year" = "%@／年";
-"Subscribe" = "登録する";
-"Auto-renewing subscription. Your Apple ID is charged at purchase confirmation and renews each year unless cancelled at least 24 hours before the period ends. Manage anytime in App Store settings." = "自動更新サブスクリプションです。購入確定時に Apple ID へ課金され、期間終了の 24 時間以上前に解約しない限り毎年自動更新されます。App Store の設定でいつでも管理できます。";
-"Couldn't reach the App Store. Check your connection and try again." = "App Store に接続できませんでした。接続を確認して、もう一度お試しください。";
-"Try Again" = "再試行";
+"iCloud Sync unlocked" = "iCloud 同期を解除しました";
+"Unlock iCloud sync for your snippets, folders, and settings, plus your last 20 snippet backups. One-time purchase." = "スニペット、フォルダ、設定の iCloud 同期に加え、直近 20 件のスニペットバックアップを解除します。買い切り購入です。";
+"%@ one-time purchase" = "%@ 買い切り";
+"Buy" = "購入";
+"No previous purchase found for this Apple ID." = "この Apple ID では以前の購入が見つかりませんでした。";
 "Get ClipMenu on the Mac App Store to use iCloud sync" = "iCloud 同期を使うには、Mac App Store 版の ClipMenu をダウンロードしてください";
-"No active subscription found for this Apple ID." = "この Apple ID で有効なサブスクリプションが見つかりませんでした。";
 "Couldn't restore purchases. Check your connection and try again." = "購入を復元できませんでした。接続を確認してもう一度お試しください。";
 
 /* iCloud snippet backup & restore (v2.8.0) */

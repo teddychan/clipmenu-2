@@ -54,6 +54,10 @@ https://nakka.com/soft/clcl/index_eng.html#google_vignette
 <img width="600" height="411" alt="image" src="https://github.com/user-attachments/assets/11cdd6d1-329f-40da-8127-76decbbba41f" />
 
 
+## Releasing
+Maintainers: the full release runbook — versioning, App Store submission, and
+publishing the public download build — lives in `RELEASE.md` in the private source repo.
+
 ## License
 MIT — see [LICENSE](LICENSE).
 

@@ -62,6 +62,7 @@
 "Snippets' position:" = "Posición de los fragmentos:";
 "Above the clipboard history" = "Encima del historial del portapapeles";
 "Below the clipboard history" = "Debajo del historial del portapapeles";
+"Group snippets under one menu" = "Agrupar fragmentos en un solo menú";
 
 /* Type preferences */
 "Select clipboard types to store:" = "Seleccionar los tipos del portapapeles que guardar:";
@@ -93,10 +94,6 @@
 "Action" = "Acción";
 "Shortcuts" = "Atajos";
 "Backup" = "Copia de seguridad";
-"Subscription" = "Suscripción";
-"Free trial active" = "Prueba gratuita activa";
-"Subscription active" = "Suscripción activa";
-"Renews %@" = "Se renueva el %@";
 "Main Menu:" = "Menú principal:";
 "History Menu:" = "Menú de historial:";
 "Snippets Menu:" = "Menú de fragmentos:";
@@ -196,28 +193,17 @@
 "To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "Para pegar automáticamente tras seleccionar un elemento, descarga ClipMenu desde GitHub o instálalo con Homebrew.";
 "Download ClipMenu" = "Descargar ClipMenu";
 
-/* iCloud subscription paywall (App Store build, v2.6.0) */
-"iCloud sync is available in the Mac App Store edition of ClipMenu." = "La sincronización con iCloud está disponible en la edición de ClipMenu de la Mac App Store.";
+/* iCloud sync purchase (App Store build) — one-time $9.99 non-consumable */
 "iCloud Sync" = "Sincronización con iCloud";
-"Sync your snippets and settings across all your Macs." = "Sincroniza tus fragmentos y ajustes en todos tus Mac.";
-"Subscribe — %@ / year" = "Suscribirse — %@/año";
+"iCloud Sync unlocked" = "Sincronización con iCloud desbloqueada";
+"Unlock iCloud sync for your snippets, folders, and settings, plus your last 20 snippet backups. One-time purchase." = "Desbloquea la sincronización con iCloud para tus fragmentos, carpetas y ajustes, además de tus últimas 20 copias de fragmentos. Pago único.";
+"%@ one-time purchase" = "%@ pago único";
+"Buy" = "Comprar";
+"No previous purchase found for this Apple ID." = "No se encontró ninguna compra anterior para este Apple ID.";
 "Restore Purchases" = "Restaurar compras";
-"Manage Subscription…" = "Gestionar suscripción…";
-"Terms of Use" = "Términos de uso";
-"Privacy Policy" = "Política de privacidad";
-"Not Now" = "Ahora no";
 
-/* Paywall gate (App Store build, whole-app subscription) */
-"Your full clipboard manager, with iCloud sync for snippets and settings." = "Tu gestor de portapapeles completo, con sincronización de iCloud para fragmentos y ajustes.";
-"Includes a 1-month free trial" = "Incluye 1 mes de prueba gratuita";
-"Start Free Trial" = "Iniciar prueba gratuita";
-"%@ / year" = "%@/año";
-"Subscribe" = "Suscribirse";
-"Auto-renewing subscription. Your Apple ID is charged at purchase confirmation and renews each year unless cancelled at least 24 hours before the period ends. Manage anytime in App Store settings." = "Suscripción de renovación automática. Se cobra a tu Apple ID al confirmar la compra y se renueva cada año, salvo que la canceles al menos 24 horas antes de que finalice el periodo. Gestiónala cuando quieras en los ajustes de la App Store.";
-"Couldn't reach the App Store. Check your connection and try again." = "No se pudo conectar con la App Store. Comprueba tu conexión e inténtalo de nuevo.";
-"Try Again" = "Reintentar";
+/* Paywall gate (App Store build) */
 "Get ClipMenu on the Mac App Store to use iCloud sync" = "Descarga ClipMenu de la Mac App Store para usar la sincronización con iCloud";
-"No active subscription found for this Apple ID." = "No se encontró ninguna suscripción activa para este Apple ID.";
 "Couldn't restore purchases. Check your connection and try again." = "No se pudieron restaurar las compras. Comprueba tu conexión e inténtalo de nuevo.";
 
 /* iCloud snippet backup & restore (v2.8.0) */

@@ -40,6 +40,7 @@ enum PreferenceKeys {
     static let showIconInTheMenu = "showIconInTheMenu"
     static let menuIconSize = "menuIconSize"
     static let positionOfSnippets = "positionOfSnippets"
+    static let groupSnippetsInFolder = "groupSnippetsInFolder"
 
     // Type
     static let storeTypes = "storeTypes"
@@ -60,9 +61,10 @@ enum PreferenceKeys {
     static let loginItem = "loginItem"
     static let suppressAlertForLoginItem = "suppressAlertForLoginItem"
     static let iCloudSyncEnabled = "iCloudSyncEnabled"
-    /// Cached StoreKit entitlement for the paid iCloud-sync subscription. Written by
-    /// `PremiumStore`; read at launch by `AppStore` to decide CloudKit activation.
-    static let subscriptionActive = "subscriptionActive"
+    /// Cached StoreKit entitlement for the paid iCloud-sync unlock (one-time
+    /// purchase). Written by `PremiumStore`; read at launch by `AppStore` to decide
+    /// CloudKit activation.
+    static let iCloudUnlocked = "iCloudUnlocked"
     /// End date of the last successful CloudKit import/export (a `Date`). Written by
     /// `CloudSyncMonitor`; shown in the Backup pane. Per-device, so not synced.
     static let lastCloudSyncDate = "lastCloudSyncDate"

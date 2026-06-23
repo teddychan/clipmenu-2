@@ -62,6 +62,7 @@
 "Snippets' position:" = "片段的位置：";
 "Above the clipboard history" = "在剪貼簿歷史上方";
 "Below the clipboard history" = "在剪貼簿歷史下方";
+"Group snippets under one menu" = "將片段歸入一個選單";
 
 /* Type preferences */
 "Select clipboard types to store:" = "選擇要儲存的剪貼簿類型：";
@@ -93,10 +94,6 @@
 "Action" = "動作";
 "Shortcuts" = "快速鍵";
 "Backup" = "備份";
-"Subscription" = "訂閱";
-"Free trial active" = "免費試用中";
-"Subscription active" = "訂閱已啟用";
-"Renews %@" = "%@ 續訂";
 "Main Menu:" = "主選單：";
 "History Menu:" = "歷史選單：";
 "Snippets Menu:" = "片段選單：";
@@ -196,28 +193,17 @@
 "To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "若要在選擇項目後自動貼上，請從 GitHub 下載 ClipMenu 或使用 Homebrew 安裝。";
 "Download ClipMenu" = "下載 ClipMenu";
 
-/* iCloud subscription paywall (App Store build, v2.6.0) */
-"iCloud sync is available in the Mac App Store edition of ClipMenu." = "iCloud 同步功能可在 Mac App Store 版本的 ClipMenu 中使用。";
+/* iCloud sync purchase (App Store build) — one-time $9.99 non-consumable */
 "iCloud Sync" = "iCloud 同步";
-"Sync your snippets and settings across all your Macs." = "在你所有的 Mac 之間同步程式碼片段與設定。";
-"Subscribe — %@ / year" = "訂閱 — %@/年";
+"iCloud Sync unlocked" = "iCloud 同步已解鎖";
+"Unlock iCloud sync for your snippets, folders, and settings, plus your last 20 snippet backups. One-time purchase." = "解鎖 iCloud 同步功能，可同步你的片段、資料夾與設定，並保留最近 20 個片段備份。一次性購買。";
+"%@ one-time purchase" = "%@ 一次性購買";
+"Buy" = "購買";
 "Restore Purchases" = "回復購買項目";
-"Manage Subscription…" = "管理訂閱…";
-"Terms of Use" = "使用條款";
-"Privacy Policy" = "隱私權政策";
-"Not Now" = "暫不";
 
-/* Paywall gate (App Store build, whole-app subscription) */
-"Your full clipboard manager, with iCloud sync for snippets and settings." = "功能完整的剪貼簿管理器，可透過 iCloud 同步程式碼片段與設定。";
-"Includes a 1-month free trial" = "包含 1 個月免費試用";
-"Start Free Trial" = "開始免費試用";
-"%@ / year" = "%@/年";
-"Subscribe" = "訂閱";
-"Auto-renewing subscription. Your Apple ID is charged at purchase confirmation and renews each year unless cancelled at least 24 hours before the period ends. Manage anytime in App Store settings." = "自動續訂訂閱。在確認購買時向你的 Apple ID 收費，除非在目前週期結束前至少 24 小時取消，否則每年自動續訂。可隨時在 App Store 設定中管理。";
-"Couldn't reach the App Store. Check your connection and try again." = "無法連線 App Store。請檢查網路後再試一次。";
-"Try Again" = "重試";
+/* Paywall gate (App Store build) */
 "Get ClipMenu on the Mac App Store to use iCloud sync" = "前往 Mac App Store 下載 ClipMenu 以使用 iCloud 同步";
-"No active subscription found for this Apple ID." = "找不到此 Apple ID 的有效訂閱。";
+"No previous purchase found for this Apple ID." = "找不到此 Apple ID 的先前購買項目。";
 "Couldn't restore purchases. Check your connection and try again." = "無法恢復購買。請檢查網路連線後重試。";
 
 /* iCloud snippet backup & restore (v2.8.0) */

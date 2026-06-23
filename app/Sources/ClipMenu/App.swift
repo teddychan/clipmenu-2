@@ -43,23 +43,17 @@ enum AppStore {
     /// True when the snippets store is actually CloudKit-mirrored this launch.
     private(set) static var isCloudKitActive = false
 
-    /// Cached StoreKit entitlement for the paid iCloud-sync subscription
-    /// (written by `PremiumStore`). iCloud sync is a $9.99/yr subscription.
-    static var isSubscriptionActive: Bool {
-        UserDefaults.standard.bool(forKey: PreferenceKeys.subscriptionActive)
+    /// Cached StoreKit entitlement for the paid iCloud-sync unlock (written by
+    /// `PremiumStore`). iCloud sync is a one-time $9.99 purchase.
+    static var isiCloudUnlocked: Bool {
+        UserDefaults.standard.bool(forKey: PreferenceKeys.iCloudUnlocked)
     }
 
     /// Pure gate (testable): CloudKit mirroring activates only in the sandboxed
-    /// Mac App Store build, when the user enabled sync AND holds the subscription.
+    /// Mac App Store build, when the user enabled sync AND owns the iCloud unlock.
     /// The Developer ID build is never App Store, so iCloud is off there.
-    static func shouldActivateCloud(channelIsAppStore: Bool, syncEnabled: Bool, subscribed: Bool) -> Bool {
-        channelIsAppStore && syncEnabled && subscribed
-    }
-
-    /// Pure gate (testable): the Mac App Store build is a paid app, so it requires an
-    /// active subscription/trial to use. The Developer ID / direct build is free.
-    static func hasAppAccess(channelIsAppStore: Bool, subscribed: Bool) -> Bool {
-        !channelIsAppStore || subscribed
+    static func shouldActivateCloud(channelIsAppStore: Bool, syncEnabled: Bool, purchased: Bool) -> Bool {
+        channelIsAppStore && syncEnabled && purchased
     }
 
     /// Pure gate (testable): whether to relaunch once to bring CloudKit up. The
@@ -70,9 +64,9 @@ enum AppStore {
     /// `alreadyRelaunched` guards against a loop when CloudKit still can't come up
     /// (e.g. the Production schema isn't deployed yet).
     static func shouldRelaunchForCloudActivation(
-        channelIsAppStore: Bool, syncEnabled: Bool, subscribed: Bool,
+        channelIsAppStore: Bool, syncEnabled: Bool, purchased: Bool,
         cloudActive: Bool, alreadyRelaunched: Bool) -> Bool {
-        channelIsAppStore && syncEnabled && subscribed && !cloudActive && !alreadyRelaunched
+        channelIsAppStore && syncEnabled && purchased && !cloudActive && !alreadyRelaunched
     }
 
     /// Dev-only escape hatch (set by scripts/build-dev-icloud.sh) to populate the
@@ -143,11 +137,11 @@ enum AppStore {
 
         // `devCloudKitSchemaRequested` forces the CloudKit-mirrored store on so a signed
         // development build can create the CloudKit Development schema (later deployed to
-        // Production). Normal builds use the channel + subscription gate.
+        // Production). Normal builds use the channel + purchase gate.
         let wantCloud = devCloudKitSchemaRequested || shouldActivateCloud(
             channelIsAppStore: DistributionChannel.current == .appStore,
             syncEnabled: isCloudSyncEnabled,
-            subscribed: isSubscriptionActive)
+            purchased: isiCloudUnlocked)
         if wantCloud {
             do {
                 let container = try make(cloud: true)
@@ -183,9 +177,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let mainMenuController = MainMenuController.shared
     private let pasteboardMonitor = PasteboardMonitor()
     private var clipStore: ClipStore?
-    #if PREMIUM
-    private var paywallGate: PaywallWindowController?
-    #endif
     private var servicesStarted = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -201,70 +192,43 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Start Sparkle's auto-updater (direct / Developer ID build only). No-op in
         // the Mac App Store build, where Sparkle is not compiled in and the App Store
-        // delivers updates. Runs regardless of the paywall: the updater belongs to
-        // the free direct build, which has no paywall.
+        // delivers updates.
         UpdaterUI.start()
 
         #if PREMIUM
-        // Mac App Store build is a paid app (30-day trial → $9.99/yr). Start StoreKit
-        // and gate the whole app behind an active subscription/trial. The Developer ID
-        // build is free and always has access.
+        // Mac App Store build: the app is free and fully functional; iCloud sync is a
+        // one-time $9.99 unlock. Start StoreKit so the entitlement is known, and when a
+        // purchase activates iCloud mid-session, relaunch once to rebuild the container
+        // with CloudKit. The Developer ID build has no iCloud (no StoreKit).
         if DistributionChannel.current == .appStore {
-            PremiumStore.shared.onChange = { [weak self] in self?.evaluateAccessGate() }
+            PremiumStore.shared.onChange = { [weak self] in self?.activateCloudIfNeeded() }
             PremiumStore.shared.start()
         }
-        evaluateAccessGate()
-        #else
-        // Free / open-source build: no paywall, start the app's services immediately.
-        startAppServices()
         #endif
+        startAppServices()
     }
 
     #if PREMIUM
-    /// Show the paywall gate when the App Store build has no entitlement; otherwise
-    /// start the app's services. Re-entrant: called at launch and whenever the StoreKit
-    /// entitlement changes. The gate is only raised before services start (i.e. at
-    /// launch) — a mid-session lapse lets the user finish the session and is re-gated
-    /// on the next launch.
-    private func evaluateAccessGate() {
-        let hasAccess = AppStore.hasAppAccess(
-            channelIsAppStore: DistributionChannel.current == .appStore,
-            subscribed: PremiumStore.shared.isSubscribed)
-        if hasAccess {
-            // If the subscription was just activated this session, the launch-built
-            // container is still the local store — relaunch once to rebuild it with
-            // CloudKit before starting services (no-op on every later launch).
-            if relaunchForCloudActivationIfNeeded() { return }
-            paywallGate?.dismiss()
-            paywallGate = nil
-            startAppServices()
-        } else {
-            // Not entitled: reset the one-shot guard so a later (re)subscribe can
-            // trigger the cloud-activation relaunch again.
-            UserDefaults.standard.set(false, forKey: PreferenceKeys.cloudActivationRelaunched)
-            if !servicesStarted, paywallGate == nil {
-                let gate = PaywallWindowController(onUnlock: { [weak self] in self?.evaluateAccessGate() })
-                paywallGate = gate
-                gate.show()
-            }
-        }
-    }
-
-    /// Relaunch once to switch the launch-built local store over to CloudKit after the
-    /// subscription becomes active mid-session. Returns true if a relaunch was started
-    /// (caller should bail). Guarded by `cloudActivationRelaunched` so it can never loop.
-    private func relaunchForCloudActivationIfNeeded() -> Bool {
+    /// React to a StoreKit entitlement change. When the iCloud unlock is purchased
+    /// mid-session the launch-built container is still the local store, so relaunch
+    /// once to rebuild it with CloudKit; otherwise reset the one-shot guard so a
+    /// later purchase can trigger that relaunch again. Never gates the app itself.
+    private func activateCloudIfNeeded() {
         let defaults = UserDefaults.standard
         guard AppStore.shouldRelaunchForCloudActivation(
             channelIsAppStore: DistributionChannel.current == .appStore,
             syncEnabled: AppStore.isCloudSyncEnabled,
-            subscribed: PremiumStore.shared.isSubscribed,
+            purchased: PremiumStore.shared.isPurchased,
             cloudActive: AppStore.isCloudKitActive,
             alreadyRelaunched: defaults.bool(forKey: PreferenceKeys.cloudActivationRelaunched))
-        else { return false }
+        else {
+            if !PremiumStore.shared.isPurchased {
+                defaults.set(false, forKey: PreferenceKeys.cloudActivationRelaunched)
+            }
+            return
+        }
         defaults.set(true, forKey: PreferenceKeys.cloudActivationRelaunched)
         AppRelaunch.relaunch()
-        return true
     }
     #endif
 

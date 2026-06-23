@@ -371,11 +371,10 @@ struct CloudBackupPreferencesView: View {
 
 /// iCloud preferences — the 2nd tab, present in both builds.
 ///
-/// - Mac App Store build: surfaces the in-app purchase up front — subscription
-///   status plus Subscribe / Restore / Manage Subscription — so the auto-renewing
-///   subscription stays easy to find even after the launch paywall is gone, with the
-///   live iCloud-sync status below it. (App Review Guideline 2.1: the IAP must be
-///   locatable in the app.)
+/// - Mac App Store build: surfaces the one-time iCloud-sync purchase up front —
+///   unlock status plus Buy / Restore — so the in-app purchase stays easy to find
+///   (App Review Guideline 2.1: the IAP must be locatable in the app), with the live
+///   iCloud-sync status below it.
 /// - Developer ID / GitHub build: has no in-app purchase, so it explains that iCloud
 ///   sync lives in the Mac App Store edition and links to it.
 struct CloudPreferencesView: View {
@@ -388,19 +387,16 @@ struct CloudPreferencesView: View {
     @Query private var snippets: [Snippet]
     @Query private var folders: [Folder]
 
-    // Subscription state, loaded from PremiumStore on appear and after each action.
-    @State private var status: PremiumStore.SubscriptionStatus = .unknown
+    // Purchase state, loaded from PremiumStore on appear and after each action.
+    @State private var state: PremiumStore.EntitlementState = .unknown
     @State private var product: Product?
-    @State private var trialAvailable = true
     @State private var working = false
     @State private var message: String?
-
-    private static let manageSubscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")!
 
     var body: some View {
         Group {
             if DistributionChannel.current == .appStore {
-                Section(L("Subscription")) { subscriptionSection }
+                Section(L("iCloud Sync")) { purchaseSection }
                 Section(L("iCloud")) { syncStatusSection }
             } else {
                 Section(L("iCloud")) { directBuildSection }
@@ -409,19 +405,16 @@ struct CloudPreferencesView: View {
         .task { await loadStatus() }
     }
 
-    // MARK: App Store build — subscription
+    // MARK: App Store build — one-time purchase
 
-    @ViewBuilder private var subscriptionSection: some View {
-        switch status {
+    @ViewBuilder private var purchaseSection: some View {
+        switch state {
         case .unknown:
             ProgressView().controlSize(.small)
-        case .subscribed(let renews):
-            activeRows(L("Subscription active"), renews: renews)
-            Link(L("Manage Subscription…"), destination: Self.manageSubscriptionsURL).font(.caption)
-        case .inTrial(let renews):
-            activeRows(L("Free trial active"), renews: renews)
-            Link(L("Manage Subscription…"), destination: Self.manageSubscriptionsURL).font(.caption)
-        case .notSubscribed:
+        case .owned:
+            Label(L("iCloud Sync unlocked"), systemImage: "checkmark.seal.fill")
+                .foregroundStyle(.green)
+        case .notOwned:
             purchaseRows
         }
         Button(L("Restore Purchases"), action: restore)
@@ -435,30 +428,17 @@ struct CloudPreferencesView: View {
         }
     }
 
-    /// Status label + (optional) renewal date for an active entitlement.
-    @ViewBuilder private func activeRows(_ title: String, renews: Date?) -> some View {
-        Label(title, systemImage: "checkmark.seal.fill")
-            .foregroundStyle(.green)
-        if let renews {
-            Text(String(format: L("Renews %@"), renews.formatted(date: .abbreviated, time: .omitted)))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    /// Price + Subscribe button when there is no active entitlement (e.g. a lapsed
-    /// subscriber re-opening Settings). Mirrors the launch paywall's pricing copy.
+    /// Description + price + Buy button when the unlock isn't owned yet.
     @ViewBuilder private var purchaseRows: some View {
+        Text(L("Unlock iCloud sync for your snippets, folders, and settings, plus your last 20 snippet backups. One-time purchase."))
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
         if let product {
-            Text(String(format: L("%@ / year"), product.displayPrice)).font(.headline)
-            if trialAvailable {
-                Text(L("Includes a 1-month free trial")).font(.caption).foregroundStyle(.secondary)
-            }
-            Button(action: subscribe) {
-                Text(trialAvailable ? L("Start Free Trial") : L("Subscribe"))
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(working)
+            Text(String(format: L("%@ one-time purchase"), product.displayPrice)).font(.headline)
+            Button(action: buy) { Text(L("Buy")) }
+                .buttonStyle(.borderedProminent)
+                .disabled(working)
         } else {
             ProgressView().controlSize(.small)
         }
@@ -536,12 +516,11 @@ struct CloudPreferencesView: View {
     private func loadStatus() async {
         await PremiumStore.shared.refresh()
         await PremiumStore.shared.loadProduct()
-        status = PremiumStore.shared.status
+        state = PremiumStore.shared.state
         product = PremiumStore.shared.product
-        trialAvailable = PremiumStore.shared.introOfferAvailable
     }
 
-    private func subscribe() {
+    private func buy() {
         working = true
         message = nil
         Task {
@@ -561,7 +540,7 @@ struct CloudPreferencesView: View {
             case .restored:
                 await loadStatus()
             case .nothingToRestore:
-                message = L("No active subscription found for this Apple ID.")
+                message = L("No previous purchase found for this Apple ID.")
             case .failed:
                 message = L("Couldn't restore purchases. Check your connection and try again.")
             }
@@ -744,6 +723,7 @@ struct MenuPreferencesView: View {
     @AppStorage(PreferenceKeys.showIconInTheMenu) private var showIcon = true
     @AppStorage(PreferenceKeys.menuIconSize) private var menuIconSize = 16
     @AppStorage(PreferenceKeys.positionOfSnippets) private var positionOfSnippets = 2
+    @AppStorage(PreferenceKeys.groupSnippetsInFolder) private var groupSnippetsInFolder = true
 
     private static let fontSizes = Array(9...24) + [36, 48, 64, 72, 96]
 
@@ -806,6 +786,7 @@ struct MenuPreferencesView: View {
                     Text(L("Above the clipboard history")).tag(1)
                     Text(L("Below the clipboard history")).tag(2)
                 }
+                Toggle(L("Group snippets under one menu"), isOn: $groupSnippetsInFolder)
             }
         }
         .formStyle(.grouped)
