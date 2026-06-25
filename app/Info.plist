@@ -33,7 +33,7 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>SUFeedURL</key>
-	<string>https://teddychan.github.io/ClipMenu-2/appcast.xml</string>
+	<string>https://www.dragonapp.com/clipmenu-2/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>p+F/ivF5bAYcmuNuCMNHcRv123A6LHFpCBagFm7Adu8=</string>
 </dict>
