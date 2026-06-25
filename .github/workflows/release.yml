@@ -1,303 +1,33 @@
 name: Release
 
-# Build, sign (Developer ID + hardened runtime), notarize, staple, and publish
-# the FREE ClipMenu whenever a v* tag is pushed to teddychan/clipmenu-2. Also
-# publishes the EdDSA-signed Sparkle appcast to the marketing site and bumps the
-# Homebrew cask. This is the public open-source app's own release pipeline; the
-# private clipmenu-2-premium repo builds only the Mac App Store variant.
+# Thin caller: delegates to the shared macOS release pipeline
+# (teddychan/dragon-release-ci). Build (SwiftPM + assemble .app with Sparkle),
+# Developer ID-sign, notarize, staple, publish the FREE ClipMenu, push the
+# EdDSA-signed Sparkle appcast to docs/clipmenu-2/, and bump the Homebrew cask.
+# Triggered by a v* tag on this repo. The private clipmenu-2-premium repo builds
+# only the Mac App Store variant (its own self-hosted workflow).
 #
-# Required repository secrets (Settings -> Secrets and variables -> Actions):
-#   DEVELOPER_ID_CERT_P12_BASE64  base64 of the "Developer ID Application" .p12
-#   DEVELOPER_ID_CERT_PASSWORD    password set when exporting the .p12
-#   NOTARY_KEY_P8_BASE64          base64 of the App Store Connect API key (.p8)
-#   NOTARY_KEY_ID                 the API key's Key ID
-#   NOTARY_ISSUER_ID              the API key's Issuer ID
-#   PUBLIC_RELEASE_TOKEN          PAT with write to teddychan/www.dragonapp.com + homebrew-tap
-#   SPARKLE_EDDSA_PRIVATE_KEY     the shared Sparkle EdDSA private key
+# Secrets are inherited from this repo's Actions secrets:
+#   DEVELOPER_ID_CERT_P12_BASE64, DEVELOPER_ID_CERT_PASSWORD,
+#   NOTARY_KEY_P8_BASE64, NOTARY_KEY_ID, NOTARY_ISSUER_ID,
+#   PUBLIC_RELEASE_TOKEN, SPARKLE_EDDSA_PRIVATE_KEY
 on:
   push:
     tags:
       - 'v*'
   workflow_dispatch: {}
 
-permissions:
-  contents: write   # upload assets / create the release on this repo
-
 jobs:
-  build:
-    # GitHub-hosted macOS runner (public repos get free Actions minutes). The
-    # image MUST ship Xcode 26 / the macOS 26 SDK — ClipMenu's Info.plist sets
-    # LSMinimumSystemVersion 26.0. The "Select Xcode" step picks the newest
-    # installed Xcode; bump this label to `macos-26` if the build fails on the SDK.
-    runs-on: macos-15
-    # Build the direct / Developer ID variant with Sparkle compiled in (auto-update).
-    # The Mac App Store build (scripts/build-appstore.sh) leaves this unset.
-    env:
-      CLIPMENU_SPARKLE: "1"
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Select Xcode
-        run: |
-          set -euo pipefail
-          latest="$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)"
-          if [ -n "$latest" ]; then sudo xcode-select -s "$latest/Contents/Developer"; fi
-          swift --version
-
-      - name: Build (release)
-        working-directory: app
-        run: swift build -c release
-
-      - name: Assemble .app bundle
-        working-directory: app
-        run: |
-          set -euo pipefail
-          # Mirror scripts/run.sh's bundle assembly (without launching). The
-          # display name follows the major version: 2.x -> "ClipMenu 2".
-          BIN_PATH="$(swift build -c release --show-bin-path)"
-          VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Info.plist)"
-          MAJOR="${VERSION%%.*}"
-          APP_NAME="ClipMenu ${MAJOR}"
-          APP="${PWD}/.build/${APP_NAME}.app"
-
-          rm -rf "$APP"
-          mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-          cp "$BIN_PATH/ClipMenu" "$APP/Contents/MacOS/ClipMenu"
-          cp Info.plist "$APP/Contents/Info.plist"
-          /usr/libexec/PlistBuddy -c "Set :CFBundleName ${APP_NAME}" "$APP/Contents/Info.plist"
-          /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string ${APP_NAME}" "$APP/Contents/Info.plist" 2>/dev/null \
-            || /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName ${APP_NAME}" "$APP/Contents/Info.plist"
-          cp AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
-
-          RESOURCE_BUNDLE="ClipMenu_ClipMenu.bundle"
-          if [ -d "$BIN_PATH/$RESOURCE_BUNDLE" ]; then
-            cp -R "$BIN_PATH/$RESOURCE_BUNDLE" "$APP/Contents/Resources/$RESOURCE_BUNDLE"
-            chmod -R u+w "$APP/Contents/Resources/$RESOURCE_BUNDLE"
-          fi
-
-          # Embed Sparkle.framework (auto-update). The executable finds it via the
-          # @loader_path/../Frameworks rpath (Package.swift). cp -R preserves symlinks.
-          if [ -d "$BIN_PATH/Sparkle.framework" ]; then
-            mkdir -p "$APP/Contents/Frameworks"
-            cp -R "$BIN_PATH/Sparkle.framework" "$APP/Contents/Frameworks/Sparkle.framework"
-            chmod -R u+w "$APP/Contents/Frameworks/Sparkle.framework"
-          else
-            echo "::error::CLIPMENU_SPARKLE build did not produce Sparkle.framework at $BIN_PATH" >&2
-            exit 1
-          fi
-
-          {
-            echo "APP=${APP}"
-            echo "APP_NAME=${APP_NAME}"
-            echo "MAJOR=${MAJOR}"
-          } >> "$GITHUB_ENV"
-
-      - name: Import Developer ID certificate
-        env:
-          CERT_P12_BASE64: ${{ secrets.DEVELOPER_ID_CERT_P12_BASE64 }}
-          CERT_PASSWORD: ${{ secrets.DEVELOPER_ID_CERT_PASSWORD }}
-        run: |
-          set -euo pipefail
-          if [ -z "${CERT_P12_BASE64:-}" ]; then
-            echo "::error::DEVELOPER_ID_CERT_P12_BASE64 secret is not set. See the comment at the top of release.yml." >&2
-            exit 1
-          fi
-          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
-          KEYCHAIN_PASSWORD="$(openssl rand -base64 24)"
-          CERT_PATH="$RUNNER_TEMP/developer_id.p12"
-          echo "$CERT_P12_BASE64" | base64 --decode > "$CERT_PATH"
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security import "$CERT_PATH" -P "$CERT_PASSWORD" -A -t cert -f pkcs12 \
-            -k "$KEYCHAIN_PATH" -T /usr/bin/codesign
-          # Import Apple's intermediate CAs so the Developer ID chain validates.
-          for url in \
-            https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer \
-            https://www.apple.com/certificateauthority/DeveloperIDCA.cer \
-            https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer; do
-            f="$RUNNER_TEMP/$(basename "$url")"
-            curl -fsSL -o "$f" "$url" && security import "$f" -k "$KEYCHAIN_PATH" >/dev/null 2>&1 || true
-          done
-          security set-key-partition-list -S apple-tool:,apple:,codesign: \
-            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >/dev/null
-          security list-keychains -d user -s "$KEYCHAIN_PATH" \
-            $(security list-keychains -d user | sed s/\"//g)
-          IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" \
-            | grep 'Developer ID Application' | head -1 | awk '{print $2}')"
-          if [ -z "$IDENTITY" ]; then
-            echo "::error::No 'Developer ID Application' identity found in the imported certificate." >&2
-            exit 1
-          fi
-          echo "Signing identity (SHA-1): $IDENTITY"
-          {
-            echo "SIGN_IDENTITY=$IDENTITY"
-            echo "KEYCHAIN_PATH=$KEYCHAIN_PATH"
-          } >> "$GITHUB_ENV"
-
-      - name: Sign (Developer ID + hardened runtime)
-        run: |
-          set -euo pipefail
-          # The free build is local-only (no iCloud entitlements / provisioning
-          # profile — those are the Mac App Store premium variant). Sign nested
-          # bundles inside-out, then seal the main bundle, all with hardened runtime.
-          RESOURCE_BUNDLE="$APP/Contents/Resources/ClipMenu_ClipMenu.bundle"
-          if [ -d "$RESOURCE_BUNDLE" ]; then
-            codesign --force --options runtime --timestamp \
-              --sign "$SIGN_IDENTITY" --keychain "$KEYCHAIN_PATH" "$RESOURCE_BUNDLE"
-          fi
-
-          # Sign Sparkle.framework inside-out (XPC services, Autoupdate, Updater.app,
-          # then the framework). --deep is unreliable for notarization, hence explicit.
-          SPARKLE_FW="$APP/Contents/Frameworks/Sparkle.framework"
-          if [ -d "$SPARKLE_FW" ]; then
-            SPARKLE_V="$(/bin/ls -d "$SPARKLE_FW"/Versions/* | grep -v '/Current$' | head -1)"
-            for item in "$SPARKLE_V"/XPCServices/*.xpc "$SPARKLE_V/Autoupdate" "$SPARKLE_V/Updater.app"; do
-              [ -e "$item" ] || continue
-              codesign --force --options runtime --timestamp \
-                --sign "$SIGN_IDENTITY" --keychain "$KEYCHAIN_PATH" "$item"
-            done
-            codesign --force --options runtime --timestamp \
-              --sign "$SIGN_IDENTITY" --keychain "$KEYCHAIN_PATH" "$SPARKLE_FW"
-          fi
-
-          codesign --force --options runtime --timestamp \
-            --sign "$SIGN_IDENTITY" --keychain "$KEYCHAIN_PATH" "$APP"
-          codesign --verify --strict --verbose=2 "$APP"
-
-      - name: Notarize and staple
-        env:
-          NOTARY_KEY_P8_BASE64: ${{ secrets.NOTARY_KEY_P8_BASE64 }}
-          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
-          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
-        run: |
-          set -euo pipefail
-          if [ -z "${NOTARY_KEY_P8_BASE64:-}" ]; then
-            echo "::error::NOTARY_KEY_P8_BASE64 secret is not set." >&2
-            exit 1
-          fi
-          KEY_PATH="$RUNNER_TEMP/notary_key.p8"
-          echo "$NOTARY_KEY_P8_BASE64" | base64 --decode > "$KEY_PATH"
-          NOTARIZE_ZIP="$RUNNER_TEMP/notarize.zip"
-          ditto -c -k --sequesterRsrc --keepParent "$APP" "$NOTARIZE_ZIP"
-          CREDS=(--key "$KEY_PATH" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID")
-          SUBMIT_JSON="$RUNNER_TEMP/submit.json"
-          xcrun notarytool submit "$NOTARIZE_ZIP" "${CREDS[@]}" --output-format json > "$SUBMIT_JSON"
-          SUBMISSION_ID="$(plutil -extract id raw -o - "$SUBMIT_JSON")"
-          echo "Notarization submission: $SUBMISSION_ID"
-          DEADLINE=$(( SECONDS + 3600 )); STATUS="In Progress"
-          while [ "$STATUS" = "In Progress" ]; do
-            if [ "$SECONDS" -ge "$DEADLINE" ]; then
-              echo "::error::Notarization timed out after 60m. Submission: $SUBMISSION_ID" >&2; exit 1
-            fi
-            sleep 30
-            if xcrun notarytool info "$SUBMISSION_ID" "${CREDS[@]}" --output-format json > "$RUNNER_TEMP/info.json" 2>/dev/null; then
-              STATUS="$(plutil -extract status raw -o - "$RUNNER_TEMP/info.json")"
-              echo "Status: $STATUS"
-            else
-              echo "::warning::notarytool info poll failed (transient); re-polling $SUBMISSION_ID"
-            fi
-          done
-          if [ "$STATUS" != "Accepted" ]; then
-            echo "::error::Notarization did not succeed (status: $STATUS). Log follows:" >&2
-            xcrun notarytool log "$SUBMISSION_ID" "${CREDS[@]}" || true
-            exit 1
-          fi
-          xcrun stapler staple "$APP"
-          xcrun stapler validate "$APP"
-
-      - name: Zip notarized app
-        run: |
-          set -euo pipefail
-          ZIP="ClipMenu-${MAJOR}-${GITHUB_REF_NAME}.zip"
-          ditto -c -k --sequesterRsrc --keepParent "$APP" "${GITHUB_WORKSPACE}/${ZIP}"
-          echo "ZIP=${ZIP}" >> "$GITHUB_ENV"
-
-      - name: Upload to release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          TAG="${GITHUB_REF_NAME}"
-          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
-            || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes
-          gh release upload "$TAG" "$ZIP" --repo "$GITHUB_REPOSITORY" --clobber
-
-      # Deliver the auto-update: this repo's Release is the binary download source,
-      # and the EdDSA-signed appcast is published to the marketing site's Pages.
-      - name: Publish appcast (Sparkle auto-update)
-        env:
-          PUBLIC_RELEASE_TOKEN: ${{ secrets.PUBLIC_RELEASE_TOKEN }}
-          SPARKLE_EDDSA_PRIVATE_KEY: ${{ secrets.SPARKLE_EDDSA_PRIVATE_KEY }}
-        run: |
-          set -euo pipefail
-          TAG="${GITHUB_REF_NAME}"
-          SITE_REPO="teddychan/www.dragonapp.com"
-          if [ -z "${PUBLIC_RELEASE_TOKEN:-}" ] || [ -z "${SPARKLE_EDDSA_PRIVATE_KEY:-}" ]; then
-            echo "::warning::PUBLIC_RELEASE_TOKEN and/or SPARKLE_EDDSA_PRIVATE_KEY not set — skipping appcast."
-            exit 0
-          fi
-          GEN="$(find "${GITHUB_WORKSPACE}/app/.build/artifacts" -path '*Sparkle/bin/generate_appcast' -type f | head -1)"
-          if [ -z "$GEN" ]; then
-            echo "::error::generate_appcast not found under app/.build/artifacts." >&2
-            exit 1
-          fi
-          WORK="$RUNNER_TEMP/appcast"; mkdir -p "$WORK"
-          cp "$ZIP" "$WORK/"
-          KEY_FILE="$RUNNER_TEMP/sparkle_ed_key"
-          printf '%s\n' "$SPARKLE_EDDSA_PRIVATE_KEY" > "$KEY_FILE"
-          "$GEN" --ed-key-file "$KEY_FILE" \
-            --download-url-prefix "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/" \
-            "$WORK"
-          # ClipMenu's feed is path-scoped per app (served at
-          # https://www.dragonapp.com/clipmenu-2/appcast.xml), matching SUFeedURL in
-          # app/Info.plist. Only docs/clipmenu-2/appcast.xml is touched.
-          PAGES="$RUNNER_TEMP/pages"
-          REMOTE="https://x-access-token:${PUBLIC_RELEASE_TOKEN}@github.com/${SITE_REPO}.git"
-          git clone --depth 1 "$REMOTE" "$PAGES"
-          mkdir -p "$PAGES/docs/clipmenu-2"
-          cp "$WORK/appcast.xml" "$PAGES/docs/clipmenu-2/appcast.xml"
-          ( cd "$PAGES"
-            git config user.name "ClipMenu Release Bot"
-            git config user.email "release-bot@users.noreply.github.com"
-            git add docs/clipmenu-2/appcast.xml
-            if git diff --cached --quiet; then echo "appcast unchanged"; exit 0; fi
-            git commit --no-verify -m "appcast: clipmenu-2 ${TAG}"
-            git push origin HEAD:main )
-          echo "Published appcast → https://www.dragonapp.com/clipmenu-2/appcast.xml"
-
-      - name: Bump Homebrew cask
-        env:
-          PUBLIC_RELEASE_TOKEN: ${{ secrets.PUBLIC_RELEASE_TOKEN }}
-        run: |
-          set -euo pipefail
-          TAG="${GITHUB_REF_NAME}"
-          VERSION="${TAG#v}"
-          TAP_REPO="teddychan/homebrew-tap"
-          ASSET_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${ZIP}"
-          if [ -z "${PUBLIC_RELEASE_TOKEN:-}" ]; then
-            echo "::warning::PUBLIC_RELEASE_TOKEN not set — skipping Homebrew cask bump."; exit 0
-          fi
-          # The cask download URL must resolve before we point users at it.
-          if [ "$(curl -sI -L -o /dev/null -w '%{http_code}' "$ASSET_URL")" != "200" ]; then
-            echo "::warning::Public asset not live ($ASSET_URL) — skipping Homebrew cask bump."; exit 0
-          fi
-          SHA="$(shasum -a 256 "${GITHUB_WORKSPACE}/${ZIP}" | awk '{print $1}')"
-          TAP_DIR="$RUNNER_TEMP/homebrew-tap"
-          REMOTE="https://x-access-token:${PUBLIC_RELEASE_TOKEN}@github.com/${TAP_REPO}.git"
-          if ! git clone --depth 1 "$REMOTE" "$TAP_DIR" 2>/dev/null; then
-            echo "::warning::Could not clone ${TAP_REPO} (token lacks access?) — skipping cask bump."; exit 0
-          fi
-          CASK="$TAP_DIR/Casks/clipmenu-2.rb"
-          /usr/bin/sed -i '' -E \
-            -e "s/^  version \".*\"/  version \"${VERSION}\"/" \
-            -e "s/^  sha256 \".*\"/  sha256 \"${SHA}\"/" \
-            "$CASK"
-          ( cd "$TAP_DIR"
-            git config user.name "ClipMenu Release Bot"
-            git config user.email "release-bot@users.noreply.github.com"
-            git add Casks/clipmenu-2.rb
-            if git diff --cached --quiet; then echo "cask unchanged"; exit 0; fi
-            git commit --no-verify -m "clipmenu-2 ${VERSION}"
-            git push origin HEAD:main )
-          echo "Bumped Homebrew cask → clipmenu-2 ${VERSION} (${SHA})"
+  release:
+    uses: teddychan/dragon-release-ci/.github/workflows/release-macos.yml@v1
+    secrets: inherit
+    with:
+      build_kind: swiftpm
+      app_slug: clipmenu-2
+      release_title_prefix: ''            # title == tag
+      bot_name: ClipMenu Release Bot
+      swiftpm_working_directory: app
+      swiftpm_sparkle: true
+      zip_name_template: 'ClipMenu-{MAJOR}-{TAG}.zip'
+      zip_keep_parent: true
+      generate_appcast_glob: swiftpm
