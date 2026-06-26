@@ -69,6 +69,19 @@ enum AppStore {
         channelIsAppStore && syncEnabled && purchased && !cloudActive && !alreadyRelaunched
     }
 
+    /// Pure gate (testable): whether to relaunch to tear CloudKit back down. The
+    /// synchronous launch path trusts the cached `iCloudUnlocked` default to bring
+    /// up the cloud container before StoreKit's async `refresh()` can verify it; a
+    /// tampered cache (or a genuine refund/revocation) can therefore activate cloud
+    /// for a purchase that isn't actually owned. When `refresh()` later finds the
+    /// entitlement is NOT owned but cloud is already active this launch, relaunch
+    /// once into the local-only store. Loop-safe: on the next launch the cache is
+    /// `false`, so cloud never comes up → `cloudActive` is `false` → no relaunch.
+    static func shouldRelaunchForCloudDeactivation(
+        channelIsAppStore: Bool, cloudActive: Bool, purchased: Bool) -> Bool {
+        channelIsAppStore && cloudActive && !purchased
+    }
+
     /// Dev-only escape hatch (set by scripts/build-dev-icloud.sh) to populate the
     /// CloudKit *Development* schema from a signed local build. Forces the
     /// CloudKit-mirrored store on regardless of channel/subscription. Never set in
@@ -178,6 +191,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let pasteboardMonitor = PasteboardMonitor()
     private var clipStore: ClipStore?
     private var servicesStarted = false
+    /// First-run setup wizard window controller, retained while it's on screen.
+    private var onboardingController: OnboardingWindowController?
+    /// True once `applicationWillTerminate` fires (incl. a relaunch). The wizard
+    /// reads this so a relaunch close doesn't mark onboarding complete.
+    private var isTerminating = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Agent app: no Dock icon (mirrors legacy LSUIElement, Info.plist:40-41).
@@ -209,14 +227,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     #if PREMIUM
-    /// React to a StoreKit entitlement change. When the iCloud unlock is purchased
-    /// mid-session the launch-built container is still the local store, so relaunch
-    /// once to rebuild it with CloudKit; otherwise reset the one-shot guard so a
-    /// later purchase can trigger that relaunch again. Never gates the app itself.
+    /// React to a StoreKit entitlement change. Two directions, both via a single
+    /// relaunch (the SwiftData container's CloudKit mode is fixed at launch):
+    ///   • purchased mid-session but the launch-built container is still local →
+    ///     relaunch once to rebuild it with CloudKit.
+    ///   • the verified entitlement is NOT owned but cloud is active this launch
+    ///     (a tampered `iCloudUnlocked` cache, or a refund/revocation) → relaunch
+    ///     once to tear cloud back down to the local-only store.
+    /// Never gates the app itself.
     private func activateCloudIfNeeded() {
         let defaults = UserDefaults.standard
+        let channelIsAppStore = DistributionChannel.current == .appStore
+
+        // Revocation / tamper: cloud came up this launch for a purchase that isn't
+        // actually owned. `PremiumStore.setPurchased(false)` already cleared the
+        // cache before this callback, so the relaunch rebuilds the local store.
+        if AppStore.shouldRelaunchForCloudDeactivation(
+            channelIsAppStore: channelIsAppStore,
+            cloudActive: AppStore.isCloudKitActive,
+            purchased: PremiumStore.shared.isPurchased) {
+            AppRelaunch.relaunch()
+            return
+        }
+
         guard AppStore.shouldRelaunchForCloudActivation(
-            channelIsAppStore: DistributionChannel.current == .appStore,
+            channelIsAppStore: channelIsAppStore,
             syncEnabled: AppStore.isCloudSyncEnabled,
             purchased: PremiumStore.shared.isPurchased,
             cloudActive: AppStore.isCloudKitActive,
@@ -287,8 +322,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // apps get no menu by default; legacy had MainMenu.xib.
         installMainMenu()
 
-        // First-run prompt to add as a login item (AppController.m:323-326).
-        maybePromptToAddLoginItem()
+        // First run: show the setup wizard (which now owns the "Launch at login"
+        // choice, superseding the legacy login-item alert). Shown once per install
+        // and resumes on the saved step after a relaunch. The main menu is already
+        // installed above, so ⌘C/⌘V work in the wizard's fields. Existing users who
+        // finished the wizard fall through to the legacy prompt, which is a no-op
+        // for them (the wizard set `suppressAlertForLoginItem`).
+        if OnboardingGate.shouldShowOnLaunch(
+            completed: UserDefaults.standard.bool(forKey: PreferenceKeys.onboardingCompleted)) {
+            showOnboarding()
+        } else {
+            maybePromptToAddLoginItem()
+        }
 
         #if PREMIUM
         // Dev-only: when generating the CloudKit Development schema, seed a sample so
@@ -337,6 +382,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        isTerminating = true
         HotKeyCenter.shared.unregisterAll()
         #if PREMIUM
         SettingsSync.shared.stop()
@@ -358,6 +404,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             // full pre-migration history in plaintext.
             StoreMigration.deleteLegacyBackupIfMigrated(folder: AppStore.folder)
         }
+    }
+
+    /// Present the first-run setup wizard. `reset` restarts it at the welcome step
+    /// (used by the "Show Setup Guide…" button in About); first-run launch omits it
+    /// so the wizard resumes on the saved step after a relaunch.
+    func showOnboarding(reset: Bool = false) {
+        if reset { UserDefaults.standard.set(0, forKey: PreferenceKeys.onboardingStep) }
+        if onboardingController == nil {
+            onboardingController = OnboardingWindowController(
+                isTerminating: { [weak self] in self?.isTerminating ?? false },
+                onClosed: { [weak self] in self?.onboardingController = nil })
+        }
+        onboardingController?.show()
     }
 
     /// First launch only: offer to add ClipMenu as a login item, with a

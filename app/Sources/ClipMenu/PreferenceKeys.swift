@@ -78,4 +78,12 @@ enum PreferenceKeys {
     static let lastSnippetBackupDate = "lastSnippetBackupDate"
     /// Local cache of the last snippet-backup content hash (offline fallback only).
     static let lastSnippetBackupHash = "lastSnippetBackupHash"
+
+    /// First-run setup wizard. `onboardingCompleted` gates *whether* the wizard
+    /// shows (set once it's finished or deliberately closed); `onboardingStep` is
+    /// the resume point (the current step index), written on every Back/Continue so
+    /// a mid-wizard relaunch — e.g. a language change — reopens on the same step.
+    /// Per-device, so not synced.
+    static let onboardingCompleted = "onboardingCompleted"
+    static let onboardingStep = "onboardingStep"
 }

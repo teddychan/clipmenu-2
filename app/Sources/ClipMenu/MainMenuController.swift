@@ -72,6 +72,17 @@ final class MainMenuController: NSObject, NSMenuDelegate {
     /// Cached downsampled image thumbnails (row 53).
     private let thumbnailer = Thumbnailer()
 
+    /// Type-to-filter for the History menu (⌘⌃V). The search field is the menu's
+    /// top item; `historySearchQuery` holds the current text and `fetchClips()`
+    /// filters by it. Empty for every other menu, so the Main menu is unaffected.
+    private lazy var historySearchFieldView: HistorySearchFieldView = {
+        let view = HistorySearchFieldView()
+        view.onChange = { [weak self] query in self?.historyQueryDidChange(query) }
+        return view
+    }()
+    private weak var historyMenu: NSMenu?
+    private var historySearchQuery = ""
+
     /// Snapshot of the preferences consulted while building a menu, captured once
     /// per open at the top of each `populate*` entry point. The per-clip helpers
     /// read these from memory instead of hitting `UserDefaults` for every row —
@@ -277,6 +288,14 @@ final class MainMenuController: NSObject, NSMenuDelegate {
 
     private func populateHistoryMenu(_ menu: NSMenu) {
         menuPrefs = .current()
+        historyMenu = menu
+        // Search field on top, then a separator that the live rebuild never
+        // removes — keeping it as a stable anchor means the field (and its key
+        // focus) survives while the user types and the clip rows below refresh.
+        let searchItem = NSMenuItem()
+        searchItem.view = historySearchFieldView
+        menu.addItem(searchItem)
+        menu.addItem(.separator())
         addClipsSection(to: menu)
         applyMenuFont(to: menu)
     }
@@ -303,12 +322,46 @@ final class MainMenuController: NSObject, NSMenuDelegate {
     /// snippets appear without rebuilding the status item's menu.
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
+        // Every fresh open starts unfiltered; only live typing in the History
+        // search field sets a query (see historyQueryDidChange). Resetting here
+        // also keeps a stale query from leaking into the Main/Snippets menus.
+        historySearchQuery = ""
         switch menu.title {
         case "ClipMenu":     populateMainMenu(menu)
-        case "HistoryMenu":  populateHistoryMenu(menu)
+        case "HistoryMenu":
+            historySearchFieldView.reset()
+            populateHistoryMenu(menu)
         case "SnippetsMenu": populateSnippetsMenu(menu)
         default: break
         }
+    }
+
+    /// Focus the History menu's search field as soon as it opens, so the user can
+    /// type to filter right away. Deferred one main-actor hop because the field's
+    /// hosting window only exists once the menu is on screen.
+    func menuWillOpen(_ menu: NSMenu) {
+        guard menu.title == "HistoryMenu" else { return }
+        Task { @MainActor [weak self] in self?.historySearchFieldView.focus() }
+    }
+
+    /// Re-filter the open History menu as the user types. The search field (item 0)
+    /// and its separator (item 1) stay put; every clip row below is rebuilt from
+    /// the filtered list. A disabled "No matches" row is shown when a non-empty
+    /// query matches nothing.
+    private func historyQueryDidChange(_ query: String) {
+        historySearchQuery = query
+        guard let menu = historyMenu else { return }
+        while menu.numberOfItems > 2 { menu.removeItem(at: menu.numberOfItems - 1) }
+        menuPrefs = .current()
+        addClipsSection(to: menu)
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty, fetchClips().isEmpty {
+            let none = NSMenuItem(title: L("No matches"), action: nil, keyEquivalent: "")
+            none.isEnabled = false
+            menu.addItem(none)
+        }
+        applyMenuFont(to: menu)
+        menu.update()
     }
 
     /// Snippet position, mirroring `CMPositionOfSnippets` (MenuController.h:18-22).
@@ -609,7 +662,16 @@ final class MainMenuController: NSObject, NSMenuDelegate {
         // is a fault — fetching clips for the menu never loads the multi-MB
         // bytes; only paste does (CLAUDE.md §4). The menu renders from the small
         // `thumbnailData` column that comes with the row.
-        return (try? AppStore.container.mainContext.fetch(descriptor)) ?? []
+        let clips = (try? AppStore.container.mainContext.fetch(descriptor)) ?? []
+        // History-menu search (⌘⌃V): keep only clips whose text matches the typed
+        // query, case- and diacritic-insensitively. The query is empty for the
+        // Main/Snippets menus, so this is a no-op there. Image-only clips (no
+        // stringValue) never match a text query, as expected. Capture trims the
+        // store to maxHistorySize, so filtering the fetched rows searches the
+        // whole history, not just a page of it.
+        let query = historySearchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return clips }
+        return clips.filter { ($0.stringValue ?? "").localizedCaseInsensitiveContains(query) }
     }
 
     /// Menu title for a clip: trimmed first line, or a type placeholder

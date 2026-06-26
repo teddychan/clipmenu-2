@@ -205,6 +205,8 @@
 /* Paywall gate (App Store build) */
 "Get ClipMenu on the Mac App Store to use iCloud sync" = "Descarga ClipMenu de la Mac App Store para usar la sincronización con iCloud";
 "Couldn't restore purchases. Check your connection and try again." = "No se pudieron restaurar las compras. Comprueba tu conexión e inténtalo de nuevo.";
+"iCloud Sync isn't available right now. Please check your connection and try again." = "La sincronización con iCloud no está disponible ahora mismo. Comprueba tu conexión e inténtalo de nuevo.";
+"Try Again" = "Intentar de nuevo";
 
 /* iCloud snippet backup & restore (v2.8.0) */
 "Snippet Versions in iCloud" = "Versiones de fragmentos en iCloud";
@@ -232,3 +234,54 @@
 "This version was made on a newer app version and can't be restored." = "Esta versión se creó con una versión más reciente de la app y no se puede restaurar.";
 "Restore failed. Your current data was not changed." = "La restauración falló. Tus datos actuales no se modificaron.";
 "iCloud & Backup" = "iCloud y copia de seguridad";
+
+/* First-run setup wizard */
+"Your clipboard history and snippets, one keystroke away." = "Tu historial del portapapeles y tus fragmentos, a una pulsación.";
+"History at your fingertips" = "El historial al alcance de la mano";
+"Everything you copy, ready to paste from the menu bar." = "Todo lo que copias, listo para pegar desde la barra de menús.";
+"Snippets for what you reuse" = "Fragmentos para lo que reutilizas";
+"Save boilerplate text and paste it instantly." = "Guarda texto recurrente y pégalo al instante.";
+"Open it with a shortcut" = "Ábrelo con un atajo";
+"Pop up your history anywhere, pick an item, done." = "Abre tu historial en cualquier lugar, elige un elemento y listo.";
+"No permissions needed" = "No se necesitan permisos";
+"ClipMenu works the moment you continue." = "ClipMenu funciona en cuanto continúas.";
+"Your clipboard stays on this Mac" = "Tu portapapeles permanece en este Mac";
+"History is stored locally. Nothing is uploaded or sent anywhere." = "El historial se guarda localmente. No se sube ni se envía nada a ningún sitio.";
+"iCloud sync is optional and off until you turn it on in Settings." = "La sincronización con iCloud es opcional y está desactivada hasta que la actives en Ajustes.";
+"Accessibility (optional)" = "Accesibilidad (opcional)";
+"Lets ClipMenu paste the item you pick straight into the app you're using." = "Permite que ClipMenu pegue el elemento que elijas directamente en la app que estés usando.";
+"Accessibility" = "Accesibilidad";
+"Granted" = "Concedido";
+"Not granted" = "No concedido";
+"Grant access" = "Conceder acceso";
+"Open System Settings…" = "Abrir Ajustes del Sistema…";
+"You can skip this and turn it on later in Settings." = "Puedes omitir esto y activarlo más tarde en Ajustes.";
+"History essentials" = "Lo esencial del historial";
+"Tune what ClipMenu remembers. Change any of it later in Settings." = "Ajusta lo que ClipMenu recuerda. Puedes cambiarlo más tarde en Ajustes.";
+"Items to keep" = "Elementos que conservar";
+"Oldest are dropped past this count." = "Los más antiguos se eliminan al superar esta cantidad.";
+"Keep history after quitting" = "Conservar el historial al salir";
+"Store copied images" = "Guardar las imágenes copiadas";
+"Kept as small thumbnails." = "Se guardan como miniaturas pequeñas.";
+"Make it yours" = "Hazlo tuyo";
+"Turn on what you want now. Everything is in Settings later." = "Activa lo que quieras ahora. Todo está en Ajustes después.";
+"Launch at login" = "Abrir al iniciar sesión";
+"Paste automatically after picking" = "Pegar automáticamente al elegir";
+"ClipMenu presses ⌘V for you." = "ClipMenu pulsa ⌘V por ti.";
+"Global shortcuts" = "Atajos globales";
+"History menu" = "Menú de historial";
+"Main menu" = "Menú principal";
+"Snippets menu" = "Menú de fragmentos";
+"You're all set" = "Todo listo";
+"ClipMenu is live in your menu bar." = "ClipMenu ya está activo en tu barra de menús.";
+"Open your clipboard history anytime." = "Abre tu historial del portapapeles cuando quieras.";
+"You can also click the ClipMenu icon in the menu bar." = "También puedes hacer clic en el icono de ClipMenu en la barra de menús.";
+"Continue" = "Continuar";
+"Skip this step" = "Omitir este paso";
+"Open ClipMenu" = "Abrir ClipMenu";
+"Back" = "Atrás";
+"Show Setup Guide…" = "Mostrar guía de configuración…";
+
+/* History menu search (⌘⌃V) */
+"Search…" = "Buscar…";
+"No matches" = "Sin resultados";

@@ -203,6 +203,8 @@
 "Get ClipMenu on the Mac App Store to use iCloud sync" = "前往 Mac App Store 下载 ClipMenu 以使用 iCloud 同步";
 "No previous purchase found for this Apple ID." = "未找到此 Apple ID 的过往购买记录。";
 "Couldn't restore purchases. Check your connection and try again." = "无法恢复购买。请检查网络连接后重试。";
+"iCloud Sync isn't available right now. Please check your connection and try again." = "iCloud 同步当前不可用。请检查网络连接后重试。";
+"Try Again" = "重试";
 
 /* iCloud snippet backup & restore (v2.8.0) */
 "Snippet Versions in iCloud" = "iCloud 中的片段版本";
@@ -230,3 +232,54 @@
 "This version was made on a newer app version and can't be restored." = "该版本由更新版本的应用创建，无法恢复。";
 "Restore failed. Your current data was not changed." = "恢复失败。你的当前数据未被更改。";
 "iCloud & Backup" = "iCloud 与备份";
+
+/* First-run setup wizard */
+"Your clipboard history and snippets, one keystroke away." = "你的剪贴板历史和片段，一个按键即可调出。";
+"History at your fingertips" = "历史触手可及";
+"Everything you copy, ready to paste from the menu bar." = "你复制的一切，都能从菜单栏随时粘贴。";
+"Snippets for what you reuse" = "常用内容存为片段";
+"Save boilerplate text and paste it instantly." = "保存常用文本，随时即刻粘贴。";
+"Open it with a shortcut" = "用快捷键打开";
+"Pop up your history anywhere, pick an item, done." = "在任意位置弹出历史，选中一项即可。";
+"No permissions needed" = "无需任何权限";
+"ClipMenu works the moment you continue." = "继续后 ClipMenu 立即可用。";
+"Your clipboard stays on this Mac" = "你的剪贴板只保留在这台 Mac 上";
+"History is stored locally. Nothing is uploaded or sent anywhere." = "历史保存在本地，不会上传或发送到任何地方。";
+"iCloud sync is optional and off until you turn it on in Settings." = "iCloud 同步为可选项，在设置中开启前一直处于关闭状态。";
+"Accessibility (optional)" = "辅助功能（可选）";
+"Lets ClipMenu paste the item you pick straight into the app you're using." = "让 ClipMenu 将你选中的项目直接粘贴到正在使用的应用中。";
+"Accessibility" = "辅助功能";
+"Granted" = "已授权";
+"Not granted" = "未授权";
+"Grant access" = "授予访问权限";
+"Open System Settings…" = "打开系统设置…";
+"You can skip this and turn it on later in Settings." = "你可以跳过此步骤，稍后在设置中开启。";
+"History essentials" = "历史基本设置";
+"Tune what ClipMenu remembers. Change any of it later in Settings." = "调整 ClipMenu 记录的内容，稍后可在设置中更改。";
+"Items to keep" = "保留的项目数";
+"Oldest are dropped past this count." = "超过此数量后将删除最旧的项目。";
+"Keep history after quitting" = "退出后保留历史";
+"Store copied images" = "保存复制的图像";
+"Kept as small thumbnails." = "以小缩略图形式保存。";
+"Make it yours" = "打造你的专属设置";
+"Turn on what you want now. Everything is in Settings later." = "现在开启你想要的功能，所有项目稍后都在设置中。";
+"Launch at login" = "登录时启动";
+"Paste automatically after picking" = "选取后自动粘贴";
+"ClipMenu presses ⌘V for you." = "ClipMenu 会替你按下 ⌘V。";
+"Global shortcuts" = "全局快捷键";
+"History menu" = "历史菜单";
+"Main menu" = "主菜单";
+"Snippets menu" = "片段菜单";
+"You're all set" = "全部就绪";
+"ClipMenu is live in your menu bar." = "ClipMenu 已在你的菜单栏中运行。";
+"Open your clipboard history anytime." = "随时打开你的剪贴板历史。";
+"You can also click the ClipMenu icon in the menu bar." = "你也可以点按菜单栏中的 ClipMenu 图标。";
+"Continue" = "继续";
+"Skip this step" = "跳过此步骤";
+"Open ClipMenu" = "打开 ClipMenu";
+"Back" = "返回";
+"Show Setup Guide…" = "显示设置向导…";
+
+/* History menu search (⌘⌃V) */
+"Search…" = "搜索…";
+"No matches" = "无匹配项";

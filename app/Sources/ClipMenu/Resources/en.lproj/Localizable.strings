@@ -204,6 +204,8 @@
 "Get ClipMenu on the Mac App Store to use iCloud sync" = "Get ClipMenu on the Mac App Store to use iCloud sync";
 "No previous purchase found for this Apple ID." = "No previous purchase found for this Apple ID.";
 "Couldn't restore purchases. Check your connection and try again." = "Couldn't restore purchases. Check your connection and try again.";
+"iCloud Sync isn't available right now. Please check your connection and try again." = "iCloud Sync isn't available right now. Please check your connection and try again.";
+"Try Again" = "Try Again";
 
 /* iCloud snippet backup & restore (v2.8.0) */
 "Snippet Versions in iCloud" = "Snippet Versions in iCloud";
@@ -232,3 +234,54 @@
 "Restore failed. Your current data was not changed." = "Restore failed. Your current data was not changed.";
 
 "iCloud & Backup" = "iCloud & Backup";
+
+/* First-run setup wizard */
+"Your clipboard history and snippets, one keystroke away." = "Your clipboard history and snippets, one keystroke away.";
+"History at your fingertips" = "History at your fingertips";
+"Everything you copy, ready to paste from the menu bar." = "Everything you copy, ready to paste from the menu bar.";
+"Snippets for what you reuse" = "Snippets for what you reuse";
+"Save boilerplate text and paste it instantly." = "Save boilerplate text and paste it instantly.";
+"Open it with a shortcut" = "Open it with a shortcut";
+"Pop up your history anywhere, pick an item, done." = "Pop up your history anywhere, pick an item, done.";
+"No permissions needed" = "No permissions needed";
+"ClipMenu works the moment you continue." = "ClipMenu works the moment you continue.";
+"Your clipboard stays on this Mac" = "Your clipboard stays on this Mac";
+"History is stored locally. Nothing is uploaded or sent anywhere." = "History is stored locally. Nothing is uploaded or sent anywhere.";
+"iCloud sync is optional and off until you turn it on in Settings." = "iCloud sync is optional and off until you turn it on in Settings.";
+"Accessibility (optional)" = "Accessibility (optional)";
+"Lets ClipMenu paste the item you pick straight into the app you're using." = "Lets ClipMenu paste the item you pick straight into the app you're using.";
+"Accessibility" = "Accessibility";
+"Granted" = "Granted";
+"Not granted" = "Not granted";
+"Grant access" = "Grant access";
+"Open System Settings…" = "Open System Settings…";
+"You can skip this and turn it on later in Settings." = "You can skip this and turn it on later in Settings.";
+"History essentials" = "History essentials";
+"Tune what ClipMenu remembers. Change any of it later in Settings." = "Tune what ClipMenu remembers. Change any of it later in Settings.";
+"Items to keep" = "Items to keep";
+"Oldest are dropped past this count." = "Oldest are dropped past this count.";
+"Keep history after quitting" = "Keep history after quitting";
+"Store copied images" = "Store copied images";
+"Kept as small thumbnails." = "Kept as small thumbnails.";
+"Make it yours" = "Make it yours";
+"Turn on what you want now. Everything is in Settings later." = "Turn on what you want now. Everything is in Settings later.";
+"Launch at login" = "Launch at login";
+"Paste automatically after picking" = "Paste automatically after picking";
+"ClipMenu presses ⌘V for you." = "ClipMenu presses ⌘V for you.";
+"Global shortcuts" = "Global shortcuts";
+"History menu" = "History menu";
+"Main menu" = "Main menu";
+"Snippets menu" = "Snippets menu";
+"You're all set" = "You're all set";
+"ClipMenu is live in your menu bar." = "ClipMenu is live in your menu bar.";
+"Open your clipboard history anytime." = "Open your clipboard history anytime.";
+"You can also click the ClipMenu icon in the menu bar." = "You can also click the ClipMenu icon in the menu bar.";
+"Continue" = "Continue";
+"Skip this step" = "Skip this step";
+"Open ClipMenu" = "Open ClipMenu";
+"Back" = "Back";
+"Show Setup Guide…" = "Show Setup Guide…";
+
+/* History menu search (⌘⌃V) */
+"Search…" = "Search…";
+"No matches" = "No matches";

@@ -203,6 +203,8 @@
 "No previous purchase found for this Apple ID." = "この Apple ID では以前の購入が見つかりませんでした。";
 "Get ClipMenu on the Mac App Store to use iCloud sync" = "iCloud 同期を使うには、Mac App Store 版の ClipMenu をダウンロードしてください";
 "Couldn't restore purchases. Check your connection and try again." = "購入を復元できませんでした。接続を確認してもう一度お試しください。";
+"iCloud Sync isn't available right now. Please check your connection and try again." = "現在 iCloud 同期は利用できません。接続を確認してもう一度お試しください。";
+"Try Again" = "もう一度試す";
 
 /* iCloud snippet backup & restore (v2.8.0) */
 "Snippet Versions in iCloud" = "iCloud のスニペットバージョン";
@@ -230,3 +232,54 @@
 "This version was made on a newer app version and can't be restored." = "このバージョンは新しいバージョンのアプリで作成されたため、復元できません。";
 "Restore failed. Your current data was not changed." = "復元に失敗しました。現在のデータは変更されていません。";
 "iCloud & Backup" = "iCloud とバックアップ";
+
+/* First-run setup wizard */
+"Your clipboard history and snippets, one keystroke away." = "クリップボード履歴とスニペットを、ワンキーで。";
+"History at your fingertips" = "履歴をすぐ手元に";
+"Everything you copy, ready to paste from the menu bar." = "コピーしたものすべてを、メニューバーからすぐにペースト。";
+"Snippets for what you reuse" = "よく使うものはスニペットに";
+"Save boilerplate text and paste it instantly." = "定型文を保存して、すぐにペースト。";
+"Open it with a shortcut" = "ショートカットで開く";
+"Pop up your history anywhere, pick an item, done." = "どこでも履歴を表示し、項目を選ぶだけ。";
+"No permissions needed" = "権限は不要";
+"ClipMenu works the moment you continue." = "続けるとすぐに ClipMenu が使えます。";
+"Your clipboard stays on this Mac" = "クリップボードはこの Mac に保存されます";
+"History is stored locally. Nothing is uploaded or sent anywhere." = "履歴はローカルに保存されます。どこにもアップロードや送信はされません。";
+"iCloud sync is optional and off until you turn it on in Settings." = "iCloud 同期は任意で、設定でオンにするまで無効です。";
+"Accessibility (optional)" = "アクセシビリティ（任意）";
+"Lets ClipMenu paste the item you pick straight into the app you're using." = "選んだ項目を、使用中のアプリに ClipMenu が直接ペーストできるようにします。";
+"Accessibility" = "アクセシビリティ";
+"Granted" = "許可済み";
+"Not granted" = "未許可";
+"Grant access" = "アクセスを許可";
+"Open System Settings…" = "システム設定を開く…";
+"You can skip this and turn it on later in Settings." = "これはスキップして、後で設定でオンにできます。";
+"History essentials" = "履歴の基本設定";
+"Tune what ClipMenu remembers. Change any of it later in Settings." = "ClipMenu が記憶する内容を調整できます。後で設定で変更できます。";
+"Items to keep" = "保持する項目数";
+"Oldest are dropped past this count." = "この数を超えると古いものから削除されます。";
+"Keep history after quitting" = "終了後も履歴を保持";
+"Store copied images" = "コピーした画像を保存";
+"Kept as small thumbnails." = "小さなサムネイルとして保存されます。";
+"Make it yours" = "自分好みに";
+"Turn on what you want now. Everything is in Settings later." = "今すぐ使いたい機能をオンに。すべて後で設定から変更できます。";
+"Launch at login" = "ログイン時に起動";
+"Paste automatically after picking" = "選択後に自動でペースト";
+"ClipMenu presses ⌘V for you." = "ClipMenu が代わりに ⌘V を押します。";
+"Global shortcuts" = "グローバルショートカット";
+"History menu" = "履歴メニュー";
+"Main menu" = "メインメニュー";
+"Snippets menu" = "スニペットメニュー";
+"You're all set" = "準備完了";
+"ClipMenu is live in your menu bar." = "ClipMenu がメニューバーで動作中です。";
+"Open your clipboard history anytime." = "いつでもクリップボード履歴を開けます。";
+"You can also click the ClipMenu icon in the menu bar." = "メニューバーの ClipMenu アイコンをクリックしても開けます。";
+"Continue" = "続ける";
+"Skip this step" = "このステップをスキップ";
+"Open ClipMenu" = "ClipMenu を開く";
+"Back" = "戻る";
+"Show Setup Guide…" = "設定ガイドを表示…";
+
+/* History menu search (⌘⌃V) */
+"Search…" = "検索…";
+"No matches" = "一致なし";

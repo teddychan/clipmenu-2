@@ -58,4 +58,32 @@ import Testing
             channelIsAppStore: true, syncEnabled: false, purchased: true,
             cloudActive: false, alreadyRelaunched: false))
     }
+
+    // Cloud-deactivation relaunch (P1): the synchronous launch path trusts the
+    // cached `iCloudUnlocked` bool to bring cloud up before StoreKit verifies it.
+    // When the verified entitlement turns out NOT owned (tampered cache, refund,
+    // revocation) but cloud is already active this launch, relaunch ONCE to tear
+    // it back down to the local store.
+    @Test func deactivatesWhenCloudActiveButNotOwned() {
+        #expect(AppStore.shouldRelaunchForCloudDeactivation(
+            channelIsAppStore: true, cloudActive: true, purchased: false))
+    }
+
+    @Test func noDeactivationWhenOwned() {
+        // A real, verified purchase: leave cloud up.
+        #expect(!AppStore.shouldRelaunchForCloudDeactivation(
+            channelIsAppStore: true, cloudActive: true, purchased: true))
+    }
+
+    @Test func noDeactivationWhenCloudInactive() {
+        // Nothing to tear down — the launch path never brought cloud up.
+        #expect(!AppStore.shouldRelaunchForCloudDeactivation(
+            channelIsAppStore: true, cloudActive: false, purchased: false))
+    }
+
+    @Test func noDeactivationOnDirectBuild() {
+        // The direct build has no CloudKit at all.
+        #expect(!AppStore.shouldRelaunchForCloudDeactivation(
+            channelIsAppStore: false, cloudActive: true, purchased: false))
+    }
 }

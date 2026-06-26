@@ -203,6 +203,8 @@
 "No previous purchase found for this Apple ID." = "이 Apple ID에 대한 이전 구매를 찾을 수 없습니다.";
 "Get ClipMenu on the Mac App Store to use iCloud sync" = "iCloud 동기화를 사용하려면 Mac App Store에서 ClipMenu를 다운로드하세요";
 "Couldn't restore purchases. Check your connection and try again." = "구매를 복원할 수 없습니다. 연결을 확인한 후 다시 시도하세요.";
+"iCloud Sync isn't available right now. Please check your connection and try again." = "지금은 iCloud 동기화를 사용할 수 없습니다. 연결을 확인한 후 다시 시도하세요.";
+"Try Again" = "다시 시도";
 
 /* iCloud snippet backup & restore (v2.8.0) */
 "Snippet Versions in iCloud" = "iCloud의 스니펫 버전";
@@ -230,3 +232,54 @@
 "This version was made on a newer app version and can't be restored." = "이 버전은 최신 버전의 앱에서 만들어져 복원할 수 없습니다.";
 "Restore failed. Your current data was not changed." = "복원에 실패했습니다. 현재 데이터는 변경되지 않았습니다.";
 "iCloud & Backup" = "iCloud 및 백업";
+
+/* First-run setup wizard */
+"Your clipboard history and snippets, one keystroke away." = "클립보드 기록과 스니펫을 단축키 하나로.";
+"History at your fingertips" = "기록을 바로 손끝에";
+"Everything you copy, ready to paste from the menu bar." = "복사한 모든 것을 메뉴 막대에서 바로 붙여넣기.";
+"Snippets for what you reuse" = "자주 쓰는 것은 스니펫으로";
+"Save boilerplate text and paste it instantly." = "상용구 텍스트를 저장하고 즉시 붙여넣으세요.";
+"Open it with a shortcut" = "단축키로 열기";
+"Pop up your history anywhere, pick an item, done." = "어디서나 기록을 띄우고 항목을 고르면 끝.";
+"No permissions needed" = "권한이 필요 없음";
+"ClipMenu works the moment you continue." = "계속하면 ClipMenu를 바로 사용할 수 있습니다.";
+"Your clipboard stays on this Mac" = "클립보드는 이 Mac에 보관됩니다";
+"History is stored locally. Nothing is uploaded or sent anywhere." = "기록은 로컬에 저장됩니다. 어디에도 업로드하거나 전송하지 않습니다.";
+"iCloud sync is optional and off until you turn it on in Settings." = "iCloud 동기화는 선택 사항이며 설정에서 켜기 전까지는 꺼져 있습니다.";
+"Accessibility (optional)" = "손쉬운 사용(선택 사항)";
+"Lets ClipMenu paste the item you pick straight into the app you're using." = "선택한 항목을 ClipMenu가 사용 중인 앱에 바로 붙여넣을 수 있게 합니다.";
+"Accessibility" = "손쉬운 사용";
+"Granted" = "허용됨";
+"Not granted" = "허용 안 됨";
+"Grant access" = "접근 허용";
+"Open System Settings…" = "시스템 설정 열기…";
+"You can skip this and turn it on later in Settings." = "이 단계를 건너뛰고 나중에 설정에서 켤 수 있습니다.";
+"History essentials" = "기록 기본 설정";
+"Tune what ClipMenu remembers. Change any of it later in Settings." = "ClipMenu가 기억할 내용을 조정하세요. 나중에 설정에서 변경할 수 있습니다.";
+"Items to keep" = "보관할 항목 수";
+"Oldest are dropped past this count." = "이 개수를 초과하면 오래된 항목부터 삭제됩니다.";
+"Keep history after quitting" = "종료 후에도 기록 유지";
+"Store copied images" = "복사한 이미지 저장";
+"Kept as small thumbnails." = "작은 썸네일로 보관됩니다.";
+"Make it yours" = "나만의 설정으로";
+"Turn on what you want now. Everything is in Settings later." = "지금 원하는 항목을 켜세요. 모든 항목은 나중에 설정에 있습니다.";
+"Launch at login" = "로그인 시 실행";
+"Paste automatically after picking" = "선택 후 자동으로 붙여넣기";
+"ClipMenu presses ⌘V for you." = "ClipMenu가 대신 ⌘V를 눌러 줍니다.";
+"Global shortcuts" = "전역 단축키";
+"History menu" = "기록 메뉴";
+"Main menu" = "기본 메뉴";
+"Snippets menu" = "스니펫 메뉴";
+"You're all set" = "모든 준비가 끝났습니다";
+"ClipMenu is live in your menu bar." = "ClipMenu가 메뉴 막대에서 실행 중입니다.";
+"Open your clipboard history anytime." = "언제든지 클립보드 기록을 열 수 있습니다.";
+"You can also click the ClipMenu icon in the menu bar." = "메뉴 막대의 ClipMenu 아이콘을 클릭해도 됩니다.";
+"Continue" = "계속";
+"Skip this step" = "이 단계 건너뛰기";
+"Open ClipMenu" = "ClipMenu 열기";
+"Back" = "뒤로";
+"Show Setup Guide…" = "설정 가이드 표시…";
+
+/* History menu search (⌘⌃V) */
+"Search…" = "검색…";
+"No matches" = "일치 항목 없음";

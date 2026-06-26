@@ -390,6 +390,7 @@ struct CloudPreferencesView: View {
     // Purchase state, loaded from PremiumStore on appear and after each action.
     @State private var state: PremiumStore.EntitlementState = .unknown
     @State private var product: Product?
+    @State private var loadingProduct = true
     @State private var working = false
     @State private var message: String?
 
@@ -439,8 +440,18 @@ struct CloudPreferencesView: View {
             Button(action: buy) { Text(L("Buy")) }
                 .buttonStyle(.borderedProminent)
                 .disabled(working)
-        } else {
+        } else if loadingProduct {
             ProgressView().controlSize(.small)
+        } else {
+            // Product load finished but the store returned nothing (IAP not yet
+            // available / offline). Don't leave a spinner running forever — explain
+            // and offer a retry.
+            Text(L("iCloud Sync isn't available right now. Please check your connection and try again."))
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Button(L("Try Again"), action: reload)
+                .disabled(working)
         }
     }
 
@@ -518,6 +529,14 @@ struct CloudPreferencesView: View {
         await PremiumStore.shared.loadProduct()
         state = PremiumStore.shared.state
         product = PremiumStore.shared.product
+        loadingProduct = false
+    }
+
+    /// Retry fetching the product after an unavailable/offline load.
+    private func reload() {
+        loadingProduct = true
+        message = nil
+        Task { await loadStatus() }
     }
 
     private func buy() {
@@ -674,6 +693,10 @@ struct AboutPreferencesView: View {
 
                 Text(L("Released under the MIT License."))
                     .foregroundStyle(.secondary)
+
+                Button(L("Show Setup Guide…")) {
+                    (NSApp.delegate as? AppDelegate)?.showOnboarding(reset: true)
+                }
 
                 Divider().frame(maxWidth: 260)
 
