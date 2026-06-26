@@ -2,9 +2,6 @@ import SwiftUI
 import SwiftData
 import AppKit
 import UniformTypeIdentifiers
-#if PREMIUM
-import StoreKit
-#endif
 
 // MARK: - General pane (PARITY §J row 164; SPEC §12.1)
 
@@ -133,17 +130,14 @@ struct BackupPreferencesView: View {
     @AppStorage("exportHistoryAsSingleFile") private var exportAsSingleFile = true
     @AppStorage("tagOfSeparatorForExportHistoryToFile") private var separatorTag = 1
 
-    #if PREMIUM
     @State private var status: String = ""
     @State private var working = false
     @State private var showRestore = false
 
     private var backupAvailable: Bool { BackupScheduler.isEligible }
-    #endif
 
     var body: some View {
         Group {
-            #if PREMIUM
             if backupAvailable {
                 Section(L("Snippet Versions in iCloud")) {
                     Text(L("ClipMenu keeps your last 20 backups of your snippets and folders in your private iCloud. You can restore any version; your current data is backed up first."))
@@ -162,7 +156,6 @@ struct BackupPreferencesView: View {
                         .font(.footnote).foregroundStyle(.secondary)
                 }
             }
-            #endif
 
             Section(L("Clipboard History Export")) {
                 Picker("", selection: $exportAsSingleFile) {
@@ -182,14 +175,11 @@ struct BackupPreferencesView: View {
                 Button(L("Export…"), action: export)
             }
         }
-        #if PREMIUM
         .sheet(isPresented: $showRestore) {
             RestoreVersionsView(manager: BackupScheduler.makeManager())
         }
-        #endif
     }
 
-    #if PREMIUM
     private func backUpNow() async {
         working = true; defer { working = false }
         do {
@@ -201,7 +191,6 @@ struct BackupPreferencesView: View {
             status = L("iCloud backup failed. Try again later.")
         }
     }
-    #endif
 
     /// Export… (PrefsWindowController.m:482-499): save panel (single file) or
     /// folder chooser (multiple files), then HistoryExport.
@@ -230,7 +219,6 @@ struct BackupPreferencesView: View {
     }
 }
 
-#if PREMIUM
 /// Lists stored backup versions newest-first and restores the chosen one.
 struct RestoreVersionsView: View {
     let manager: BackupManager
@@ -348,15 +336,14 @@ struct RestoreVersionsView: View {
         }
     }
 }
-#endif
 
 // MARK: - iCloud & Backup pane (combined tab)
 
-/// The single "iCloud & Backup" Settings tab. Hosts the subscription + sync
-/// sections (`CloudPreferencesView`) and the snippet-versions + history-export
-/// sections (`BackupPreferencesView`) in one grouped `Form`, so subscription,
-/// sync status, versioned backup, and history export all live in one place
-/// (previously two separate tabs, which confused users).
+/// The single "iCloud & Backup" Settings tab. Hosts the iCloud sync-status section
+/// (`CloudPreferencesView`) and the snippet-versions + history-export sections
+/// (`BackupPreferencesView`) in one grouped `Form`, so sync status, versioned
+/// backup, and history export all live in one place (previously two separate tabs,
+/// which confused users).
 struct CloudBackupPreferencesView: View {
     var body: some View {
         Form {
@@ -367,92 +354,21 @@ struct CloudBackupPreferencesView: View {
     }
 }
 
-// MARK: - iCloud pane (subscription + sync status)
+// MARK: - iCloud pane (sync status)
 
-/// iCloud preferences — the 2nd tab, present in both builds.
-///
-/// - Mac App Store build: surfaces the one-time iCloud-sync purchase up front —
-///   unlock status plus Buy / Restore — so the in-app purchase stays easy to find
-///   (App Review Guideline 2.1: the IAP must be locatable in the app), with the live
-///   iCloud-sync status below it.
-/// - Developer ID / GitHub build: has no in-app purchase, so it explains that iCloud
-///   sync lives in the Mac App Store edition and links to it.
+/// iCloud preferences — the 2nd tab, shown in every build. iCloud sync is free; this
+/// pane shows live sync status (last sync time + synced snippet/folder counts), or a
+/// note that iCloud is unavailable and storage is local-only (offline, or a build
+/// without iCloud entitlements / an embedded provisioning profile).
 struct CloudPreferencesView: View {
-    private static let macAppStoreURL = URL(string: "https://apps.apple.com/app/id6775685878")!
-
-    #if PREMIUM
     // iCloud sync status: last successful sync time + live counts of the records that
     // actually sync (snippets + folders; clipboard history is local-only).
     @ObservedObject private var syncMonitor = CloudSyncMonitor.shared
     @Query private var snippets: [Snippet]
     @Query private var folders: [Folder]
 
-    // Purchase state, loaded from PremiumStore on appear and after each action.
-    @State private var state: PremiumStore.EntitlementState = .unknown
-    @State private var product: Product?
-    @State private var loadingProduct = true
-    @State private var working = false
-    @State private var message: String?
-
     var body: some View {
-        Group {
-            if DistributionChannel.current == .appStore {
-                Section(L("iCloud Sync")) { purchaseSection }
-                Section(L("iCloud")) { syncStatusSection }
-            } else {
-                Section(L("iCloud")) { directBuildSection }
-            }
-        }
-        .task { await loadStatus() }
-    }
-
-    // MARK: App Store build — one-time purchase
-
-    @ViewBuilder private var purchaseSection: some View {
-        switch state {
-        case .unknown:
-            ProgressView().controlSize(.small)
-        case .owned:
-            Label(L("iCloud Sync unlocked"), systemImage: "checkmark.seal.fill")
-                .foregroundStyle(.green)
-        case .notOwned:
-            purchaseRows
-        }
-        Button(L("Restore Purchases"), action: restore)
-            .buttonStyle(.link)
-            .disabled(working)
-        if let message {
-            Text(message)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
-    /// Description + price + Buy button when the unlock isn't owned yet.
-    @ViewBuilder private var purchaseRows: some View {
-        Text(L("Unlock iCloud sync for your snippets, folders, and settings, plus your last 20 snippet backups. One-time purchase."))
-            .font(.callout)
-            .foregroundStyle(.secondary)
-            .fixedSize(horizontal: false, vertical: true)
-        if let product {
-            Text(String(format: L("%@ one-time purchase"), product.displayPrice)).font(.headline)
-            Button(action: buy) { Text(L("Buy")) }
-                .buttonStyle(.borderedProminent)
-                .disabled(working)
-        } else if loadingProduct {
-            ProgressView().controlSize(.small)
-        } else {
-            // Product load finished but the store returned nothing (IAP not yet
-            // available / offline). Don't leave a spinner running forever — explain
-            // and offer a retry.
-            Text(L("iCloud Sync isn't available right now. Please check your connection and try again."))
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            Button(L("Try Again"), action: reload)
-                .disabled(working)
-        }
+        Section(L("iCloud")) { syncStatusSection }
     }
 
     @ViewBuilder private var syncStatusSection: some View {
@@ -475,19 +391,7 @@ struct CloudPreferencesView: View {
         }
     }
 
-    #endif
-
-    // MARK: Developer ID / GitHub build (shared; the free build shows only this)
-
-    @ViewBuilder private var directBuildSection: some View {
-        Toggle(L("Sync settings and snippets via iCloud"), isOn: .constant(false))
-            .disabled(true)
-        Link(L("Get ClipMenu on the Mac App Store to use iCloud sync"), destination: Self.macAppStoreURL)
-            .font(.caption)
-    }
-
-    #if PREMIUM
-    // MARK: Sync status text (moved from the Backup pane)
+    // MARK: Sync status text
 
     /// Date/time part of the "Last synced" line: YYYY-MMM-DD HH:MM:SS (e.g.
     /// 2026-Jun-07 14:32:05). Fixed POSIX locale so the month abbreviation is stable
@@ -521,55 +425,6 @@ struct CloudPreferencesView: View {
         let folderPart = String(format: L(folderCount == 1 ? "%d folder" : "%d folders"), folderCount)
         return String(format: L("%1$@, %2$@ synced"), snippetPart, folderPart)
     }
-
-    // MARK: Actions
-
-    private func loadStatus() async {
-        await PremiumStore.shared.refresh()
-        await PremiumStore.shared.loadProduct()
-        state = PremiumStore.shared.state
-        product = PremiumStore.shared.product
-        loadingProduct = false
-    }
-
-    /// Retry fetching the product after an unavailable/offline load.
-    private func reload() {
-        loadingProduct = true
-        message = nil
-        Task { await loadStatus() }
-    }
-
-    private func buy() {
-        working = true
-        message = nil
-        Task {
-            let ok = await PremiumStore.shared.purchase()
-            working = false
-            if ok { await loadStatus() }
-        }
-    }
-
-    private func restore() {
-        working = true
-        message = nil
-        Task {
-            let result = await PremiumStore.shared.restore()
-            working = false
-            switch result {
-            case .restored:
-                await loadStatus()
-            case .nothingToRestore:
-                message = L("No previous purchase found for this Apple ID.")
-            case .failed:
-                message = L("Couldn't restore purchases. Check your connection and try again.")
-            }
-        }
-    }
-    #else
-    var body: some View {
-        Section(L("iCloud")) { directBuildSection }
-    }
-    #endif
 }
 
 // Preferences panes. SwiftUI forms bound to the exact legacy UserDefaults keys

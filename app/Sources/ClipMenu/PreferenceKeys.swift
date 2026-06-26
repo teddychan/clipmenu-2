@@ -61,18 +61,9 @@ enum PreferenceKeys {
     static let loginItem = "loginItem"
     static let suppressAlertForLoginItem = "suppressAlertForLoginItem"
     static let iCloudSyncEnabled = "iCloudSyncEnabled"
-    /// Cached StoreKit entitlement for the paid iCloud-sync unlock (one-time
-    /// purchase). Written by `PremiumStore`; read at launch by `AppStore` to decide
-    /// CloudKit activation.
-    static let iCloudUnlocked = "iCloudUnlocked"
     /// End date of the last successful CloudKit import/export (a `Date`). Written by
     /// `CloudSyncMonitor`; shown in the Backup pane. Per-device, so not synced.
     static let lastCloudSyncDate = "lastCloudSyncDate"
-    /// One-shot guard: set the first time we relaunch to switch the (launch-built)
-    /// local store over to CloudKit after the subscription is activated mid-session.
-    /// Prevents a relaunch loop when CloudKit can't come up (e.g. Production schema
-    /// not yet deployed). Per-device, so not synced.
-    static let cloudActivationRelaunched = "cloudActivationRelaunched"
     /// Local cache of the last snippet-backup time (a `Date`). NOT authoritative —
     /// CloudKit metadata is the source of truth; this is an offline/perf fallback.
     static let lastSnippetBackupDate = "lastSnippetBackupDate"

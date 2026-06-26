@@ -43,43 +43,12 @@ enum AppStore {
     /// True when the snippets store is actually CloudKit-mirrored this launch.
     private(set) static var isCloudKitActive = false
 
-    /// Cached StoreKit entitlement for the paid iCloud-sync unlock (written by
-    /// `PremiumStore`). iCloud sync is a one-time $9.99 purchase.
-    static var isiCloudUnlocked: Bool {
-        UserDefaults.standard.bool(forKey: PreferenceKeys.iCloudUnlocked)
-    }
-
-    /// Pure gate (testable): CloudKit mirroring activates only in the sandboxed
-    /// Mac App Store build, when the user enabled sync AND owns the iCloud unlock.
-    /// The Developer ID build is never App Store, so iCloud is off there.
-    static func shouldActivateCloud(channelIsAppStore: Bool, syncEnabled: Bool, purchased: Bool) -> Bool {
-        channelIsAppStore && syncEnabled && purchased
-    }
-
-    /// Pure gate (testable): whether to relaunch once to bring CloudKit up. The
-    /// SwiftData container is built once at launch (the Settings scene's
-    /// `.modelContainer`); on a fresh install the user isn't subscribed yet, so it's
-    /// built as the LOCAL store and can't switch to CloudKit when the trial starts
-    /// later in the same session. A single relaunch rebuilds it with iCloud.
-    /// `alreadyRelaunched` guards against a loop when CloudKit still can't come up
-    /// (e.g. the Production schema isn't deployed yet).
-    static func shouldRelaunchForCloudActivation(
-        channelIsAppStore: Bool, syncEnabled: Bool, purchased: Bool,
-        cloudActive: Bool, alreadyRelaunched: Bool) -> Bool {
-        channelIsAppStore && syncEnabled && purchased && !cloudActive && !alreadyRelaunched
-    }
-
-    /// Pure gate (testable): whether to relaunch to tear CloudKit back down. The
-    /// synchronous launch path trusts the cached `iCloudUnlocked` default to bring
-    /// up the cloud container before StoreKit's async `refresh()` can verify it; a
-    /// tampered cache (or a genuine refund/revocation) can therefore activate cloud
-    /// for a purchase that isn't actually owned. When `refresh()` later finds the
-    /// entitlement is NOT owned but cloud is already active this launch, relaunch
-    /// once into the local-only store. Loop-safe: on the next launch the cache is
-    /// `false`, so cloud never comes up → `cloudActive` is `false` → no relaunch.
-    static func shouldRelaunchForCloudDeactivation(
-        channelIsAppStore: Bool, cloudActive: Bool, purchased: Bool) -> Bool {
-        channelIsAppStore && cloudActive && !purchased
+    /// Pure gate (testable): CloudKit mirroring activates whenever the user has
+    /// iCloud sync enabled (the default). Sync is free in every build; if the build
+    /// lacks iCloud entitlements / an embedded provisioning profile, `makeContainer`
+    /// catches the failure and falls back to a local store.
+    static func shouldActivateCloud(syncEnabled: Bool) -> Bool {
+        syncEnabled
     }
 
     /// Dev-only escape hatch (set by scripts/build-dev-icloud.sh) to populate the
@@ -90,7 +59,6 @@ enum AppStore {
         ProcessInfo.processInfo.environment["CLIPMENU_DEV_CLOUDKIT_SCHEMA"] == "1"
     }
 
-    #if PREMIUM
     /// Dev-only: create both CloudKit Development schemas so they can be deployed to
     /// Production: the SwiftData-mirrored snippet schema (CD_Folder / CD_Snippet) and
     /// the raw-CloudKit backup schema (Backups zone + SnippetBackup record type).
@@ -123,7 +91,6 @@ enum AppStore {
             }
         }
     }
-    #endif
 
     static let container: ModelContainer = makeContainer()
 
@@ -150,11 +117,9 @@ enum AppStore {
 
         // `devCloudKitSchemaRequested` forces the CloudKit-mirrored store on so a signed
         // development build can create the CloudKit Development schema (later deployed to
-        // Production). Normal builds use the channel + purchase gate.
+        // Production). Normal builds activate cloud whenever sync is enabled.
         let wantCloud = devCloudKitSchemaRequested || shouldActivateCloud(
-            channelIsAppStore: DistributionChannel.current == .appStore,
-            syncEnabled: isCloudSyncEnabled,
-            purchased: isiCloudUnlocked)
+            syncEnabled: isCloudSyncEnabled)
         if wantCloud {
             do {
                 let container = try make(cloud: true)
@@ -213,59 +178,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // delivers updates.
         UpdaterUI.start()
 
-        #if PREMIUM
-        // Mac App Store build: the app is free and fully functional; iCloud sync is a
-        // one-time $9.99 unlock. Start StoreKit so the entitlement is known, and when a
-        // purchase activates iCloud mid-session, relaunch once to rebuild the container
-        // with CloudKit. The Developer ID build has no iCloud (no StoreKit).
-        if DistributionChannel.current == .appStore {
-            PremiumStore.shared.onChange = { [weak self] in self?.activateCloudIfNeeded() }
-            PremiumStore.shared.start()
-        }
-        #endif
         startAppServices()
     }
-
-    #if PREMIUM
-    /// React to a StoreKit entitlement change. Two directions, both via a single
-    /// relaunch (the SwiftData container's CloudKit mode is fixed at launch):
-    ///   • purchased mid-session but the launch-built container is still local →
-    ///     relaunch once to rebuild it with CloudKit.
-    ///   • the verified entitlement is NOT owned but cloud is active this launch
-    ///     (a tampered `iCloudUnlocked` cache, or a refund/revocation) → relaunch
-    ///     once to tear cloud back down to the local-only store.
-    /// Never gates the app itself.
-    private func activateCloudIfNeeded() {
-        let defaults = UserDefaults.standard
-        let channelIsAppStore = DistributionChannel.current == .appStore
-
-        // Revocation / tamper: cloud came up this launch for a purchase that isn't
-        // actually owned. `PremiumStore.setPurchased(false)` already cleared the
-        // cache before this callback, so the relaunch rebuilds the local store.
-        if AppStore.shouldRelaunchForCloudDeactivation(
-            channelIsAppStore: channelIsAppStore,
-            cloudActive: AppStore.isCloudKitActive,
-            purchased: PremiumStore.shared.isPurchased) {
-            AppRelaunch.relaunch()
-            return
-        }
-
-        guard AppStore.shouldRelaunchForCloudActivation(
-            channelIsAppStore: channelIsAppStore,
-            syncEnabled: AppStore.isCloudSyncEnabled,
-            purchased: PremiumStore.shared.isPurchased,
-            cloudActive: AppStore.isCloudKitActive,
-            alreadyRelaunched: defaults.bool(forKey: PreferenceKeys.cloudActivationRelaunched))
-        else {
-            if !PremiumStore.shared.isPurchased {
-                defaults.set(false, forKey: PreferenceKeys.cloudActivationRelaunched)
-            }
-            return
-        }
-        defaults.set(true, forKey: PreferenceKeys.cloudActivationRelaunched)
-        AppRelaunch.relaunch()
-    }
-    #endif
 
     /// Bring up the app's actual functionality (status item, hot-keys, clipboard
     /// capture, menus). Runs once, after the access gate is satisfied.
@@ -279,15 +193,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             oldStoreURL: AppStore.folder.appending(path: "ClipMenu.store"),
             into: AppStore.container.mainContext)
 
-        #if PREMIUM
         // Start iCloud settings sync only when CloudKit is actually active this launch.
-        // In the App Store build iCloud is included with the subscription and on by
-        // default; the Developer ID build has no iCloud, so this stays off there.
+        // iCloud sync is free and on by default; when the build can't bring CloudKit
+        // up (no entitlement/profile, or offline), this stays off and the app is local.
         if AppStore.isCloudKitActive {
             SettingsSync.shared.start()
             CloudSyncMonitor.shared.start()
         }
-        #endif
 
         // Status-bar item shows the Main menu (MenuController.m:1314). Honor
         // showStatusItem: 0 = none (OQ#12) — still reachable via the Main-menu
@@ -335,7 +247,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             maybePromptToAddLoginItem()
         }
 
-        #if PREMIUM
         // Dev-only: when generating the CloudKit Development schema, seed a sample so
         // SwiftData exports and creates the CD_* record types (scripts/build-dev-icloud.sh).
         if AppStore.devCloudKitSchemaRequested {
@@ -343,7 +254,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         BackupScheduler.runIfEligible()
-        #endif
     }
 
     /// Minimal main menu (App + Edit). The Edit ▸ Undo/Redo items route through
@@ -384,9 +294,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         isTerminating = true
         HotKeyCenter.shared.unregisterAll()
-        #if PREMIUM
-        SettingsSync.shared.stop()
-        #endif
+        if AppStore.isCloudKitActive {
+            SettingsSync.shared.stop()
+        }
         Task { await pasteboardMonitor.stop() }
 
         // Save-on-quit (AppController.m:351-373): SwiftData persists clips
@@ -450,10 +360,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 // MARK: - Settings scene
 
 /// Preference tabs: General, iCloud, Menu, Type, Action, Shortcuts, Backup, About.
-/// iCloud is the 2nd tab (both builds): in the App Store build it surfaces the
-/// subscription / in-app purchase + sync status; in the direct build it points to
-/// the Mac App Store edition. There is no separate Updates pane: the auto-update
-/// controls live in the General pane (direct build only), next to Launch on Login.
+/// iCloud is the 2nd tab (all builds): it shows live iCloud-sync status. Sync is
+/// free in every build. There is no separate Updates pane: the auto-update controls
+/// live in the General pane (direct build only), next to Launch on Login.
 struct SettingsView: View {
     var body: some View {
         TabView {

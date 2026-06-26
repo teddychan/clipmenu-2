@@ -35,43 +35,12 @@ if sparkleEnabled {
     clipMenuLinkerSettings.append(.unsafeFlags(["-Xlinker", "-rpath", "-Xlinker", "@loader_path/../Frameworks"]))
 }
 
-// Premium / Mac App Store features — the StoreKit paywall plus the entire iCloud
-// sync & backup subsystem — are compiled in ONLY for the paid Mac App Store build,
-// which sets CLIPMENU_PREMIUM=1 (scripts/build-appstore.sh, scripts/build-dev-icloud.sh).
-// With the flag off — the default for the free Developer ID / Homebrew build, CI,
-// and tests — the whole Sources/ClipMenu/Premium/ folder is excluded from the target
-// and the `PREMIUM` compile flag is undefined, so the open-source build contains no
-// monetization or iCloud code. The premium sources live under Premium/ (a private
-// overlay once the repo is split); the `fileExists` guards let the free build resolve
-// whether or not that folder is present, so the public repo builds fine without it.
-let fileManager = FileManager.default
-let premiumEnabled = ProcessInfo.processInfo.environment["CLIPMENU_PREMIUM"] == "1"
-
-var clipMenuExclude: [String] = []
-if premiumEnabled {
-    clipMenuSwiftSettings.append(.define("PREMIUM"))
-} else if fileManager.fileExists(atPath: "Sources/ClipMenu/Premium") {
-    clipMenuExclude.append("Premium")
-}
-
-// Test files that exercise premium-only code; excluded from the free test build for
-// the same reason (the code they import isn't compiled in). Filtered by existence so
-// the public repo (where they're absent) is unaffected.
-let premiumTestFiles = [
-    "BackupManagerTests.swift",
-    "BackupRetentionTests.swift",
-    "SettingsSyncTests.swift",
-    "SnippetSnapshotTests.swift",
-]
-var clipMenuTestExclude: [String] = []
+// iCloud sync & backup (Sources/ClipMenu/Premium/) is compiled into every build —
+// the app is free on all channels, and iCloud sync is a free feature. It only goes
+// live when the build carries iCloud entitlements + an embedded provisioning profile
+// (and the CloudKit schema is deployed); otherwise `AppStore.makeContainer` falls
+// back to a local store, so dev/unsigned builds still run.
 var clipMenuTestSwiftSettings: [SwiftSetting] = [.swiftLanguageMode(.v6)]
-if premiumEnabled {
-    clipMenuTestSwiftSettings.append(.define("PREMIUM"))
-} else {
-    clipMenuTestExclude = premiumTestFiles.filter {
-        fileManager.fileExists(atPath: "Tests/ClipMenuTests/\($0)")
-    }
-}
 
 let package = Package(
     name: "ClipMenu",
@@ -92,7 +61,6 @@ let package = Package(
             name: "ClipMenu",
             dependencies: clipMenuDependencies,
             path: "Sources/ClipMenu",
-            exclude: clipMenuExclude,
             resources: [
                 // Bundled JS actions + libraries (legacy resource/script tree),
                 // run verbatim by JSActionRunner for transform parity (OQ#3).
@@ -118,7 +86,6 @@ let package = Package(
             name: "ClipMenuTests",
             dependencies: ["ClipMenu"],
             path: "Tests/ClipMenuTests",
-            exclude: clipMenuTestExclude,
             swiftSettings: clipMenuTestSwiftSettings
         )
     ]
