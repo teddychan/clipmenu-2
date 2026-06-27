@@ -194,17 +194,19 @@ jobs:
           set -euo pipefail
           mkdir -p "$HOME/.appstoreconnect/private_keys"
           echo "$NOTARY_KEY_P8_BASE64" | base64 --decode > "$HOME/.appstoreconnect/private_keys/AuthKey_${NOTARY_KEY_ID}.p8"
-          # altool is broken on Xcode 26 ("Defaults.properties couldn't be opened"),
-          # so upload with iTMSTransporter (ships with Xcode). The .pkg is also kept
-          # as a workflow artifact above for manual upload via Transporter.app if needed.
-          ITMS="$(xcrun --find iTMSTransporter 2>/dev/null || true)"
-          if [ -z "$ITMS" ]; then
-            ITMS="$(find "$(xcode-select -p)" -name iTMSTransporter -type f 2>/dev/null | head -1)"
+          # altool is broken on Xcode 26, and the Xcode-bundled `xcrun iTMSTransporter`
+          # is now only a stub that defers to the standalone Transporter app — which is
+          # NOT preinstalled on the hosted runner. Install Transporter and use its real
+          # iTMSTransporter. The .pkg is also kept as an artifact for manual upload.
+          TR="/Applications/Transporter.app/Contents/itms/bin/iTMSTransporter"
+          if [ ! -x "$TR" ]; then
+            echo "Installing Transporter (provides iTMSTransporter)…"
+            brew install --cask transporter
           fi
-          if [ -z "$ITMS" ]; then
-            echo "::warning::iTMSTransporter not found on the runner — skipping upload. Download the ClipMenu-MAS-pkg artifact and upload it via Transporter.app."
+          if [ ! -x "$TR" ]; then
+            echo "::warning::Transporter unavailable — skipping upload. Download the ClipMenu-MAS-pkg artifact and upload it via Transporter.app."
             exit 0
           fi
-          "$ITMS" -m upload -assetFile "$PKG" \
+          "$TR" -m upload -assetFile "$PKG" \
             -apiKey "$NOTARY_KEY_ID" -apiIssuer "$NOTARY_ISSUER_ID" \
             -apiKeyDir "$HOME/.appstoreconnect/private_keys"
