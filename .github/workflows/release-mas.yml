@@ -1,0 +1,210 @@
+name: Release (Mac App Store)
+
+# Build the SANDBOXED Mac App Store variant of ClipMenu and upload the signed
+# .pkg to App Store Connect. This is a self-contained CI port of the old local
+# app/scripts/build-appstore.sh — that script and the MAS entitlements are kept
+# private (not mirrored to this public repo by sync-public.sh), so this workflow
+# carries the sandbox entitlements inline.
+#
+# Separate from release.yml (Developer ID / GitHub download / Homebrew) because
+# App Store submissions go through App Review on a different cadence. Runs on a
+# GitHub-hosted macOS runner (free for public repos).
+#
+# Trigger: run manually from the Actions tab, or push a tag like `mas-v2.12.0`.
+#
+# Required repository secrets:
+#   MAS_SIGNING_P12_BASE64    base64 of a .p12 holding the "Apple Distribution" +
+#                             "3rd Party Mac Developer Installer" identities
+#   MAS_SIGNING_P12_PASSWORD  the .p12 password
+#   MAS_PROVISIONING_PROFILE_BASE64  base64 of the Mac App Store .provisionprofile
+#                             (iCloud-enabled, com.dragonapp.clipmenu-2)
+#   APPLE_TEAM_ID             10-char Team ID (substituted into the entitlements)
+#   NOTARY_KEY_P8_BASE64 / NOTARY_KEY_ID / NOTARY_ISSUER_ID
+#                             App Store Connect API key (used for the upload)
+
+on:
+  workflow_dispatch: {}
+  push:
+    tags:
+      - 'mas-v*'
+
+permissions:
+  contents: read
+
+jobs:
+  appstore:
+    # ClipMenu targets the macOS 26 SDK — build on the macos-26 hosted image.
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        run: |
+          set -euo pipefail
+          latest="$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)"
+          if [ -n "$latest" ]; then sudo xcode-select -s "$latest/Contents/Developer"; fi
+          swift --version
+
+      - name: Build (release, arm64)
+        working-directory: app
+        # Apple Silicon only: macOS 26 drops Intel, so a single arm64 slice.
+        run: swift build -c release --arch arm64
+
+      - name: Assemble sandboxed .app
+        working-directory: app
+        run: |
+          set -euo pipefail
+          BIN_PATH="$(swift build -c release --arch arm64 --show-bin-path)"
+          VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Info.plist)"
+          MAJOR="${VERSION%%.*}"
+          APP_NAME="ClipMenu ${MAJOR}"
+          OUT="$GITHUB_WORKSPACE/app/.build/appstore"
+          APP="$OUT/${APP_NAME}.app"
+          rm -rf "$OUT"; mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+
+          cp "$BIN_PATH/ClipMenu" "$APP/Contents/MacOS/ClipMenu"
+          cp Info.plist "$APP/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleName ${APP_NAME}" "$APP/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string ${APP_NAME}" "$APP/Contents/Info.plist" 2>/dev/null \
+            || /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName ${APP_NAME}" "$APP/Contents/Info.plist"
+
+          # Unique, strictly-increasing build number per upload (App Store Connect
+          # de-dupes by CFBundleVersion). Marketing version stays as-is.
+          BUILD_NUMBER="$(date +%s)"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD_NUMBER}" "$APP/Contents/Info.plist"
+          echo "Build number (CFBundleVersion): ${BUILD_NUMBER}  (marketing ${VERSION})"
+          cp AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+
+          RB="ClipMenu_ClipMenu.bundle"
+          if [ -d "$BIN_PATH/$RB" ]; then
+            cp -R "$BIN_PATH/$RB" "$APP/Contents/Resources/$RB"
+            chmod -R u+w "$APP/Contents/Resources/$RB"
+            # The App Store validator rejects nested bundles without a bundle id (90276).
+            RBP="$APP/Contents/Resources/$RB/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.dragonapp.clipmenu-2.resources" "$RBP" 2>/dev/null \
+              || /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.dragonapp.clipmenu-2.resources" "$RBP"
+            /usr/libexec/PlistBuddy -c "Add :CFBundleName string ClipMenu Resources" "$RBP" 2>/dev/null || true
+            /usr/libexec/PlistBuddy -c "Add :CFBundlePackageType string BNDL" "$RBP" 2>/dev/null || true
+          fi
+
+          # The App Store build must NOT contain a self-updater.
+          if [ -d "$APP/Contents/Frameworks/Sparkle.framework" ]; then
+            echo "::error::Sparkle.framework present in the MAS build — it must be excluded." >&2
+            exit 1
+          fi
+
+          { echo "APP=$APP"; echo "OUT=$OUT"; echo "VERSION=$VERSION"; } >> "$GITHUB_ENV"
+
+      - name: Import signing certificates (ephemeral keychain)
+        env:
+          P12_BASE64: ${{ secrets.MAS_SIGNING_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.MAS_SIGNING_P12_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${P12_BASE64:-}" ]; then echo "::error::MAS_SIGNING_P12_BASE64 not set" >&2; exit 1; fi
+          KC="$RUNNER_TEMP/mas-signing.keychain-db"
+          KP="$(openssl rand -base64 24)"
+          echo "$P12_BASE64" | base64 --decode > "$RUNNER_TEMP/mas.p12"
+          security create-keychain -p "$KP" "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p "$KP" "$KC"
+          security import "$RUNNER_TEMP/mas.p12" -P "$P12_PASSWORD" -A -t cert -f pkcs12 \
+            -k "$KC" -T /usr/bin/codesign -T /usr/bin/productbuild
+          # Apple intermediates so the cert chain validates on a fresh keychain.
+          for url in \
+            https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer \
+            https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer \
+            https://www.apple.com/certificateauthority/AppleRootCA.cer; do
+            f="$RUNNER_TEMP/$(basename "$url")"
+            curl -fsSL -o "$f" "$url" && security import "$f" -k "$KC" >/dev/null 2>&1 || true
+          done
+          security set-key-partition-list -S apple-tool:,apple:,codesign:,productbuild: \
+            -s -k "$KP" "$KC" >/dev/null
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | sed s/\"//g)
+
+          # Resolve identities by SHA-1 (unique) to avoid name ambiguity.
+          APP_ID="$(security find-identity -v -p codesigning "$KC" | grep 'Apple Distribution' | head -1 | awk '{print $2}')"
+          INST_ID="$(security find-identity -v "$KC" | grep '3rd Party Mac Developer Installer' | head -1 | awk '{print $2}')"
+          if [ -z "$APP_ID" ]; then echo "::error::Apple Distribution identity not found in the .p12" >&2; exit 1; fi
+          if [ -z "$INST_ID" ]; then echo "::error::3rd Party Mac Developer Installer identity not found in the .p12" >&2; exit 1; fi
+          echo "App-signing identity:       $APP_ID"
+          echo "Installer-signing identity: $INST_ID"
+          { echo "APP_ID=$APP_ID"; echo "INST_ID=$INST_ID"; echo "KC=$KC"; } >> "$GITHUB_ENV"
+
+      - name: Sign + build .pkg
+        env:
+          PROFILE_BASE64: ${{ secrets.MAS_PROVISIONING_PROFILE_BASE64 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PROFILE_BASE64:-}" ]; then echo "::error::MAS_PROVISIONING_PROFILE_BASE64 not set" >&2; exit 1; fi
+          if [ -z "${APPLE_TEAM_ID:-}" ]; then echo "::error::APPLE_TEAM_ID not set" >&2; exit 1; fi
+
+          echo "$PROFILE_BASE64" | base64 --decode > "$APP/Contents/embedded.provisionprofile"
+          # The App Store validator rejects any file with extended attributes (ITMS-91109).
+          xattr -cr "$APP"
+
+          # Sandbox entitlements (inline; mirrors the private ClipMenu-AppStore.entitlements).
+          # Built with printf, not a heredoc, to avoid YAML indentation pitfalls.
+          ENT="$OUT/ClipMenu-AppStore.entitlements"
+          {
+            printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>'
+            printf '%s\n' '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">'
+            printf '%s\n' '<plist version="1.0"><dict>'
+            printf '%s\n' "  <key>com.apple.application-identifier</key><string>${APPLE_TEAM_ID}.com.dragonapp.clipmenu-2</string>"
+            printf '%s\n' "  <key>com.apple.developer.team-identifier</key><string>${APPLE_TEAM_ID}</string>"
+            printf '%s\n' '  <key>com.apple.security.app-sandbox</key><true/>'
+            printf '%s\n' '  <key>com.apple.security.files.user-selected.read-write</key><true/>'
+            printf '%s\n' '  <key>com.apple.developer.icloud-container-identifiers</key><array><string>iCloud.com.dragonapp.clipmenu-2</string></array>'
+            printf '%s\n' '  <key>com.apple.developer.icloud-services</key><array><string>CloudKit</string></array>'
+            printf '%s\n' "  <key>com.apple.developer.ubiquity-kvstore-identifier</key><string>${APPLE_TEAM_ID}.com.dragonapp.clipmenu-2</string>"
+            printf '%s\n' '  <key>com.apple.developer.icloud-container-environment</key><string>Production</string>'
+            printf '%s\n' '</dict></plist>'
+          } > "$ENT"
+
+          # Sign nested bundles inside-out, then seal the app with entitlements.
+          # --timestamp=none: App Store uploads don't need a secure timestamp (App
+          # Store Connect processes the build) and requesting one adds a flaky TSA dependency.
+          RB="$APP/Contents/Resources/ClipMenu_ClipMenu.bundle"
+          if [ -d "$RB" ]; then
+            codesign --force --timestamp=none --sign "$APP_ID" --keychain "$KC" "$RB"
+          fi
+          codesign --force --timestamp=none --entitlements "$ENT" \
+            --sign "$APP_ID" --keychain "$KC" "$APP"
+          codesign --verify --strict --verbose=2 "$APP"
+
+          PKG="$OUT/ClipMenu-${VERSION}.pkg"
+          productbuild --component "$APP" /Applications --sign "$INST_ID" --keychain "$KC" "$PKG"
+          echo "Built App Store package: $PKG"
+          echo "PKG=$PKG" >> "$GITHUB_ENV"
+
+      - name: Upload .pkg as a build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClipMenu-MAS-pkg
+          path: ${{ env.PKG }}
+          if-no-files-found: error
+
+      - name: Upload to App Store Connect
+        env:
+          NOTARY_KEY_P8_BASE64: ${{ secrets.NOTARY_KEY_P8_BASE64 }}
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          echo "$NOTARY_KEY_P8_BASE64" | base64 --decode > "$HOME/.appstoreconnect/private_keys/AuthKey_${NOTARY_KEY_ID}.p8"
+          # altool is broken on Xcode 26 ("Defaults.properties couldn't be opened"),
+          # so upload with iTMSTransporter (ships with Xcode). The .pkg is also kept
+          # as a workflow artifact above for manual upload via Transporter.app if needed.
+          ITMS="$(xcrun --find iTMSTransporter 2>/dev/null || true)"
+          if [ -z "$ITMS" ]; then
+            ITMS="$(find "$(xcode-select -p)" -name iTMSTransporter -type f 2>/dev/null | head -1)"
+          fi
+          if [ -z "$ITMS" ]; then
+            echo "::warning::iTMSTransporter not found on the runner — skipping upload. Download the ClipMenu-MAS-pkg artifact and upload it via Transporter.app."
+            exit 0
+          fi
+          "$ITMS" -m upload -assetFile "$PKG" \
+            -apiKey "$NOTARY_KEY_ID" -apiIssuer "$NOTARY_ISSUER_ID" \
+            -apiKeyDir "$HOME/.appstoreconnect/private_keys"
