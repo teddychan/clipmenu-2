@@ -192,21 +192,19 @@ jobs:
           NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
         run: |
           set -euo pipefail
-          mkdir -p "$HOME/.appstoreconnect/private_keys"
-          echo "$NOTARY_KEY_P8_BASE64" | base64 --decode > "$HOME/.appstoreconnect/private_keys/AuthKey_${NOTARY_KEY_ID}.p8"
-          # altool is broken on Xcode 26, and the Xcode-bundled `xcrun iTMSTransporter`
-          # is now only a stub that defers to the standalone Transporter app — which is
-          # NOT preinstalled on the hosted runner. Install Transporter and use its real
-          # iTMSTransporter. The .pkg is also kept as an artifact for manual upload.
-          TR="/Applications/Transporter.app/Contents/itms/bin/iTMSTransporter"
-          if [ ! -x "$TR" ]; then
-            echo "Installing Transporter (provides iTMSTransporter)…"
-            brew install --cask transporter
-          fi
-          if [ ! -x "$TR" ]; then
-            echo "::warning::Transporter unavailable — skipping upload. Download the ClipMenu-MAS-pkg artifact and upload it via Transporter.app."
-            exit 0
-          fi
-          "$TR" -m upload -assetFile "$PKG" \
-            -apiKey "$NOTARY_KEY_ID" -apiIssuer "$NOTARY_ISSUER_ID" \
-            -apiKeyDir "$HOME/.appstoreconnect/private_keys"
+          # Upload via fastlane (preinstalled on the runner; manages its own
+          # Transporter). altool is broken on Xcode 26 and the Xcode-bundled
+          # iTMSTransporter is now only a stub, and Transporter.app can't be installed
+          # headlessly — fastlane's deliver handles the App Store Connect binary upload.
+          # The signed .pkg is also kept as an artifact for manual upload as a fallback.
+          KEYFILE="$RUNNER_TEMP/asc_key.json"
+          printf '{"key_id":"%s","issuer_id":"%s","key":"%s","is_key_content_base64":true,"in_house":false}\n' \
+            "$NOTARY_KEY_ID" "$NOTARY_ISSUER_ID" "$NOTARY_KEY_P8_BASE64" > "$KEYFILE"
+          fastlane run upload_to_app_store \
+            api_key_path:"$KEYFILE" \
+            pkg:"$PKG" \
+            platform:osx \
+            skip_screenshots:true \
+            skip_metadata:true \
+            run_precheck_before_submit:false \
+            force:true
