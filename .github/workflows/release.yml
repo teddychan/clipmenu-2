@@ -4,8 +4,8 @@ name: Release
 # (teddychan/dragon-release-ci). Build (SwiftPM + assemble .app with Sparkle),
 # Developer ID-sign, notarize, staple, publish the FREE ClipMenu, push the
 # EdDSA-signed Sparkle appcast to docs/clipmenu-2/, and bump the Homebrew cask.
-# Triggered by a v* tag on this repo. The private clipmenu-2-premium repo builds
-# only the Mac App Store variant (its own self-hosted workflow).
+# Triggered by a v* tag on this repo. The Mac App Store build is separate —
+# clipmenu-2 builds it in its own release-mas.yml (mas-v* tag, also GitHub-hosted).
 #
 # Secrets are inherited from this repo's Actions secrets:
 #   DEVELOPER_ID_CERT_P12_BASE64, DEVELOPER_ID_CERT_PASSWORD,
