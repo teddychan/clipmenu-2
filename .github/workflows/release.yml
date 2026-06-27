@@ -25,7 +25,7 @@ permissions:
 
 jobs:
   release:
-    uses: teddychan/dragon-release-ci/.github/workflows/release-macos.yml@v1
+    uses: teddychan/dragon-release-ci/.github/workflows/release-macos.yml@v2
     secrets: inherit
     with:
       build_kind: swiftpm
@@ -34,6 +34,12 @@ jobs:
       bot_name: ClipMenu Release Bot
       swiftpm_working_directory: app
       swiftpm_sparkle: true
+      # ClipMenu targets the macOS 26 SDK, so build on the macos-26 hosted image.
+      swiftpm_runner: macos-26
+      # Sign the free direct/Homebrew build with iCloud: embeds the Developer ID iCloud
+      # provisioning profile (PROVISIONING_PROFILE_BASE64) + these entitlements. Falls
+      # back to local-only if the profile secret is absent.
+      swiftpm_icloud_entitlements_path: app/ClipMenu.entitlements
       zip_name_template: 'ClipMenu-{MAJOR}-{TAG}.zip'
       zip_keep_parent: true
       generate_appcast_glob: swiftpm
