@@ -110,9 +110,16 @@ enum StoreMigration {
     // Fix 3: copy clips in bounded batches so image blobs don't all live in memory at once (CLAUDE.md §4).
     // Skips clips whose contentHash already exists in the destination, so a
     // retry after a partial failure doesn't duplicate already-copied batches.
+    //
+    // Only the newest `limit` clips are carried over (same order `trim()` keeps),
+    // so the upgrade never copies the full legacy history — including its old
+    // image/PDF blobs — onto disk just to have the first capture trim it away
+    // (CLAUDE.md §2/§4). The oldest legacy rows are never even faulted.
     private static func copyClipsInBatches(from legacy: ModelContext,
                                            into context: ModelContext,
+                                           limit: Int,
                                            batchSize: Int = 50) throws -> Int {
+        guard limit > 0 else { return 0 }
         var existingHashes: Set<Int> = []
         do {
             var existing = FetchDescriptor<ClipRecord>()
@@ -122,10 +129,11 @@ enum StoreMigration {
 
         var offset = 0
         var total = 0
-        while true {
-            var descriptor = FetchDescriptor<ClipRecord>(sortBy: [SortDescriptor(\.createdDate)])
+        while offset < limit {
+            let pageSize = min(batchSize, limit - offset)
+            var descriptor = FetchDescriptor<ClipRecord>(sortBy: [ClipStore.sortDescriptor])
             descriptor.fetchOffset = offset
-            descriptor.fetchLimit = batchSize
+            descriptor.fetchLimit = pageSize
             let batch = try legacy.fetch(descriptor)
             if batch.isEmpty { break }
             let fresh = batch.map(clipSeed(from:)).filter { !existingHashes.contains($0.contentHash) }
@@ -136,7 +144,7 @@ enum StoreMigration {
             }
             total += fresh.count
             offset += batch.count
-            if batch.count < batchSize { break }
+            if batch.count < pageSize { break }
         }
         return total
     }
@@ -199,7 +207,8 @@ enum StoreMigration {
             insert(folders: freshFolders, orphanSnippets: freshOrphans, into: context)
             try context.save()
 
-            let clipCount = try copyClipsInBatches(from: legacyContext, into: context)
+            let clipCount = try copyClipsInBatches(
+                from: legacyContext, into: context, limit: ClipStore.maxHistorySize(defaults))
 
             defaults.set(true, forKey: flagKey)
             log.info("Migrated \(folders.count) folders / \(clipCount) clips to split stores")

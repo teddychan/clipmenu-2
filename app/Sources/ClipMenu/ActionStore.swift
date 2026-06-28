@@ -1,6 +1,6 @@
 import Foundation
 
-// Action tree model + persistence (PARITY §F; ActionController.m:181-271 save/
+// Action tree model + persistence (ActionController.m:181-271 save/
 // load, 523-555 default set; ActionFactory.m:12-13 type keys;
 // BuiltInActionController.m:17-20 selectors).
 //
@@ -112,7 +112,7 @@ enum ActionStore {
 
     // MARK: - Editor palettes (ActionNodeController.m:186-188; 3 reserved segments)
 
-    /// Built-in actions palette (BuiltInActionController.m; HFS dropped, OQ#11).
+    /// Built-in actions palette (BuiltInActionController.m; HFS dropped).
     static func builtinNodes() -> [ActionNode] {
         [
             .builtin("Paste as Plain Text", name: pasteAsPlainText),

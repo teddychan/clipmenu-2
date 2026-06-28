@@ -7,7 +7,7 @@ import SwiftData
 // SnippetEditorView is hosted in a plain NSWindow. Maps to the legacy
 // SnippetEditorController window (SnippetEditorController.m showWindow).
 //
-// Undo (PARITY §G row 138): the legacy editor returns the managed-object
+// Undo: the legacy editor returns the managed-object
 // context's undo manager from windowWillReturnUndoManager:
 // (SnippetEditorController.m:297-302). We mirror that — enable undo on the
 // shared SwiftData context and hand the window that same UndoManager, so the

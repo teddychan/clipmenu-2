@@ -1,7 +1,7 @@
 import AppKit
 
 // Owns the menu-bar NSStatusItem and its menu.
-// Maps to ARCHITECTURE.md §2 `StatusItemController` (legacy MenuController
+// Legacy MenuController
 // status-item code, MenuController.m:1236-1316). The status item displays the
 // Main menu (MenuController.m:1314); the 13 icon styles are a later row.
 
@@ -37,16 +37,5 @@ final class StatusItemController {
         image.size = NSSize(width: 18, height: 18)
         image.isTemplate = true
         return image
-    }
-
-    func setMenu(_ menu: NSMenu) {
-        statusItem?.menu = menu
-    }
-
-    func remove() {
-        if let item = statusItem {
-            NSStatusBar.system.removeStatusItem(item)
-            statusItem = nil
-        }
     }
 }

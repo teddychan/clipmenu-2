@@ -3,7 +3,7 @@ import SwiftData
 import AppKit
 import UniformTypeIdentifiers
 
-// MARK: - General pane (PARITY §J row 164; SPEC §12.1)
+// MARK: - General pane
 
 struct GeneralPreferencesView: View {
     @AppStorage(PreferenceKeys.appLanguage) private var appLanguage = "en"
@@ -196,8 +196,9 @@ struct BackupPreferencesView: View {
     /// folder chooser (multiple files), then HistoryExport.
     private func export() {
         let context = AppStore.container.mainContext
-        let clips = (try? context.fetch(
-            FetchDescriptor<ClipRecord>(sortBy: [ClipStore.sortDescriptor]))) ?? []
+        // Export the same bounded, visible history the menu shows — not every row
+        // ever stored — so it can't leak old clips past maxHistorySize (CLAUDE.md §2).
+        let clips = (try? context.fetch(ClipStore.boundedHistoryDescriptor())) ?? []
 
         if exportAsSingleFile {
             let panel = NSSavePanel()
@@ -429,11 +430,10 @@ struct CloudPreferencesView: View {
 
 // Preferences panes. SwiftUI forms bound to the exact legacy UserDefaults keys
 // and defaults (AppController.m:131-188; labels English.lproj/Preferences.strings).
-// Maps to ARCHITECTURE.md `Preferences` / `SettingsScene` (legacy
-// PrefsWindowController panes). @AppStorage defaults match the legacy registered
+// Legacy PrefsWindowController panes. @AppStorage defaults match the legacy registered
 // defaults, so behavior is identical whether or not the user opens Settings.
 
-// MARK: - Exclude-apps sheet (PARITY §J row 171; PrefsWindowController.m:378-478,789-877)
+// MARK: - Exclude-apps sheet (PrefsWindowController.m:378-478,789-877)
 
 /// "Exclude these applications:" — apps whose frontmost clipboard activity is not
 /// captured. Persisted as the `excludeApps` array of {bundleIdentifier, name},
@@ -579,7 +579,7 @@ struct AboutPreferencesView: View {
     }
 }
 
-// MARK: - Menu pane (PARITY §J row 165; SPEC §12.2)
+// MARK: - Menu pane
 
 struct MenuPreferencesView: View {
     @AppStorage(PreferenceKeys.numberOfItemsPlaceInline) private var inlineCount = 0
@@ -671,13 +671,13 @@ struct MenuPreferencesView: View {
     }
 }
 
-// MARK: - Type pane (PARITY §J row 166; SPEC §12.3)
+// MARK: - Type pane
 
 /// "Select clipboard types to store:" — the 7 live store-type toggles
 /// (Preferences.strings:1097-1104). Bound to the `storeTypes` [String:Bool]
 /// UserDefaults dict that PasteboardReader gates capture on (AppController.m:142,
 /// 48-58; ClipsController.m:670-678). The legacy PICT Image toggle is removed —
-/// PICT is dead on modern macOS (OPEN-QUESTIONS #2).
+/// PICT is dead on modern macOS.
 struct TypePreferencesView: View {
     /// Legacy type name (storeTypes key) → display label, in xib order.
     private static let types: [(name: String, label: String)] = [
@@ -720,7 +720,7 @@ struct TypePreferencesView: View {
     }
 }
 
-// MARK: - Action pane (PARITY §J row 168; §E rows 74/75/91)
+// MARK: - Action pane
 
 /// Action preferences: enable, invoke-immediately, and the per-modifier click
 /// behavior pickers (AppController.m:184-186 defaults; PrefsWindowController.m:
@@ -771,7 +771,7 @@ struct ActionPreferencesView: View {
     }
 }
 
-/// Action-tree editor (PARITY §G row 90; ActionNodeController.m): a palette
+/// Action-tree editor (ActionNodeController.m): a palette
 /// (Built-in / Script / User Script) on the left whose selection is added to the
 /// user's action tree on the right; remove + drag-reorder there. Persists to
 /// ActionStore (actions.plist).

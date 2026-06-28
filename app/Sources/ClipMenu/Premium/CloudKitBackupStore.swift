@@ -1,6 +1,5 @@
 import Foundation
 import CloudKit
-import os
 
 /// CloudKit-backed `BackupStore`. Stores one `SnippetBackup` record per version
 /// in a dedicated `Backups` zone of the app's private database. The snapshot
@@ -28,7 +27,6 @@ actor CloudKitBackupStore: BackupStore {
     /// other processes might read them. Swept on each save.
     private let stagingDir = FileManager.default.temporaryDirectory
         .appendingPathComponent("ClipMenuBackupStaging", isDirectory: true)
-    private let log = Logger(subsystem: "com.dragonapp.clipmenu-2", category: "backup")
 
     init(containerID: String) {
         let container = CKContainer(identifier: containerID)

@@ -9,7 +9,7 @@ import SwiftData
 //  - _trimHistorySize              (795-813): drop oldest beyond maxHistorySize
 //  - sortedClips                   (190-212): lastUsed (reorder) / created, descending
 //
-// PICT is dropped (OQ#2). Reading NSPasteboard happens off the main actor on
+// PICT is dropped. Reading NSPasteboard happens off the main actor on
 // the PasteboardMonitor actor (see PasteboardReader below); persistence runs
 // off the main actor in a @ModelActor.
 
@@ -266,7 +266,7 @@ actor ClipStore {
 
     /// Drop oldest clips beyond maxHistorySize (ClipsController.m:795-813).
     private func trim() {
-        let maxHistory = UserDefaults.standard.object(forKey: PreferenceKeys.maxHistorySize) as? Int ?? 20
+        let maxHistory = Self.maxHistorySize()
         var descriptor = FetchDescriptor<ClipRecord>(sortBy: [Self.sortDescriptor])
         // Only need the rows to delete the oldest — don't fault their image
         // payloads into the store actor's context on every capture.
@@ -285,5 +285,23 @@ actor ClipStore {
         return reorder
             ? SortDescriptor(\ClipRecord.lastUsedDate, order: .reverse)
             : SortDescriptor(\ClipRecord.createdDate, order: .reverse)
+    }
+
+    /// The user's configured history cap (default 20). Single source of truth for
+    /// the bound applied everywhere clip history is materialized — storage
+    /// (`trim`), the menu and its search, history export, and the upgrade
+    /// migration — so the on-disk and in-view history never exceed it (CLAUDE.md §2/§4).
+    static func maxHistorySize(_ defaults: UserDefaults = .standard) -> Int {
+        defaults.object(forKey: PreferenceKeys.maxHistorySize) as? Int ?? 20
+    }
+
+    /// Newest-first fetch of the visible history, capped to `maxHistorySize`. The
+    /// `ClipRecord.image` relationship stays faulted, so this never loads the
+    /// multi-MB originals — callers that only need text/thumbnails (menu, search,
+    /// export) pay nothing for image clips.
+    static func boundedHistoryDescriptor(_ defaults: UserDefaults = .standard) -> FetchDescriptor<ClipRecord> {
+        var descriptor = FetchDescriptor<ClipRecord>(sortBy: [sortDescriptor])
+        descriptor.fetchLimit = maxHistorySize(defaults)
+        return descriptor
     }
 }

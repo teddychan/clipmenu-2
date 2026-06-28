@@ -200,6 +200,46 @@ struct StoreMigrationTests {
         #expect(!fm.fileExists(atPath: tempDir.appending(path: ".ClipMenu.store_SUPPORT").path))
     }
 
+    // Migration must not copy the whole legacy history onto disk: only the
+    // newest `maxHistorySize` clips are carried over (matching what trim() keeps
+    // on the first capture anyway), so old image/PDF blobs never land in the new
+    // store. CLAUDE.md §2/§4: bounded history everywhere.
+    @Test func migrationCapsClipsToMaxHistorySize() throws {
+        let tempDir = URL.temporaryDirectory.appending(path: "MigrationCapTest-\(UUID().uuidString)", directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+        let oldStoreURL = tempDir.appending(path: "ClipMenu.store")
+
+        // Legacy combined store: five clips, monotonically newer (hash == age rank).
+        let base = Date(timeIntervalSince1970: 2_000_000)
+        do {
+            let legacy = try ModelContainer(
+                for: Folder.self, Snippet.self, ClipRecord.self, ClipImage.self,
+                configurations: ModelConfiguration(schema: Schema([Folder.self, Snippet.self, ClipRecord.self, ClipImage.self]),
+                                                   url: oldStoreURL, cloudKitDatabase: .none))
+            let ctx = ModelContext(legacy)
+            for i in 0 ..< 5 {
+                let date = base.addingTimeInterval(Double(i))
+                ctx.insert(ClipRecord(createdDate: date, lastUsedDate: date,
+                                      typeIdentifiers: ["String"], stringValue: "clip\(i)", contentHash: i))
+            }
+            try ctx.save()
+        }
+
+        let suite = "MigrationCap-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        defaults.set(3, forKey: PreferenceKeys.maxHistorySize)
+
+        let dest = try inMemoryContext()
+        StoreMigration.migrateIfNeeded(defaults: defaults, oldStoreURL: oldStoreURL, into: dest)
+
+        let clips = try dest.fetch(FetchDescriptor<ClipRecord>())
+        #expect(clips.count == 3)
+        // The three newest (hashes 2, 3, 4); the two oldest are dropped.
+        #expect(Set(clips.map(\.contentHash)) == [2, 3, 4])
+    }
+
     @Test func migrateIfNeededWithNoOldStoreJustSetsFlag() throws {
         let suite = "StoreMigrationNoStore-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!

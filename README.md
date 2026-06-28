@@ -15,7 +15,8 @@ A modern macOS clipboard-history menu-bar app, written in Swift 6. It lives in
   `UserDefaults`; history and snippets stored via SwiftData.
 
 ## Requirements
-- Current macOS and a Swift 6 toolchain (Xcode or the Command Line Tools).
+- macOS 26 or 27 on Apple Silicon — the app ships a single arm64 build.
+- A Swift 6 toolchain (Xcode 26+ or the matching Command Line Tools).
 
 ## Build & run
 ```bash
@@ -40,12 +41,7 @@ cd app && swift test
 ```
 
 ## Project layout
-- `app/` — the Swift app (sources, tests, bundled resources, `scripts/`).
-- `CLAUDE.md` — how to work on this repo with Claude Code.
-- `app/CLAUDE.md` — Swift engineering conventions.
-- `docs/archive/` — historical docs from the original legacy-parity rebuild
-  phase. Kept for reference only; their `/legacy` citations refer to a checkout
-  that is not part of this repo.
+- `app/` — the Swift app: `Sources/`, `Tests/`, bundled `Resources/`, and `scripts/`.
 
 ## Fun fact
 My first clipboard mangaer is CLCL
@@ -55,8 +51,11 @@ https://nakka.com/soft/clcl/index_eng.html#google_vignette
 
 
 ## Releasing
-Maintainers: the full release runbook — versioning, App Store submission, and
-publishing the public download build — lives in `RELEASE.md` in the private source repo.
+Maintainers: releases are automated in GitHub Actions. Pushing a `vX.Y.Z` tag
+builds, signs (Developer ID), notarizes, and publishes the GitHub Release, the
+Sparkle appcast, and the Homebrew cask; pushing a `mas-vX.Y.Z` tag builds and
+uploads the Mac App Store package. See `.github/workflows/release.yml` and
+`.github/workflows/release-mas.yml`.
 
 ## License
 MIT — see [LICENSE](LICENSE).

@@ -17,12 +17,6 @@ import SwiftData
 //    558-651 (`_addClipsToMenu`) and 653-739 (`_addSnippetsToMenu`).
 //  - Snippet ordering/enabled display: SnippetsController.m:39-43 (index asc),
 //    MenuController.m:687-733 (enabled folders → enabled snippets).
-//
-// Deliberately inert here (own PARITY rows):
-//  - clip rows + their formatting (§C / §D — clipboard capture not built yet)
-//  - snippet/folder formatting: numbering, icons, tooltips, title-trim (§C)
-//  - Clear History action (§H), Edit Snippets action (§G), Paste snippet (§G)
-//  - Snippets' position preference UI (§J Menu pane; default Below is honored)
 
 /// Carries the action node + its target (clip or snippet) on an Actions-menu
 /// item's `representedObject` (legacy set the action dict as representedObject and
@@ -472,7 +466,6 @@ final class MainMenuController: NSObject, NSMenuDelegate {
         // `numberOfItemsPlaceInline` clips appear inline; the rest are grouped
         // into "N - M" overflow folders of `numberOfItemsPlaceInsideFolder`.
         // Default inline=0 → every clip goes into folders (AppController.m:146-147).
-        // (Numbering 46, icons 52, thumbnails 53, tooltips 49 are deferred rows.)
         let defaults = UserDefaults.standard
         let inlineCount = max(defaults.object(forKey: PreferenceKeys.numberOfItemsPlaceInline) as? Int ?? 0, 0)
         let perFolder = max(defaults.object(forKey: PreferenceKeys.numberOfItemsPlaceInsideFolder) as? Int ?? 10, 1)
@@ -498,7 +491,8 @@ final class MainMenuController: NSObject, NSMenuDelegate {
         }
     }
 
-    /// A selectable clip menu item (paste action deferred — §D row 69).
+    /// A selectable clip menu item; choosing it copies the clip and pastes it
+    /// into the frontmost app (see `selectClip`).
     /// `count` is the clip's overall index, used for the numeric key-equivalent.
     private func makeClipMenuItem(_ clip: ClipRecord, count: Int, listNumber: Int) -> NSMenuItem {
         let item = NSMenuItem(title: "", action: #selector(selectClip(_:)),
@@ -655,20 +649,18 @@ final class MainMenuController: NSObject, NSMenuDelegate {
     /// maxHistorySize (ClipsController.m:190-212; AppController.m:135). Read-only
     /// on the main context.
     private func fetchClips() -> [ClipRecord] {
-        let maxHistory = UserDefaults.standard.object(forKey: PreferenceKeys.maxHistorySize) as? Int ?? 20
-        var descriptor = FetchDescriptor<ClipRecord>(sortBy: [ClipStore.sortDescriptor])
-        descriptor.fetchLimit = maxHistory
-        // The original image lives in the `ClipRecord.image` relationship, which
-        // is a fault — fetching clips for the menu never loads the multi-MB
-        // bytes; only paste does (CLAUDE.md §4). The menu renders from the small
-        // `thumbnailData` column that comes with the row.
-        let clips = (try? AppStore.container.mainContext.fetch(descriptor)) ?? []
+        // Shared bounded-history policy (newest-first, capped to maxHistorySize)
+        // used by the menu, this search, and Export… (ClipStore). The original
+        // image lives in the faulted `ClipRecord.image` relationship, so fetching
+        // for the menu never loads the multi-MB bytes; only paste does (CLAUDE.md
+        // §4). The menu renders from the small `thumbnailData` column on the row.
+        let clips = (try? AppStore.container.mainContext.fetch(ClipStore.boundedHistoryDescriptor())) ?? []
         // History-menu search (⌘⌃V): keep only clips whose text matches the typed
         // query, case- and diacritic-insensitively. The query is empty for the
         // Main/Snippets menus, so this is a no-op there. Image-only clips (no
-        // stringValue) never match a text query, as expected. Capture trims the
-        // store to maxHistorySize, so filtering the fetched rows searches the
-        // whole history, not just a page of it.
+        // stringValue) never match a text query, as expected. Storage is trimmed
+        // to maxHistorySize on every capture, so this bounded fetch already holds
+        // the entire stored history — filtering it searches all of it.
         let query = historySearchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return clips }
         return clips.filter { ($0.stringValue ?? "").localizedCaseInsensitiveContains(query) }
@@ -743,7 +735,7 @@ final class MainMenuController: NSObject, NSMenuDelegate {
         return NSPoint(x: cursor.x, y: y)
     }
 
-    // MARK: - Menu actions (deferred items are inert; see scope note above)
+    // MARK: - Menu actions
 
     @objc private func clearHistory(_ sender: Any?) {
         // Confirm (with a "don't ask again" suppression) when showAlertBeforeClearHistory

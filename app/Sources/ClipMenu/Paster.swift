@@ -2,7 +2,7 @@ import AppKit
 import ApplicationServices
 
 // Copy a clip/snippet back to the pasteboard and paste it into the frontmost app.
-// Maps to ARCHITECTURE.md `Paster`; legacy ClipsController.m:503-566 (copy*) +
+// Legacy ClipsController.m:503-566 (copy*) +
 // CMUtilities.m:95-172 (paste / postCommandV) + AppController.m:493-528.
 //
 // Modern-OS reality (CLAUDE.md §6): synthesizing ⌘V needs Accessibility (TCC).

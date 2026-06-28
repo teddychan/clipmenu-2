@@ -2,7 +2,7 @@ import AppKit
 import Carbon.HIToolbox
 
 // Swift wrapper around Carbon `RegisterEventHotKey` for system-wide hot-keys.
-// Replaces the bundled PTHotKeys library (ARCHITECTURE.md §1 row 1; legacy
+// Replaces the bundled PTHotKeys library (legacy
 // AppController.m:601-633, CMUtilities.m:174-205). There is no first-party
 // Swift API for global hot-keys, so Carbon remains the right tool.
 //

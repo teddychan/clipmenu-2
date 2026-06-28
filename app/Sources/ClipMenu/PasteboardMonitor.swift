@@ -1,7 +1,7 @@
 import AppKit
 
-// Stub clipboard watcher. Maps to ARCHITECTURE.md §2 `ClipboardMonitor`
-// (legacy ClipsController polling, ClipsController.m:587-649, 815-833).
+// Clipboard watcher (legacy ClipsController polling, ClipsController.m:587-649,
+// 815-833).
 //
 // Design per CLAUDE.md performance guardrails: the pasteboard has no change
 // notification, so poll `NSPasteboard.general.changeCount` on a coalesced
@@ -11,8 +11,8 @@ import AppKit
 // used entirely on this actor's executor (see PasteboardReader).
 //
 // On a changeCount change it reads a snapshot and hands it to the ClipStore
-// actor to persist. Default interval 0.75s with a 1.0s cap mirrors SPEC §4
-// (timeInterval / MAX_TIME_INTERVAL). Per-app exclusion
+// actor to persist. Default interval 0.75s with a 1.0s cap mirrors the legacy
+// timeInterval / MAX_TIME_INTERVAL. Per-app exclusion
 // (ClipsController.m:606-608) is applied inside PasteboardReader.snapshot()
 // (returns nil for excluded front apps).
 

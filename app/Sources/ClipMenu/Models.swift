@@ -1,11 +1,10 @@
 import Foundation
 import SwiftData
 
-// SwiftData persistence schema. Derived from SPEC.md:
-//  - Snippets: §5.1 (Snippets.xcdatamodel → Folder / Snippet).
-//  - Clipboard history: §4 / Clip.m (types, dates, per-type payloads).
-// Replaces the legacy Core Data XML store + NSCoding Clip archive
-// (see ARCHITECTURE.md §1 row 10 and §2 `Clip`).
+// SwiftData persistence schema:
+//  - Snippets: Snippets.xcdatamodel → Folder / Snippet.
+//  - Clipboard history: Clip.m (types, dates, per-type payloads).
+// Replaces the legacy Core Data XML store + NSCoding Clip archive (legacy `Clip`).
 // Builds with the Xcode toolchain (provides the SwiftDataMacros plugin).
 
 // MARK: - Snippets

@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-// One-time best-effort import of a legacy snippets file on first launch (OQ#6;
+// One-time best-effort import of a legacy snippets file on first launch (legacy
 // SnippetsController.m:83-92). The new SwiftData store is authoritative; if a
 // `~/Library/Application Support/ClipMenu/Snippets.xml` is present and the store
 // is still empty, import it via the same XML schema the editor uses (SnippetXML).

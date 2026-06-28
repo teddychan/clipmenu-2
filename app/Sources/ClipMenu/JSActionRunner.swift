@@ -3,19 +3,19 @@ import JavaScriptCore
 
 // Runs a bundled (or user) JavaScript action against a clip's text, matching the
 // legacy WebView model (ActionController.m:361-470; JavaScriptSupport.m) but on
-// JavaScriptCore (OPEN-QUESTIONS #3). The script body is wrapped in a function
+// JavaScriptCore. The script body is wrapped in a function
 // that returns the transformed string; errors are captured like the legacy
 // `scriptException` key.
 //
 // Globals exposed to a script (parity with the legacy WebScriptObject setup):
 //   clipText           — the clip's plain string
 //   ClipMenu.require(name) -> Bool — load+eval a bundled lib (adds prototypes)
-//   ClipMenu.activate()  — no-op here (front-process handling for prompt, §later)
-//   prompt(msg, def)     — STUBBED (returns def); real NSAlert bridge lands with
-//                          "Surround with Tags…" (§F prompt bridge)
+//   ClipMenu.activate()  — no-op (front-process focus is handled at the call site)
+//   prompt(msg, def)     — bridges to a native handler (NSAlert at the call site);
+//                          returns null when no handler is supplied (e.g. tests)
 //
-// Not yet covered: the `clip` ScriptableClip object (RTF/RTFD actions) and the
-// user action/lib directories (~/…/script) — separate §F rows.
+// The `clip` ScriptableClip object (RTF/RTFD actions) and the user action/lib
+// directories (~/…/script, searched before the bundled tree) are supported.
 
 enum JSActionError: Error, Equatable {
     case scriptNotFound(String)
@@ -151,7 +151,7 @@ enum JSActionRunner {
     /// User script root: ~/Library/Application Support/ClipMenu/script
     /// (CMUtilities.m:316-336). Searched before the bundled tree so user scripts
     /// can override or add to the built-ins (ActionController.m:593-604). ⚠️SBX:
-    /// not sandboxed (OQ#4), so the real home directory is reachable.
+    /// not sandboxed, so the real home directory is reachable.
     private static var userScriptRoot: URL? {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
             .first?.appendingPathComponent("ClipMenu/script")
