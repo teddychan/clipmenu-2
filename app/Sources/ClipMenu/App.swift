@@ -6,7 +6,6 @@ import AppKit
 // status-bar item (AppKit) plus a SwiftUI Settings scene. LSUIElement is set
 // in Resources/Info.plist for the bundled .app; at runtime we also force
 // .accessory activation so `swift run` behaves as an agent.
-// Maps to ARCHITECTURE.md §2 `@main App` + `AppDelegate`.
 
 @main
 struct ClipMenuApp: App {
@@ -202,7 +201,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         // Status-bar item shows the Main menu (MenuController.m:1314). Honor
-        // showStatusItem: 0 = none (OQ#12) — still reachable via the Main-menu
+        // showStatusItem: 0 = none — still reachable via the Main-menu
         // hot-key. Applied at launch (live toggle deferred).
         if UserDefaults.standard.object(forKey: PreferenceKeys.showStatusItem) as? Int ?? 1 != 0 {
             statusItemController.install(menu: mainMenuController.buildMainMenu())
@@ -215,7 +214,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Clipboard capture: poll changeCount, read snapshots on the main actor,
         // persist ClipRecords off it via the ClipStore actor (ClipsController.m).
-        // One-time best-effort import of a legacy Snippets.xml (OQ#6).
+        // One-time best-effort import of a legacy Snippets.xml.
         LegacySnippetImport.runOnceIfNeeded()
 
         // Load the action tree (creates the default actions.plist on first run,

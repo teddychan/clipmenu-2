@@ -1,7 +1,7 @@
 import AppKit
 import ImageIO
 
-// Downsampled image thumbnails for the menu. Maps to ARCHITECTURE.md `Thumbnailer`;
+// Downsampled image thumbnails for the menu;
 // legacy MenuController.m:828-846 (image vs icon) + Clip.m:350-441 (thumbnailOfSize:
 // aspect-preserving, never upscale, cached by size).
 //

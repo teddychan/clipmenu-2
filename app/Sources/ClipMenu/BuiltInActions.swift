@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-// The four built-in actions (PARITY §F; BuiltInActionController.m:175-234).
+// The four built-in actions (BuiltInActionController.m:175-234).
 // The text transforms are pure and unit-tested; the effect functions perform
 // the copy+paste (via Paster) or the store removal. Invocation from the Actions
 // menu (§C41) and modifier-click behaviors (§E) is wired in a later batch.
@@ -20,8 +20,8 @@ enum BuiltInActions {
         filenames.joined(separator: newLine)
     }
 
-    // NOTE: "Paste as HFS File Path" (213-234) is DROPPED (OPEN-QUESTIONS #11,
-    // user decision 2026-05-31). It used CFURLCopyFileSystemPath(kCFURLHFSPathStyle),
+    // NOTE: "Paste as HFS File Path" (213-234) is DROPPED (user decision
+    // 2026-05-31). It used CFURLCopyFileSystemPath(kCFURLHFSPathStyle),
     // which the modern SDK marks *unavailable* (Carbon File Manager removed), and
     // HFS colon-paths are extinct. "Paste as File Path" (POSIX) is retained.
 

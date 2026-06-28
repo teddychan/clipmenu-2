@@ -47,7 +47,8 @@ jobs:
 
       - name: Build (release, arm64)
         working-directory: app
-        # Apple Silicon only: macOS 26 drops Intel, so a single arm64 slice.
+        # Apple Silicon only by product policy (macOS 26 still supports some Intel
+        # Macs; macOS 27 is Apple-silicon-only): a single arm64 slice.
         run: swift build -c release --arch arm64
 
       - name: Assemble sandboxed .app

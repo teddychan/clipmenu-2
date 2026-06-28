@@ -1,6 +1,6 @@
 import Foundation
 
-// Snippet XML import/export (PARITY §G rows 139-140; SnippetEditorController.m
+// Snippet XML import/export (SnippetEditorController.m
 // :742-814 parse, :992-1072 export; constants.h:79-88). Schema (version 1.0,
 // UTF-8), <content> preserves whitespace:
 //

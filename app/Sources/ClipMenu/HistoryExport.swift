@@ -1,6 +1,6 @@
 import Foundation
 
-// Export clipboard history to text (PARITY §H; ClipsController.m:323-408 single
+// Export clipboard history to text (ClipsController.m:323-408 single
 // file, 410-457 multiple files; separators constants.h:30-35). The transforms
 // are pure + tested; the Export… button + save panel that invoke them live in
 // the §J General preferences pane (later).

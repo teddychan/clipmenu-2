@@ -48,12 +48,13 @@ let package = Package(
     // (Resources/<lang>.lproj/Localizable.strings) and fall back to English.
     defaultLocalization: "en",
     platforms: [
-        // Apple Silicon only. macOS 26 doesn't run on Intel Macs (Apple dropped
-        // x86_64 after macOS 15), so ClipMenu ships a single arm64 slice — there
-        // is no universal/Intel build. The build scripts and CI pass
-        // `--arch arm64` to enforce this explicitly (run.sh, build-appstore.sh,
-        // .github/workflows/release.yml).
-        .macOS("26.0") // latest macOS (SDK 26.x); see CLAUDE.md
+        // Apple Silicon only — a product decision, not a platform limit. (macOS 26
+        // Tahoe still runs on some Intel Macs; macOS 27 is the first
+        // Apple-silicon-only release.) ClipMenu supports macOS 26 and 27 and ships
+        // a single arm64 slice — no universal/Intel build. The build script and CI
+        // pass `--arch arm64` to enforce this explicitly (scripts/run.sh,
+        // .github/workflows/release-mas.yml).
+        .macOS("26.0") // minimum supported macOS (SDK 26.x)
     ],
     dependencies: packageDependencies,
     targets: [

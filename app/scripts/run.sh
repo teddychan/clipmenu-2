@@ -18,10 +18,10 @@ CONFIG="${1:-debug}"
 # is excluded there (see Package.swift).
 export CLIPMENU_SPARKLE=1
 
-# Apple Silicon only: ClipMenu targets macOS 26, which Intel Macs cannot run, so
-# we never ship an x86_64 slice. `--arch arm64` makes that explicit — the build
-# fails loudly on a non-Apple-Silicon toolchain instead of silently producing an
-# Intel binary.
+# Apple Silicon only by product policy (not a platform limit — macOS 26 still
+# runs on some Intel Macs). ClipMenu ships a single arm64 slice, so `--arch arm64`
+# makes that explicit — the build fails loudly on a non-Apple-Silicon toolchain
+# instead of silently producing an Intel binary.
 swift build -c "$CONFIG" --arch arm64
 BIN_PATH="$(swift build -c "$CONFIG" --arch arm64 --show-bin-path)"
 

@@ -1,6 +1,6 @@
 import Foundation
 
-// Dispatch an action node onto a target clip/snippet (PARITY §F;
+// Dispatch an action node onto a target clip/snippet (legacy
 // AppController.m:_invokeBuiltinAction 742-750, _invokeJavaScriptAction 752-815).
 //   - builtin: route the selector name to BuiltInActions
 //   - js: run the script on the target's text, then copy+paste the result

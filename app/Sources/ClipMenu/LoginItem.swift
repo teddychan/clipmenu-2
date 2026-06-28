@@ -1,7 +1,7 @@
 import ServiceManagement
 
 // Launch-at-login via SMAppService. Replaces the legacy NMLoginItems /
-// LSSharedFileList code (ARCHITECTURE.md §1 row 6; AppController.m:581-597,
+// LSSharedFileList code (AppController.m:581-597,
 // NMLoginItems.m) with the modern, sandbox-safe API (CLAUDE.md §8).
 
 @MainActor
