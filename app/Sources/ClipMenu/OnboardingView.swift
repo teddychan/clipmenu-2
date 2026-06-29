@@ -264,7 +264,7 @@ private struct PermissionsStep: View {
                     }
                     .padding(15)
                 }
-                Text(L("iCloud sync is optional and off until you turn it on in Settings."))
+                Text(L("Back up snippets and settings to a folder you choose in Settings — put it in Dropbox or iCloud Drive to sync across Macs."))
                     .font(.system(size: 12)).foregroundStyle(OB.hint)
                     .multilineTextAlignment(.center)
             } else {

@@ -3,20 +3,13 @@
 <!--
   Developer ID / Homebrew (direct, non-sandboxed) build entitlements.
 
-  iCloud sync is FREE in every build (2.12.0). For it to go live in this
-  Developer ID build, the app must be signed with these entitlements AND carry an
-  embedded provisioning profile that grants the iCloud container — see the "Sign"
-  step in .github/workflows/release.yml, which embeds the profile and substitutes
-  __TEAM_ID__ only when the PROVISIONING_PROFILE_BASE64 + APPLE_TEAM_ID secrets are
-  set. Without that profile the app signs local-only and AppStore.makeContainer
-  falls back to a local store at runtime (no crash, just no sync).
+  No App Sandbox key: the direct build is unsandboxed, so it can auto-paste AND
+  read/write the user's chosen backup folder (in Dropbox / iCloud Drive / Google
+  Drive) with no extra entitlement.
 
-  com.apple.developer.icloud-container-environment is "Production": Developer ID
-  apps use the Production CloudKit environment, and the CloudKit schema must be
-  deployed to Production in the CloudKit Console for sync to actually work.
-
-  No App Sandbox key here: the direct build is unsandboxed (so it can auto-paste).
-  __TEAM_ID__ is substituted at sign time.
+  No iCloud entitlements: sync and backup are folder-based (see FolderBackupStore /
+  SettingsSidecar), which require no iCloud container, CloudKit, or KV-store
+  entitlement. __TEAM_ID__ is substituted at sign time.
 -->
 <plist version="1.0">
 <dict>
@@ -24,17 +17,5 @@
 	<string>__TEAM_ID__.com.dragonapp.clipmenu-2</string>
 	<key>com.apple.developer.team-identifier</key>
 	<string>__TEAM_ID__</string>
-	<key>com.apple.developer.icloud-container-identifiers</key>
-	<array>
-		<string>iCloud.com.dragonapp.clipmenu-2</string>
-	</array>
-	<key>com.apple.developer.icloud-services</key>
-	<array>
-		<string>CloudKit</string>
-	</array>
-	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
-	<string>__TEAM_ID__.com.dragonapp.clipmenu-2</string>
-	<key>com.apple.developer.icloud-container-environment</key>
-	<string>Production</string>
 </dict>
 </plist>

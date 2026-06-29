@@ -122,38 +122,46 @@ struct GeneralPreferencesView: View {
     }
 }
 
-// MARK: - Backup pane (snippet versions + history export)
+// MARK: - Sync & Backup pane (folder backup + history export)
 
-/// Backup preferences. Two clearly-separated sections so users never confuse the
-/// snippet version history (iCloud) with the one-shot clipboard-history export.
+/// Sync & backup preferences. Snippets and settings are backed up to a folder you
+/// choose; put that folder in Dropbox / iCloud Drive / Google Drive to sync across
+/// Macs. A separate section handles the one-shot clipboard-history text export.
 struct BackupPreferencesView: View {
     @AppStorage("exportHistoryAsSingleFile") private var exportAsSingleFile = true
     @AppStorage("tagOfSeparatorForExportHistoryToFile") private var separatorTag = 1
+    @AppStorage(PreferenceKeys.automaticBackupEnabled) private var automaticBackup = true
 
+    @State private var folderPath: String = BackupFolder.displayPath()
     @State private var status: String = ""
     @State private var working = false
     @State private var showRestore = false
 
-    private var backupAvailable: Bool { BackupScheduler.isEligible }
+    private var backupConfigured: Bool { BackupFolder.isConfigured() }
 
     var body: some View {
         Group {
-            if backupAvailable {
-                Section(L("Snippet Versions in iCloud")) {
-                    Text(L("ClipMenu keeps your last 20 backups of your snippets and folders in your private iCloud. You can restore any version; your current data is backed up first."))
-                        .font(.callout).foregroundStyle(.secondary)
-                    HStack {
-                        Button(L("Back up now")) { Task { await backUpNow() } }
-                            .disabled(working)
-                        Button(L("Restore from iCloud…")) { showRestore = true }
-                            .disabled(working)
-                        if working { ProgressView().controlSize(.small) }
-                    }
-                    if !status.isEmpty {
-                        Text(status).font(.callout).foregroundStyle(.secondary)
-                    }
-                    Text(L("Backups use your private iCloud (encrypted in transit and at rest). Turn on Advanced Data Protection for end-to-end encryption."))
-                        .font(.footnote).foregroundStyle(.secondary)
+            Section(L("Sync & Backup")) {
+                LabeledContent(L("Backup folder")) {
+                    Button(folderPath.isEmpty ? L("Choose…") : L("Change…"), action: chooseFolder)
+                }
+                if !folderPath.isEmpty {
+                    Text(folderPath)
+                        .font(.caption).foregroundStyle(.secondary)
+                        .lineLimit(1).truncationMode(.middle)
+                }
+                Text(L("Snippets and settings are backed up to this folder (the newest 20 are kept). Put it in Dropbox, iCloud Drive, or Google Drive to sync across your Macs or set up a new Mac."))
+                    .font(.callout).foregroundStyle(.secondary)
+                Toggle(L("Back up automatically when quitting"), isOn: $automaticBackup)
+                HStack {
+                    Button(L("Back up now")) { Task { await backUpNow() } }
+                        .disabled(working || !backupConfigured)
+                    Button(L("Restore…")) { showRestore = true }
+                        .disabled(working || !backupConfigured)
+                    if working { ProgressView().controlSize(.small) }
+                }
+                if !status.isEmpty {
+                    Text(status).font(.callout).foregroundStyle(.secondary)
                 }
             }
 
@@ -176,19 +184,51 @@ struct BackupPreferencesView: View {
             }
         }
         .sheet(isPresented: $showRestore) {
-            RestoreVersionsView(manager: BackupScheduler.makeManager())
+            if let manager = BackupScheduler.makeManager() {
+                RestoreVersionsView(manager: manager)
+            } else {
+                Text(L("Choose a backup folder first.")).padding()
+            }
         }
+    }
+
+    /// Pick the backup folder, persist a (security-scoped) bookmark, and seed the
+    /// settings sidecar so the folder immediately holds current settings.
+    private func chooseFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.prompt = L("Choose")
+        if let current = BackupFolder.resolvedURL() { panel.directoryURL = current }
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        _ = BackupFolder.set(url)
+        folderPath = BackupFolder.displayPath()
+        let scoped = url.startAccessingSecurityScopedResource()
+        SettingsSidecar.write(from: .standard, to: url.appending(path: SettingsSidecar.fileName))
+        if scoped { url.stopAccessingSecurityScopedResource() }
     }
 
     private func backUpNow() async {
         working = true; defer { working = false }
+        guard let manager = BackupScheduler.makeManager() else {
+            status = L("Choose a backup folder first.")
+            return
+        }
         do {
-            switch try await BackupScheduler.makeManager().backUpNow(kind: .manual) {
+            switch try await manager.backUpNow(kind: .manual) {
             case .created: status = L("Backup saved.")
             case .noChanges: status = L("No changes since the last backup.")
             }
+            // Keep the settings sidecar current alongside the snippet version.
+            if let folder = BackupFolder.resolvedURL() {
+                let scoped = folder.startAccessingSecurityScopedResource()
+                SettingsSidecar.write(from: .standard, to: folder.appending(path: SettingsSidecar.fileName))
+                if scoped { folder.stopAccessingSecurityScopedResource() }
+            }
         } catch {
-            status = L("iCloud backup failed. Try again later.")
+            status = L("Backup failed. Try again later.")
         }
     }
 
@@ -239,7 +279,7 @@ struct RestoreVersionsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(L("Restore from iCloud")).font(.headline)
+            Text(L("Restore from Backup")).font(.headline)
 
             if restoring {
                 HStack { ProgressView().controlSize(.small); Text(L("Restoring…")) }
@@ -316,7 +356,7 @@ struct RestoreVersionsView: View {
     private func load() async {
         loading = true; defer { loading = false }
         do { versions = try await manager.listForUI() }
-        catch _ { error = L("Couldn't load backups from iCloud.") }
+        catch _ { error = L("Couldn't load backups from the folder.") }
     }
 
     private func restore() async {
@@ -338,93 +378,16 @@ struct RestoreVersionsView: View {
     }
 }
 
-// MARK: - iCloud & Backup pane (combined tab)
+// MARK: - Sync & Backup pane (combined tab)
 
-/// The single "iCloud & Backup" Settings tab. Hosts the iCloud sync-status section
-/// (`CloudPreferencesView`) and the snippet-versions + history-export sections
-/// (`BackupPreferencesView`) in one grouped `Form`, so sync status, versioned
-/// backup, and history export all live in one place (previously two separate tabs,
-/// which confused users).
+/// The single "Sync & Backup" Settings tab: folder-based snippet + settings backup
+/// and restore, plus the one-shot clipboard-history export, in one grouped `Form`.
 struct CloudBackupPreferencesView: View {
     var body: some View {
         Form {
-            CloudPreferencesView()
             BackupPreferencesView()
         }
         .formStyle(.grouped)
-    }
-}
-
-// MARK: - iCloud pane (sync status)
-
-/// iCloud preferences — the 2nd tab, shown in every build. iCloud sync is free; this
-/// pane shows live sync status (last sync time + synced snippet/folder counts), or a
-/// note that iCloud is unavailable and storage is local-only (offline, or a build
-/// without iCloud entitlements / an embedded provisioning profile).
-struct CloudPreferencesView: View {
-    // iCloud sync status: last successful sync time + live counts of the records that
-    // actually sync (snippets + folders; clipboard history is local-only).
-    @ObservedObject private var syncMonitor = CloudSyncMonitor.shared
-    @Query private var snippets: [Snippet]
-    @Query private var folders: [Folder]
-
-    var body: some View {
-        Section(L("iCloud")) { syncStatusSection }
-    }
-
-    @ViewBuilder private var syncStatusSection: some View {
-        if AppStore.isCloudKitActive {
-            VStack(alignment: .leading, spacing: 4) {
-                Label(L("Syncing via iCloud"), systemImage: "checkmark.icloud")
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(lastSyncedText)
-                    Text(syncedCountText)
-                }
-                .padding(.leading, 20)   // align under the label text, past the icon
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        } else {
-            Label(L("iCloud unavailable — using local storage only"),
-                  systemImage: "exclamationmark.icloud")
-                .font(.caption)
-                .foregroundStyle(.orange)
-        }
-    }
-
-    // MARK: Sync status text
-
-    /// Date/time part of the "Last synced" line: YYYY-MMM-DD HH:MM:SS (e.g.
-    /// 2026-Jun-07 14:32:05). Fixed POSIX locale so the month abbreviation is stable
-    /// English; the time-zone abbreviation is appended via `TimeZone.abbreviation(for:)`,
-    /// which yields "HKT"/"JST"/etc. where `DateFormatter`'s `zzz` falls back to offsets.
-    private static let syncDateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MMM-dd HH:mm:ss"
-        return formatter
-    }()
-
-    private static func formattedSyncDate(_ date: Date) -> String {
-        let zone = TimeZone.current.abbreviation(for: date) ?? TimeZone.current.identifier
-        return "\(syncDateFormatter.string(from: date)) \(zone)"
-    }
-
-    private var lastSyncedText: String {
-        let value = syncMonitor.lastSyncDate.map(Self.formattedSyncDate)
-            ?? L("Waiting for first sync…")
-        return String(format: L("Last synced: %@"), value)
-    }
-
-    private var syncedCountText: String {
-        let snippetCount = snippets.count
-        let folderCount = folders.count
-        if snippetCount == 0 && folderCount == 0 {
-            return L("No snippets synced yet")
-        }
-        let snippetPart = String(format: L(snippetCount == 1 ? "%d snippet" : "%d snippets"), snippetCount)
-        let folderPart = String(format: L(folderCount == 1 ? "%d folder" : "%d folders"), folderCount)
-        return String(format: L("%1$@, %2$@ synced"), snippetPart, folderPart)
     }
 }
 
