@@ -242,6 +242,8 @@ final class MainMenuController: NSObject, NSMenuDelegate {
 
         menu.addItem(.separator())
 
+        // Quick-actions zone (Liquid Glass §5A): the app's most-frequent actions,
+        // directly above the standardized App menu.
         if addClearHistoryMenuItem {
             let clear = NSMenuItem(title: L("Clear History"),
                                    action: #selector(clearHistory(_:)), keyEquivalent: "")
@@ -256,16 +258,7 @@ final class MainMenuController: NSObject, NSMenuDelegate {
         editSnippets.target = self
         menu.addItem(editSnippets)
 
-        let preferences = NSMenuItem(title: L("Preferences…"),
-                                     action: #selector(showPreferences(_:)), keyEquivalent: ",")
-        preferences.target = self
-        menu.addItem(preferences)
-
-        menu.addItem(.separator())
-
-        let quit = NSMenuItem(title: L("Quit ClipMenu"),
-                              action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
-        menu.addItem(quit)
+        addAppMenuSection(to: menu)
 
         applyMenuFont(to: menu)
     }
@@ -999,5 +992,126 @@ final class MainMenuController: NSObject, NSMenuDelegate {
         // Self-managed window — the SwiftUI `Settings` scene can't be opened
         // programmatically from an LSUIElement agent (no main-menu responder).
         SettingsWindowController.shared.show()
+    }
+
+    // MARK: - Standardized App menu (Liquid Glass §5A)
+
+    /// The canonical product name used in the App-menu titles (must match
+    /// CFBundleDisplayName, including the "2"). Hard-coded rather than read from
+    /// AppInfo.displayName so the menu reads "ClipMenu 2" even under `swift run`,
+    /// where the bundle has no CFBundleDisplayName and AppInfo falls back to
+    /// "ClipMenu".
+    private static let canonicalName = "ClipMenu 2"
+
+    /// Append the standardized App menu (Liquid Glass §5A): About · Check for
+    /// updates… (Sparkle/direct build only) · Settings… (⌘,) · — · Uninstall… ·
+    /// Quit (⌘Q). Each item leads with an SF Symbol.
+    private func addAppMenuSection(to menu: NSMenu) {
+        let name = Self.canonicalName
+        menu.addItem(.separator())
+
+        let about = NSMenuItem(title: String(format: L("About %@"), name),
+                               action: #selector(showAbout(_:)), keyEquivalent: "")
+        about.target = self
+        about.image = NSImage(systemSymbolName: "info.circle", accessibilityDescription: nil)
+        menu.addItem(about)
+
+        // Check for updates… exists only in the Sparkle / Developer ID build; the
+        // Mac App Store build is updated by the App Store and shows no item.
+        if UpdaterUI.isSupported {
+            let updates = NSMenuItem(title: L("Check for updates…"),
+                                     action: #selector(checkForUpdates(_:)), keyEquivalent: "")
+            updates.target = self
+            updates.image = NSImage(systemSymbolName: "arrow.down.circle", accessibilityDescription: nil)
+            menu.addItem(updates)
+        }
+
+        let settings = NSMenuItem(title: L("Settings…"),
+                                  action: #selector(showPreferences(_:)), keyEquivalent: ",")
+        settings.target = self
+        settings.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)
+        menu.addItem(settings)
+
+        menu.addItem(.separator())
+
+        let uninstall = NSMenuItem(title: String(format: L("Uninstall %@…"), name),
+                                   action: #selector(uninstall(_:)), keyEquivalent: "")
+        uninstall.target = self
+        uninstall.image = NSImage(systemSymbolName: "trash", accessibilityDescription: nil)
+        menu.addItem(uninstall)
+
+        let quit = NSMenuItem(title: String(format: L("Quit %@"), name),
+                              action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        quit.image = NSImage(systemSymbolName: "power", accessibilityDescription: nil)
+        menu.addItem(quit)
+    }
+
+    /// "About ClipMenu 2" — opens the existing Settings window (its About pane is
+    /// reachable there). There is no standalone About panel; the SwiftUI `Settings`
+    /// TabView has no programmatic tab selection, so we open Settings as-is.
+    @objc private func showAbout(_ sender: Any?) {
+        SettingsWindowController.shared.show()
+    }
+
+    @objc private func checkForUpdates(_ sender: Any?) {
+        UpdaterUI.checkNow()
+    }
+
+    // MARK: - Uninstall (Liquid Glass §5A — 100% clean)
+
+    /// Destructive confirmation, then a clean removal: unregister the login item,
+    /// delete the Application Support dir, remove the UserDefaults domain, move the
+    /// app bundle to Trash, then quit.
+    ///
+    /// Button order is destructive-safe per §5A: **Uninstall on the LEFT, Cancel on
+    /// the RIGHT as the default** — Cancel is added last so Return/Esc both land on
+    /// the safe choice.
+    @objc private func uninstall(_ sender: Any?) {
+        let alert = NSAlert()
+        alert.alertStyle = .critical
+        alert.messageText = String(format: L("Uninstall %@?"), Self.canonicalName)
+        alert.informativeText = L(
+            "This will turn off Launch at Login, delete your clipboard history and "
+            + "snippets, remove this app's settings, and move the app to the Trash. "
+            + "Clipboard and Accessibility permissions are removed by macOS in System "
+            + "Settings, not by this app. This cannot be undone.")
+        // Uninstall first → leftmost; Cancel last → rightmost and the default.
+        alert.addButton(withTitle: String(format: L("Uninstall %@"), Self.canonicalName))
+        alert.addButton(withTitle: L("Cancel"))
+
+        NSApp.activate(ignoringOtherApps: true)
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+
+        performUninstall()
+    }
+
+    /// Tear down on-disk + system state, then quit. Best-effort: each step logs and
+    /// continues so a single failure (e.g. a locked file) can't strand the user with
+    /// a half-uninstalled app that never quits.
+    private func performUninstall() {
+        // 1. Unregister the login item.
+        LoginItem.setEnabled(false)
+
+        // 2. Delete the Application Support directory (history + snippets stores,
+        //    actions.plist, user scripts). The on-disk folder is "ClipMenu".
+        do {
+            try FileManager.default.removeItem(at: AppStore.folder)
+        } catch {
+            NSLog("Uninstall: failed to remove Application Support dir: \(error)")
+        }
+
+        // 3. Remove the UserDefaults domain (all preferences).
+        let domain = Bundle.main.bundleIdentifier ?? "com.dragonapp.clipmenu-2"
+        UserDefaults.standard.removePersistentDomain(forName: domain)
+
+        // 4. Move the running app bundle to the Trash. NSWorkspace.recycle works on
+        //    a running bundle. Quit once it's gone (or immediately if it can't be
+        //    moved, e.g. a read-only volume), so we never leave the app running with
+        //    its data already deleted.
+        let bundleURL = Bundle.main.bundleURL
+        NSWorkspace.shared.recycle([bundleURL]) { _, error in
+            if let error { NSLog("Uninstall: failed to move app to Trash: \(error)") }
+            DispatchQueue.main.async { NSApp.terminate(nil) }
+        }
     }
 }
