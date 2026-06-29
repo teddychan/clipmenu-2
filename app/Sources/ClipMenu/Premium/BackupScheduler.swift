@@ -2,41 +2,35 @@ import Foundation
 import AppKit
 import os
 
-/// Runs the once-per-launch automatic snippet backup whenever iCloud sync is active
-/// this launch (the same condition under which CloudKit is mirroring). A no-op when
-/// the build is running local-only.
+/// Runs the once-per-launch automatic snippet backup into the user-chosen backup
+/// folder. A no-op until the user has picked a folder in the Sync/Backup pane.
 @MainActor
 enum BackupScheduler {
     private static let log = Logger(subsystem: "com.dragonapp.clipmenu-2", category: "backup")
 
-    /// Whether automatic backup may run this launch. Mirrors the live-sync gate:
-    /// CloudKit is actually active, so there's a private database to back up to.
+    /// Whether automatic backup may run: the user has chosen a backup folder.
     static var isEligible: Bool {
-        AppStore.isCloudKitActive
+        BackupFolder.isConfigured()
     }
 
-    /// Build a manager bound to the live container + CloudKit store.
-    static func makeManager() -> BackupManager {
-        let deviceName = ProcessInfo.processInfo.hostName
+    /// Build a manager bound to the live container + the user's backup folder, or
+    /// nil when no folder is configured.
+    static func makeManager() -> BackupManager? {
+        guard let folder = BackupFolder.resolvedURL() else { return nil }
         return BackupManager(
-            store: CloudKitBackupStore(containerID: AppStore.cloudContainerID),
+            store: FolderBackupStore(folder: folder),
             context: AppStore.container.mainContext,
-            deviceName: deviceName,
+            deviceName: ProcessInfo.processInfo.hostName,
             appVersion: AppInfo.version)
     }
 
     /// Fire-and-forget daily check; safe to call once at startup.
     static func runIfEligible() {
-        guard isEligible else { return }
-        let manager = makeManager()
+        guard let manager = makeManager() else { return }
         Task {
-            // Wait for the first CloudKit import/export this launch so the backup
-            // reflects synced data rather than a stale or empty local store (e.g.
-            // a new Mac or freshly re-enabled iCloud). Fall back after 30s so an
-            // offline launch — which fires no sync events — still backs up.
-            await CloudSyncMonitor.shared.waitForFirstSync(timeout: 30)
-            let didSync = CloudSyncMonitor.shared.hasSyncedThisLaunch
-            do { try await manager.runDailyCheck(didSyncThisLaunch: didSync) }
+            // The local store is authoritative (no CloudKit import to wait for), so the
+            // snapshot always reflects real data.
+            do { try await manager.runDailyCheck(didSyncThisLaunch: true) }
             catch { log.error("daily backup check failed: \(String(describing: error))") }
         }
     }

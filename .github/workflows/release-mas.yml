@@ -156,10 +156,7 @@ jobs:
             printf '%s\n' "  <key>com.apple.developer.team-identifier</key><string>${APPLE_TEAM_ID}</string>"
             printf '%s\n' '  <key>com.apple.security.app-sandbox</key><true/>'
             printf '%s\n' '  <key>com.apple.security.files.user-selected.read-write</key><true/>'
-            printf '%s\n' '  <key>com.apple.developer.icloud-container-identifiers</key><array><string>iCloud.com.dragonapp.clipmenu-2</string></array>'
-            printf '%s\n' '  <key>com.apple.developer.icloud-services</key><array><string>CloudKit</string></array>'
-            printf '%s\n' "  <key>com.apple.developer.ubiquity-kvstore-identifier</key><string>${APPLE_TEAM_ID}.com.dragonapp.clipmenu-2</string>"
-            printf '%s\n' '  <key>com.apple.developer.icloud-container-environment</key><string>Production</string>'
+            printf '%s\n' '  <key>com.apple.security.files.bookmarks.app-scope</key><true/>'
             printf '%s\n' '</dict></plist>'
           } > "$ENT"
 

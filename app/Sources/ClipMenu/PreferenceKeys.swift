@@ -64,8 +64,15 @@ enum PreferenceKeys {
     /// End date of the last successful CloudKit import/export (a `Date`). Written by
     /// `CloudSyncMonitor`; shown in the Backup pane. Per-device, so not synced.
     static let lastCloudSyncDate = "lastCloudSyncDate"
+    /// Security-scoped bookmark (Data) of the user-chosen backup folder, and a
+    /// display path for the UI. The folder can live in Dropbox / iCloud Drive /
+    /// Google Drive to sync backups across Macs (no iCloud entitlement needed).
+    static let backupFolderBookmark = "backupFolderBookmark"
+    static let backupFolderPath = "backupFolderPath"
+    /// Whether to back up automatically when quitting (default true).
+    static let automaticBackupEnabled = "automaticBackupEnabled"
     /// Local cache of the last snippet-backup time (a `Date`). NOT authoritative —
-    /// CloudKit metadata is the source of truth; this is an offline/perf fallback.
+    /// the backup folder is the source of truth; this is an offline/perf fallback.
     static let lastSnippetBackupDate = "lastSnippetBackupDate"
     /// Local cache of the last snippet-backup content hash (offline fallback only).
     static let lastSnippetBackupHash = "lastSnippetBackupHash"

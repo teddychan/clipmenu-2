@@ -28,68 +28,8 @@ struct ClipMenuApp: App {
 /// throws and we fall back to a fully-local container so dev/unsigned builds run fine.
 @MainActor
 enum AppStore {
-    /// The iCloud container backing synced snippets (must match the entitlement).
-    static let cloudContainerID = "iCloud.com.dragonapp.clipmenu-2"
-
     /// Application Support directory holding the SwiftData stores.
     static let folder = URL.applicationSupportDirectory.appending(path: "ClipMenu", directoryHint: .isDirectory)
-
-    /// Whether iCloud sync is enabled (default on). Read at launch; applied next launch.
-    static var isCloudSyncEnabled: Bool {
-        UserDefaults.standard.object(forKey: PreferenceKeys.iCloudSyncEnabled) as? Bool ?? true
-    }
-
-    /// True when the snippets store is actually CloudKit-mirrored this launch.
-    private(set) static var isCloudKitActive = false
-
-    /// Pure gate (testable): CloudKit mirroring activates whenever the user has
-    /// iCloud sync enabled (the default). Sync is free in every build; if the build
-    /// lacks iCloud entitlements / an embedded provisioning profile, `makeContainer`
-    /// catches the failure and falls back to a local store.
-    static func shouldActivateCloud(syncEnabled: Bool) -> Bool {
-        syncEnabled
-    }
-
-    /// Dev-only escape hatch (set by scripts/build-dev-icloud.sh) to populate the
-    /// CloudKit *Development* schema from a signed local build. Forces the
-    /// CloudKit-mirrored store on regardless of channel/subscription. Never set in
-    /// shipping builds, and a no-op unless the build also carries iCloud entitlements.
-    static var devCloudKitSchemaRequested: Bool {
-        ProcessInfo.processInfo.environment["CLIPMENU_DEV_CLOUDKIT_SCHEMA"] == "1"
-    }
-
-    /// Dev-only: create both CloudKit Development schemas so they can be deployed to
-    /// Production: the SwiftData-mirrored snippet schema (CD_Folder / CD_Snippet) and
-    /// the raw-CloudKit backup schema (Backups zone + SnippetBackup record type).
-    /// Safe to delete the seeded records afterward.
-    static func seedCloudKitSchemaSample() {
-        let context = container.mainContext
-
-        // 1) Snippet sync schema — insert a sample Folder+Snippet so SwiftData exports.
-        let folders = (try? context.fetch(FetchDescriptor<Folder>())) ?? []
-        if folders.isEmpty {   // existing data already exports the schema
-            let folder = Folder(title: "iCloud Schema Init", index: 0)
-            context.insert(folder)
-            context.insert(Snippet(title: "schema", content: "schema", index: 0, folder: folder))
-            try? context.save()
-        }
-        NSLog("ClipMenu: dev CloudKit schema seed saved. Keep the app running ~1 minute while it uploads, then check CloudKit Console → Development → Record Types for CD_Folder / CD_Snippet and Deploy to Production.")
-
-        // 2) Backup schema — the backup store is gated to the App Store build and never
-        //    runs here, so write one version explicitly to create the Backups zone and
-        //    SnippetBackup record type in the Development environment.
-        Task { @MainActor in
-            let store = CloudKitBackupStore(containerID: cloudContainerID)
-            let manager = BackupManager(store: store, context: container.mainContext,
-                                        deviceName: "schema-seed", appVersion: AppInfo.version)
-            do {
-                try await manager.backUpNow(kind: .manual, force: true)
-                NSLog("ClipMenu: dev SnippetBackup schema seed uploaded. Check CloudKit Console → Development → Record Types for SnippetBackup, then Deploy to Production.")
-            } catch {
-                NSLog("ClipMenu: SnippetBackup schema seed failed: \(error)")
-            }
-        }
-    }
 
     static let container: ModelContainer = makeContainer()
 
@@ -102,45 +42,32 @@ enum AppStore {
         let snippetSchema = Schema([Folder.self, Snippet.self])
         let historySchema = Schema([ClipRecord.self, ClipImage.self])
 
-        func make(cloud: Bool) throws -> ModelContainer {
+        // Both stores are local. Snippets are protected by folder-based backups
+        // (FolderBackupStore + the Sync/Backup pane), not CloudKit mirroring;
+        // history is a regenerable cache.
+        func make() throws -> ModelContainer {
             let snippetsConfig = ModelConfiguration(
-                "Snippets", schema: snippetSchema, url: snippetsURL,
-                cloudKitDatabase: cloud ? .private(cloudContainerID) : .none)
+                "Snippets", schema: snippetSchema, url: snippetsURL, cloudKitDatabase: .none)
             let historyConfig = ModelConfiguration(
-                "History", schema: historySchema, url: historyURL,
-                cloudKitDatabase: .none)
+                "History", schema: historySchema, url: historyURL, cloudKitDatabase: .none)
             return try ModelContainer(
                 for: Folder.self, Snippet.self, ClipRecord.self, ClipImage.self,
                 configurations: snippetsConfig, historyConfig)
         }
 
-        // `devCloudKitSchemaRequested` forces the CloudKit-mirrored store on so a signed
-        // development build can create the CloudKit Development schema (later deployed to
-        // Production). Normal builds activate cloud whenever sync is enabled.
-        let wantCloud = devCloudKitSchemaRequested || shouldActivateCloud(
-            syncEnabled: isCloudSyncEnabled)
-        if wantCloud {
-            do {
-                let container = try make(cloud: true)
-                isCloudKitActive = true
-                return container
-            } catch {
-                NSLog("ClipMenu: CloudKit unavailable, using local store (\(error))")
-            }
-        }
         do {
-            return try make(cloud: false)
+            return try make()
         } catch {
-            // The split stores are regenerable (snippets re-sync from CloudKit, history
-            // is a cache). If the on-disk schema is incompatible, reset ONLY the new
-            // files — never the old combined ClipMenu.store, which is the migration backup.
-            NSLog("ClipMenu: resetting incompatible split stores; using local-only this launch (\(error))")
+            // The split stores are regenerable (snippets restore from a backup,
+            // history is a cache). If the on-disk schema is incompatible, reset ONLY
+            // the new files — never the old combined ClipMenu.store (migration backup).
+            NSLog("ClipMenu: resetting incompatible split stores (\(error))")
             for base in ["ClipMenu-Snippets.store", "ClipMenu-History.store"] {
                 for suffix in ["", "-wal", "-shm"] {
                     try? FileManager.default.removeItem(at: folder.appending(path: base + suffix))
                 }
             }
-            do { return try make(cloud: false) }
+            do { return try make() }
             catch { fatalError("Failed to create ModelContainer: \(error)") }
         }
     }
@@ -192,12 +119,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             oldStoreURL: AppStore.folder.appending(path: "ClipMenu.store"),
             into: AppStore.container.mainContext)
 
-        // Start iCloud settings sync only when CloudKit is actually active this launch.
-        // iCloud sync is free and on by default; when the build can't bring CloudKit
-        // up (no entitlement/profile, or offline), this stays off and the app is local.
-        if AppStore.isCloudKitActive {
-            SettingsSync.shared.start()
-            CloudSyncMonitor.shared.start()
+        // Folder-based settings sync: if a backup folder is configured, pull the
+        // settings sidecar so changes made on the user's other Macs apply this launch
+        // (the folder syncs via Dropbox / iCloud Drive / Google Drive).
+        if let backupFolder = BackupFolder.resolvedURL() {
+            let scoped = backupFolder.startAccessingSecurityScopedResource()
+            SettingsSidecar.read(from: backupFolder.appending(path: SettingsSidecar.fileName), into: .standard)
+            if scoped { backupFolder.stopAccessingSecurityScopedResource() }
         }
 
         // Status-bar item shows the Main menu (MenuController.m:1314). Honor
@@ -246,12 +174,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             maybePromptToAddLoginItem()
         }
 
-        // Dev-only: when generating the CloudKit Development schema, seed a sample so
-        // SwiftData exports and creates the CD_* record types (scripts/build-dev-icloud.sh).
-        if AppStore.devCloudKitSchemaRequested {
-            AppStore.seedCloudKitSchemaSample()
-        }
-
         BackupScheduler.runIfEligible()
     }
 
@@ -293,8 +215,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         isTerminating = true
         HotKeyCenter.shared.unregisterAll()
-        if AppStore.isCloudKitActive {
-            SettingsSync.shared.stop()
+        // Write the settings sidecar to the backup folder on quit (best-effort) so the
+        // latest settings always travel with the synced folder. Snippet versions are
+        // captured by the launch-time daily check and the manual "Back Up Now" button
+        // (a snippet snapshot is async and can't run during synchronous termination).
+        if BackupFolder.automaticBackupEnabled(), let backupFolder = BackupFolder.resolvedURL() {
+            let scoped = backupFolder.startAccessingSecurityScopedResource()
+            SettingsSidecar.write(from: .standard, to: backupFolder.appending(path: SettingsSidecar.fileName))
+            if scoped { backupFolder.stopAccessingSecurityScopedResource() }
         }
         Task { await pasteboardMonitor.stop() }
 
@@ -368,7 +296,7 @@ struct SettingsView: View {
             GeneralPreferencesView()
                 .tabItem { Label(L("General"), systemImage: "gearshape") }
             CloudBackupPreferencesView()
-                .tabItem { Label(L("iCloud & Backup"), systemImage: "icloud") }
+                .tabItem { Label(L("Sync & Backup"), systemImage: "externaldrive.badge.timemachine") }
             MenuPreferencesView()
                 .tabItem { Label(L("Menu"), systemImage: "menubar.rectangle") }
             TypePreferencesView()
