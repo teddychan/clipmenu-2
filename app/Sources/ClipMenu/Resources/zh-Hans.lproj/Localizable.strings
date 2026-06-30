@@ -141,14 +141,7 @@
 "untitled folder" = "未命名文件夹";
 "untitled snippet" = "未命名片段";
 
-/* iCloud sync (General preferences) */
-"iCloud" = "iCloud";
-"Sync settings and snippets via iCloud" = "通过 iCloud 同步设置和片段";
-"Restart ClipMenu to apply iCloud sync changes." = "重新启动 ClipMenu 以应用 iCloud 同步更改。";
-"Syncing via iCloud" = "正在通过 iCloud 同步";
-"iCloud unavailable — using local storage only" = "iCloud 不可用——仅使用本地存储";
 
-/* iCloud sync status (Backup preferences, v2.6.2) */
 "Last synced: %@" = "上次同步：%@";
 "Waiting for first sync…" = "正在等待首次同步…";
 "%d snippet" = "%d 个片段";
@@ -193,32 +186,19 @@
 "To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "若要在选择条目后自动粘贴，请从 GitHub 下载 ClipMenu 或使用 Homebrew 安装。";
 "Download ClipMenu" = "下载 ClipMenu";
 
-/* iCloud sync purchase (App Store build) — one-time $9.99 non-consumable */
-"iCloud Sync" = "iCloud 同步";
-"iCloud Sync unlocked" = "已解锁 iCloud 同步";
-"Unlock iCloud sync for your snippets, folders, and settings, plus your last 20 snippet backups. One-time purchase." = "解锁 iCloud 同步，同步你的代码片段、文件夹和设置，并保留最近 20 个片段备份。一次性购买。";
 "%@ one-time purchase" = "%@ 一次性购买";
 "Buy" = "购买";
 "Restore Purchases" = "恢复购买";
-"Get ClipMenu on the Mac App Store to use iCloud sync" = "前往 Mac App Store 下载 ClipMenu 以使用 iCloud 同步";
 "No previous purchase found for this Apple ID." = "未找到此 Apple ID 的过往购买记录。";
 "Couldn't restore purchases. Check your connection and try again." = "无法恢复购买。请检查网络连接后重试。";
-"iCloud Sync isn't available right now. Please check your connection and try again." = "iCloud 同步当前不可用。请检查网络连接后重试。";
 "Try Again" = "重试";
 
-/* iCloud snippet backup & restore (v2.8.0) */
-"Snippet Versions in iCloud" = "iCloud 中的片段版本";
 "Clipboard History Export" = "剪贴板历史导出";
 "Back up now" = "立即备份";
-"Restore from iCloud…" = "从 iCloud 恢复…";
-"Restore from iCloud" = "从 iCloud 恢复";
 "Restoring…" = "正在恢复…";
 "Restore" = "恢复";
-"ClipMenu keeps your last 20 backups of your snippets and folders in your private iCloud. You can restore any version; your current data is backed up first." = "ClipMenu 会在你的私人 iCloud 中保留你最近的 20 个片段和文件夹备份。你可以恢复任意版本；恢复前会先备份当前数据。";
-"Backups use your private iCloud (encrypted in transit and at rest). Turn on Advanced Data Protection for end-to-end encryption." = "备份使用你的私人 iCloud（传输和存储均加密）。开启“高级数据保护”可实现端到端加密。";
 "Backup saved." = "备份已保存。";
 "No changes since the last backup." = "自上次备份以来没有更改。";
-"iCloud backup failed. Try again later." = "iCloud 备份失败，请稍后重试。";
 "No backups yet." = "暂无备份。";
 "Restore this backup?" = "要恢复此备份吗？";
 "This replaces all your current snippets and folders. Your current snippets are backed up first." = "这将替换您当前所有的片段和文件夹。您当前的片段会先备份。";
@@ -227,11 +207,9 @@
 "Automatic" = "自动";
 "Manual" = "手动";
 "Before restore" = "恢复前";
-"Couldn't load backups from iCloud." = "无法从 iCloud 加载备份。";
 "Couldn't save a safety backup, so the restore was cancelled." = "无法保存安全备份，已取消恢复。";
 "This version was made on a newer app version and can't be restored." = "该版本由更新版本的应用创建，无法恢复。";
 "Restore failed. Your current data was not changed." = "恢复失败。你的当前数据未被更改。";
-"iCloud & Backup" = "iCloud 与备份";
 
 /* First-run setup wizard */
 "Your clipboard history and snippets, one keystroke away." = "你的剪贴板历史和片段，一个按键即可调出。";
@@ -245,7 +223,6 @@
 "ClipMenu works the moment you continue." = "继续后 ClipMenu 立即可用。";
 "Your clipboard stays on this Mac" = "你的剪贴板只保留在这台 Mac 上";
 "History is stored locally. Nothing is uploaded or sent anywhere." = "历史保存在本地，不会上传或发送到任何地方。";
-"iCloud sync is optional and off until you turn it on in Settings." = "iCloud 同步为可选项，在设置中开启前一直处于关闭状态。";
 "Accessibility (optional)" = "辅助功能（可选）";
 "Lets ClipMenu paste the item you pick straight into the app you're using." = "让 ClipMenu 将你选中的项目直接粘贴到正在使用的应用中。";
 "Accessibility" = "辅助功能";
