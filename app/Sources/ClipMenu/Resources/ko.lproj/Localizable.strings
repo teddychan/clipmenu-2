@@ -141,14 +141,7 @@
 "untitled folder" = "제목 없는 폴더";
 "untitled snippet" = "제목 없는 스니펫";
 
-/* iCloud sync (General preferences) */
-"iCloud" = "iCloud";
-"Sync settings and snippets via iCloud" = "iCloud로 설정 및 스니펫 동기화";
-"Restart ClipMenu to apply iCloud sync changes." = "iCloud 동기화 변경 사항을 적용하려면 ClipMenu를 다시 시작하십시오.";
-"Syncing via iCloud" = "iCloud로 동기화 중";
-"iCloud unavailable — using local storage only" = "iCloud를 사용할 수 없음 — 로컬 저장소만 사용";
 
-/* iCloud sync status (Backup preferences, v2.6.2) */
 "Last synced: %@" = "마지막 동기화: %@";
 "Waiting for first sync…" = "첫 동기화를 기다리는 중…";
 "%d snippet" = "스니펫 %d개";
@@ -193,32 +186,19 @@
 "To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "항목을 선택한 후 자동으로 붙여넣으려면 GitHub에서 ClipMenu를 다운로드하거나 Homebrew로 설치하세요.";
 "Download ClipMenu" = "ClipMenu 다운로드";
 
-/* iCloud sync purchase (App Store build) — one-time $9.99 non-consumable */
-"iCloud Sync" = "iCloud 동기화";
-"iCloud Sync unlocked" = "iCloud 동기화 잠금 해제됨";
-"Unlock iCloud sync for your snippets, folders, and settings, plus your last 20 snippet backups. One-time purchase." = "스니펫, 폴더, 설정의 iCloud 동기화와 최근 스니펫 백업 20개를 잠금 해제하세요. 일회성 구매입니다.";
 "%@ one-time purchase" = "%@ 일회성 구매";
 "Buy" = "구입";
 "Restore Purchases" = "구입 복원";
 "No previous purchase found for this Apple ID." = "이 Apple ID에 대한 이전 구매를 찾을 수 없습니다.";
-"Get ClipMenu on the Mac App Store to use iCloud sync" = "iCloud 동기화를 사용하려면 Mac App Store에서 ClipMenu를 다운로드하세요";
 "Couldn't restore purchases. Check your connection and try again." = "구매를 복원할 수 없습니다. 연결을 확인한 후 다시 시도하세요.";
-"iCloud Sync isn't available right now. Please check your connection and try again." = "지금은 iCloud 동기화를 사용할 수 없습니다. 연결을 확인한 후 다시 시도하세요.";
 "Try Again" = "다시 시도";
 
-/* iCloud snippet backup & restore (v2.8.0) */
-"Snippet Versions in iCloud" = "iCloud의 스니펫 버전";
 "Clipboard History Export" = "클립보드 기록 내보내기";
 "Back up now" = "지금 백업";
-"Restore from iCloud…" = "iCloud에서 복원…";
-"Restore from iCloud" = "iCloud에서 복원";
 "Restoring…" = "복원 중…";
 "Restore" = "복원";
-"ClipMenu keeps your last 20 backups of your snippets and folders in your private iCloud. You can restore any version; your current data is backed up first." = "ClipMenu는 스니펫과 폴더의 최근 백업 20개를 개인 iCloud에 보관합니다. 어떤 버전이든 복원할 수 있으며, 복원 전에 현재 데이터가 먼저 백업됩니다.";
-"Backups use your private iCloud (encrypted in transit and at rest). Turn on Advanced Data Protection for end-to-end encryption." = "백업은 개인 iCloud를 사용합니다(전송 및 저장 시 암호화). 종단 간 암호화를 사용하려면 고급 데이터 보호를 켜십시오.";
 "Backup saved." = "백업이 저장되었습니다.";
 "No changes since the last backup." = "마지막 백업 이후 변경 사항이 없습니다.";
-"iCloud backup failed. Try again later." = "iCloud 백업에 실패했습니다. 나중에 다시 시도해 주세요.";
 "No backups yet." = "아직 백업이 없습니다.";
 "Restore this backup?" = "이 백업을 복원하시겠습니까?";
 "This replaces all your current snippets and folders. Your current snippets are backed up first." = "현재의 모든 스니펫과 폴더를 대체합니다. 현재 스니펫은 먼저 백업됩니다.";
@@ -227,11 +207,9 @@
 "Automatic" = "자동";
 "Manual" = "수동";
 "Before restore" = "복원 전";
-"Couldn't load backups from iCloud." = "iCloud에서 백업을 불러올 수 없습니다.";
 "Couldn't save a safety backup, so the restore was cancelled." = "안전 백업을 저장하지 못해 복원이 취소되었습니다.";
 "This version was made on a newer app version and can't be restored." = "이 버전은 최신 버전의 앱에서 만들어져 복원할 수 없습니다.";
 "Restore failed. Your current data was not changed." = "복원에 실패했습니다. 현재 데이터는 변경되지 않았습니다.";
-"iCloud & Backup" = "iCloud 및 백업";
 
 /* First-run setup wizard */
 "Your clipboard history and snippets, one keystroke away." = "클립보드 기록과 스니펫을 단축키 하나로.";
@@ -245,7 +223,6 @@
 "ClipMenu works the moment you continue." = "계속하면 ClipMenu를 바로 사용할 수 있습니다.";
 "Your clipboard stays on this Mac" = "클립보드는 이 Mac에 보관됩니다";
 "History is stored locally. Nothing is uploaded or sent anywhere." = "기록은 로컬에 저장됩니다. 어디에도 업로드하거나 전송하지 않습니다.";
-"iCloud sync is optional and off until you turn it on in Settings." = "iCloud 동기화는 선택 사항이며 설정에서 켜기 전까지는 꺼져 있습니다.";
 "Accessibility (optional)" = "손쉬운 사용(선택 사항)";
 "Lets ClipMenu paste the item you pick straight into the app you're using." = "선택한 항목을 ClipMenu가 사용 중인 앱에 바로 붙여넣을 수 있게 합니다.";
 "Accessibility" = "손쉬운 사용";

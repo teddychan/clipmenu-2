@@ -141,14 +141,7 @@
 "untitled folder" = "dossier sans titre";
 "untitled snippet" = "fragment sans titre";
 
-/* iCloud sync (General preferences) */
-"iCloud" = "iCloud";
-"Sync settings and snippets via iCloud" = "Synchroniser les réglages et les extraits via iCloud";
-"Restart ClipMenu to apply iCloud sync changes." = "Redémarrez ClipMenu pour appliquer les modifications de synchronisation iCloud.";
-"Syncing via iCloud" = "Synchronisation via iCloud";
-"iCloud unavailable — using local storage only" = "iCloud indisponible — stockage local uniquement";
 
-/* iCloud sync status (Backup preferences, v2.6.2) */
 "Last synced: %@" = "Dernière synchronisation : %@";
 "Waiting for first sync…" = "En attente de la première synchronisation…";
 "%d snippet" = "%d fragment";
@@ -193,32 +186,19 @@
 "To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "Pour coller automatiquement après avoir sélectionné un élément, téléchargez ClipMenu depuis GitHub ou installez-le avec Homebrew.";
 "Download ClipMenu" = "Télécharger ClipMenu";
 
-/* iCloud sync purchase (App Store build) — one-time $9.99 non-consumable */
-"iCloud Sync unlocked" = "Synchronisation iCloud débloquée";
-"Unlock iCloud sync for your snippets, folders, and settings, plus your last 20 snippet backups. One-time purchase." = "Débloquez la synchronisation iCloud pour vos extraits, vos dossiers et vos réglages, ainsi que vos 20 dernières sauvegardes d’extraits. Achat unique.";
 "%@ one-time purchase" = "%@ achat unique";
 "Buy" = "Acheter";
 "No previous purchase found for this Apple ID." = "Aucun achat précédent trouvé pour cet identifiant Apple.";
-"iCloud Sync" = "Synchronisation iCloud";
 "Restore Purchases" = "Restaurer les achats";
-"Get ClipMenu on the Mac App Store to use iCloud sync" = "Téléchargez ClipMenu sur le Mac App Store pour utiliser la synchronisation iCloud";
 "Couldn't restore purchases. Check your connection and try again." = "Impossible de restaurer les achats. Vérifiez votre connexion et réessayez.";
-"iCloud Sync isn't available right now. Please check your connection and try again." = "La synchronisation iCloud n’est pas disponible pour le moment. Vérifiez votre connexion et réessayez.";
 "Try Again" = "Réessayer";
 
-/* iCloud snippet backup & restore (v2.8.0) */
-"Snippet Versions in iCloud" = "Versions des extraits dans iCloud";
 "Clipboard History Export" = "Exporter l'historique du presse-papiers";
 "Back up now" = "Sauvegarder maintenant";
-"Restore from iCloud…" = "Restaurer depuis iCloud…";
-"Restore from iCloud" = "Restaurer depuis iCloud";
 "Restoring…" = "Restauration…";
 "Restore" = "Restaurer";
-"ClipMenu keeps your last 20 backups of your snippets and folders in your private iCloud. You can restore any version; your current data is backed up first." = "ClipMenu conserve vos 20 dernières sauvegardes de vos extraits et dossiers dans votre iCloud privé. Vous pouvez restaurer n'importe quelle version ; vos données actuelles sont d'abord sauvegardées.";
-"Backups use your private iCloud (encrypted in transit and at rest). Turn on Advanced Data Protection for end-to-end encryption." = "Les sauvegardes utilisent votre iCloud privé (chiffré en transit et au repos). Activez la Protection avancée des données pour un chiffrement de bout en bout.";
 "Backup saved." = "Sauvegarde enregistrée.";
 "No changes since the last backup." = "Aucune modification depuis la dernière sauvegarde.";
-"iCloud backup failed. Try again later." = "La sauvegarde iCloud a échoué. Réessayez plus tard.";
 "No backups yet." = "Aucune sauvegarde pour l'instant.";
 "Restore this backup?" = "Restaurer cette sauvegarde ?";
 "This replaces all your current snippets and folders. Your current snippets are backed up first." = "Cela remplace tous vos extraits et dossiers actuels. Vos extraits actuels sont d'abord sauvegardés.";
@@ -227,11 +207,9 @@
 "Automatic" = "Automatique";
 "Manual" = "Manuelle";
 "Before restore" = "Avant restauration";
-"Couldn't load backups from iCloud." = "Impossible de charger les sauvegardes depuis iCloud.";
 "Couldn't save a safety backup, so the restore was cancelled." = "Impossible d'enregistrer une sauvegarde de sécurité ; la restauration a été annulée.";
 "This version was made on a newer app version and can't be restored." = "Cette version a été créée avec une version plus récente de l'app et ne peut pas être restaurée.";
 "Restore failed. Your current data was not changed." = "Échec de la restauration. Vos données actuelles n'ont pas été modifiées.";
-"iCloud & Backup" = "iCloud et sauvegarde";
 
 /* First-run setup wizard */
 "Your clipboard history and snippets, one keystroke away." = "Votre historique de presse-papiers et vos extraits, à une frappe près.";
@@ -245,7 +223,6 @@
 "ClipMenu works the moment you continue." = "ClipMenu fonctionne dès que vous continuez.";
 "Your clipboard stays on this Mac" = "Votre presse-papiers reste sur ce Mac";
 "History is stored locally. Nothing is uploaded or sent anywhere." = "L'historique est stocké localement. Rien n'est téléversé ni envoyé où que ce soit.";
-"iCloud sync is optional and off until you turn it on in Settings." = "La synchronisation iCloud est facultative et désactivée tant que vous ne l'activez pas dans les Réglages.";
 "Accessibility (optional)" = "Accessibilité (facultatif)";
 "Lets ClipMenu paste the item you pick straight into the app you're using." = "Permet à ClipMenu de coller l'élément choisi directement dans l'app que vous utilisez.";
 "Accessibility" = "Accessibilité";

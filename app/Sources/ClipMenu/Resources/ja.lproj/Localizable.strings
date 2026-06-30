@@ -141,14 +141,7 @@
 "untitled folder" = "名称未設定フォルダ";
 "untitled snippet" = "名称未設定スニペット";
 
-/* iCloud sync (General preferences) */
-"iCloud" = "iCloud";
-"Sync settings and snippets via iCloud" = "設定とスニペットを iCloud で同期";
-"Restart ClipMenu to apply iCloud sync changes." = "iCloud 同期の変更を適用するには ClipMenu を再起動してください。";
-"Syncing via iCloud" = "iCloud で同期中";
-"iCloud unavailable — using local storage only" = "iCloud を利用できません — ローカルストレージのみ使用";
 
-/* iCloud sync status (Backup preferences, v2.6.2) */
 "Last synced: %@" = "最終同期: %@";
 "Waiting for first sync…" = "最初の同期を待っています…";
 "%d snippet" = "%d 個のスニペット";
@@ -193,32 +186,19 @@
 "To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "クリップを選択した後に自動でペーストするには、GitHub から ClipMenu をダウンロードするか、Homebrew でインストールしてください。";
 "Download ClipMenu" = "ClipMenu をダウンロード";
 
-/* iCloud sync purchase (App Store build) — one-time $9.99 non-consumable */
-"iCloud Sync" = "iCloud 同期";
 "Restore Purchases" = "購入を復元";
-"iCloud Sync unlocked" = "iCloud 同期を解除しました";
-"Unlock iCloud sync for your snippets, folders, and settings, plus your last 20 snippet backups. One-time purchase." = "スニペット、フォルダ、設定の iCloud 同期に加え、直近 20 件のスニペットバックアップを解除します。買い切り購入です。";
 "%@ one-time purchase" = "%@ 買い切り";
 "Buy" = "購入";
 "No previous purchase found for this Apple ID." = "この Apple ID では以前の購入が見つかりませんでした。";
-"Get ClipMenu on the Mac App Store to use iCloud sync" = "iCloud 同期を使うには、Mac App Store 版の ClipMenu をダウンロードしてください";
 "Couldn't restore purchases. Check your connection and try again." = "購入を復元できませんでした。接続を確認してもう一度お試しください。";
-"iCloud Sync isn't available right now. Please check your connection and try again." = "現在 iCloud 同期は利用できません。接続を確認してもう一度お試しください。";
 "Try Again" = "もう一度試す";
 
-/* iCloud snippet backup & restore (v2.8.0) */
-"Snippet Versions in iCloud" = "iCloud のスニペットバージョン";
 "Clipboard History Export" = "クリップボード履歴の書き出し";
 "Back up now" = "今すぐバックアップ";
-"Restore from iCloud…" = "iCloud から復元…";
-"Restore from iCloud" = "iCloud から復元";
 "Restoring…" = "復元中…";
 "Restore" = "復元";
-"ClipMenu keeps your last 20 backups of your snippets and folders in your private iCloud. You can restore any version; your current data is backed up first." = "ClipMenu はスニペットとフォルダの最新 20 件のバックアップを、あなたのプライベート iCloud に保存します。どのバージョンでも復元でき、復元前に現在のデータがバックアップされます。";
-"Backups use your private iCloud (encrypted in transit and at rest). Turn on Advanced Data Protection for end-to-end encryption." = "バックアップはプライベート iCloud を使用します（通信時・保存時とも暗号化）。エンドツーエンド暗号化には「高度なデータ保護」を有効にしてください。";
 "Backup saved." = "バックアップを保存しました。";
 "No changes since the last backup." = "前回のバックアップから変更はありません。";
-"iCloud backup failed. Try again later." = "iCloud バックアップに失敗しました。後でもう一度お試しください。";
 "No backups yet." = "まだバックアップがありません。";
 "Restore this backup?" = "このバックアップを復元しますか？";
 "This replaces all your current snippets and folders. Your current snippets are backed up first." = "現在のすべてのスニペットとフォルダを置き換えます。現在のスニペットは先にバックアップされます。";
@@ -227,11 +207,9 @@
 "Automatic" = "自動";
 "Manual" = "手動";
 "Before restore" = "復元前";
-"Couldn't load backups from iCloud." = "iCloud からバックアップを読み込めませんでした。";
 "Couldn't save a safety backup, so the restore was cancelled." = "安全のためのバックアップを保存できなかったため、復元を中止しました。";
 "This version was made on a newer app version and can't be restored." = "このバージョンは新しいバージョンのアプリで作成されたため、復元できません。";
 "Restore failed. Your current data was not changed." = "復元に失敗しました。現在のデータは変更されていません。";
-"iCloud & Backup" = "iCloud とバックアップ";
 
 /* First-run setup wizard */
 "Your clipboard history and snippets, one keystroke away." = "クリップボード履歴とスニペットを、ワンキーで。";
@@ -245,7 +223,6 @@
 "ClipMenu works the moment you continue." = "続けるとすぐに ClipMenu が使えます。";
 "Your clipboard stays on this Mac" = "クリップボードはこの Mac に保存されます";
 "History is stored locally. Nothing is uploaded or sent anywhere." = "履歴はローカルに保存されます。どこにもアップロードや送信はされません。";
-"iCloud sync is optional and off until you turn it on in Settings." = "iCloud 同期は任意で、設定でオンにするまで無効です。";
 "Accessibility (optional)" = "アクセシビリティ（任意）";
 "Lets ClipMenu paste the item you pick straight into the app you're using." = "選んだ項目を、使用中のアプリに ClipMenu が直接ペーストできるようにします。";
 "Accessibility" = "アクセシビリティ";
