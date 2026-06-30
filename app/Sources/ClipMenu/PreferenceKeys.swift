@@ -71,6 +71,9 @@ enum PreferenceKeys {
     static let backupFolderPath = "backupFolderPath"
     /// Whether to back up automatically when quitting (default true).
     static let automaticBackupEnabled = "automaticBackupEnabled"
+    /// Last-selected Settings tab, so reopening Settings returns to it. The
+    /// "About <App>" menu item overrides this to the About tab.
+    static let settingsSelectedTab = "settingsSelectedTab"
     /// Local cache of the last snippet-backup time (a `Date`). NOT authoritative —
     /// the backup folder is the source of truth; this is an offline/perf fallback.
     static let lastSnippetBackupDate = "lastSnippetBackupDate"

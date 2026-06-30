@@ -1046,10 +1046,10 @@ final class MainMenuController: NSObject, NSMenuDelegate {
         menu.addItem(quit)
     }
 
-    /// "About ClipMenu 2" — opens the existing Settings window (its About pane is
-    /// reachable there). There is no standalone About panel; the SwiftUI `Settings`
-    /// TabView has no programmatic tab selection, so we open Settings as-is.
+    /// "About ClipMenu 2" — opens Settings on the About tab specifically. (The
+    /// Settings… item opens the last-used tab; About always lands on About.)
     @objc private func showAbout(_ sender: Any?) {
+        UserDefaults.standard.set(SettingsTab.about.rawValue, forKey: PreferenceKeys.settingsSelectedTab)
         SettingsWindowController.shared.show()
     }
 
@@ -1059,57 +1059,51 @@ final class MainMenuController: NSObject, NSMenuDelegate {
 
     // MARK: - Uninstall (Liquid Glass §5A — 100% clean)
 
-    /// Destructive confirmation, then a clean removal: unregister the login item,
-    /// delete the Application Support dir, remove the UserDefaults domain, move the
-    /// app bundle to Trash, then quit.
-    ///
-    /// Button order is destructive-safe per §5A: **Uninstall on the LEFT, Cancel on
-    /// the RIGHT as the default** — Cancel is added last so Return/Esc both land on
-    /// the safe choice.
+    /// Show the standardized Uninstall confirmation sheet (§5A): a deletion
+    /// checklist + a default-off "Also delete clipboard history and snippets"
+    /// toggle, with Uninstall (red, destructive) left and Cancel (default) right.
     @objc private func uninstall(_ sender: Any?) {
-        let alert = NSAlert()
-        alert.alertStyle = .critical
-        alert.messageText = String(format: L("Uninstall %@?"), Self.canonicalName)
-        alert.informativeText = L(
-            "This will turn off Launch at Login, delete your clipboard history and "
-            + "snippets, remove this app's settings, and move the app to the Trash. "
-            + "Clipboard and Accessibility permissions are removed by macOS in System "
-            + "Settings, not by this app. This cannot be undone.")
-        // Uninstall first → leftmost; Cancel last → rightmost and the default.
-        alert.addButton(withTitle: String(format: L("Uninstall %@"), Self.canonicalName))
-        alert.addButton(withTitle: L("Cancel"))
-
-        NSApp.activate(ignoringOtherApps: true)
-        guard alert.runModal() == .alertFirstButtonReturn else { return }
-
-        performUninstall()
+        UninstallWindowController.shared.present(appName: Self.canonicalName) { [weak self] deleteUserData in
+            self?.performUninstall(deleteUserData: deleteUserData)
+        }
     }
 
     /// Tear down on-disk + system state, then quit. Best-effort: each step logs and
     /// continues so a single failure (e.g. a locked file) can't strand the user with
     /// a half-uninstalled app that never quits.
-    private func performUninstall() {
+    /// `deleteUserData` also removes the clipboard-history + snippet stores; when
+    /// false they are kept (the default — see the Uninstall sheet's toggle).
+    private func performUninstall(deleteUserData: Bool) {
+        let fm = FileManager.default
+        let folder = AppStore.folder
+
         // 1. Unregister the login item.
         LoginItem.setEnabled(false)
 
-        // 2. Delete the Application Support directory (history + snippets stores,
-        //    actions.plist, user scripts). The on-disk folder is "ClipMenu".
-        do {
-            try FileManager.default.removeItem(at: AppStore.folder)
-        } catch {
-            NSLog("Uninstall: failed to remove Application Support dir: \(error)")
+        // 2. App data + support files in Application Support/ClipMenu.
+        if deleteUserData {
+            // Everything: history + snippet stores, actions.plist, user scripts, and
+            // the pre-2.3 plaintext backup store (all under this folder).
+            do { try fm.removeItem(at: folder) }
+            catch { NSLog("Uninstall: failed to remove Application Support dir: \(error)") }
+        } else {
+            // Keep the user's clipboard history + snippets; remove only support files.
+            try? fm.removeItem(at: folder.appending(path: "actions.plist"))
+            try? fm.removeItem(at: folder.appending(path: "script"))
         }
 
-        // 3. Remove the UserDefaults domain (all preferences).
-        let domain = Bundle.main.bundleIdentifier ?? "com.dragonapp.clipmenu-2"
-        UserDefaults.standard.removePersistentDomain(forName: domain)
+        // 3. Caches + transient state (always).
+        let id = Bundle.main.bundleIdentifier ?? "com.dragonapp.clipmenu-2"
+        let library = fm.homeDirectoryForCurrentUser.appending(path: "Library")
+        try? fm.removeItem(at: library.appending(path: "Caches/\(id)"))
+        try? fm.removeItem(at: library.appending(path: "HTTPStorages/\(id)"))
 
-        // 4. Move the running app bundle to the Trash. NSWorkspace.recycle works on
-        //    a running bundle. Quit once it's gone (or immediately if it can't be
-        //    moved, e.g. a read-only volume), so we never leave the app running with
-        //    its data already deleted.
-        let bundleURL = Bundle.main.bundleURL
-        NSWorkspace.shared.recycle([bundleURL]) { _, error in
+        // 4. Remove the UserDefaults domain (all preferences) — always.
+        UserDefaults.standard.removePersistentDomain(forName: id)
+
+        // 5. Move the running app bundle to the Trash (works on a running bundle),
+        //    then quit so we never leave the app running with its data deleted.
+        NSWorkspace.shared.recycle([Bundle.main.bundleURL]) { _, error in
             if let error { NSLog("Uninstall: failed to move app to Trash: \(error)") }
             DispatchQueue.main.async { NSApp.terminate(nil) }
         }
