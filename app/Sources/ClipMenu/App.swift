@@ -28,8 +28,15 @@ struct ClipMenuApp: App {
 /// throws and we fall back to a fully-local container so dev/unsigned builds run fine.
 @MainActor
 enum AppStore {
-    /// Application Support directory holding the SwiftData stores.
-    static let folder = URL.applicationSupportDirectory.appending(path: "ClipMenu", directoryHint: .isDirectory)
+    /// Application Support directory holding the SwiftData stores. A local debug
+    /// build (bundle id `…clipmenu-2.debug`, from scripts/run-debug.sh) uses a
+    /// SEPARATE "ClipMenu Debug" folder so it never reads, pollutes, or (on
+    /// Uninstall) deletes the installed release's clipboard history + snippets.
+    static let folder: URL = {
+        let isDebug = (Bundle.main.bundleIdentifier ?? "").hasSuffix(".debug")
+        return URL.applicationSupportDirectory.appending(
+            path: isDebug ? "ClipMenu Debug" : "ClipMenu", directoryHint: .isDirectory)
+    }()
 
     static let container: ModelContainer = makeContainer()
 
@@ -286,27 +293,42 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 // MARK: - Settings scene
 
-/// Preference tabs: General, iCloud, Menu, Type, Action, Shortcuts, Backup, About.
-/// iCloud is the 2nd tab (all builds): it shows live iCloud-sync status. Sync is
-/// free in every build. There is no separate Updates pane: the auto-update controls
-/// live in the General pane (direct build only), next to Launch on Login.
+/// The Settings tabs. Raw values persist the last-selected tab
+/// (`PreferenceKeys.settingsSelectedTab`); the "About <App>" menu item forces `.about`.
+enum SettingsTab: String {
+    case general, syncBackup, menu, type, action, shortcuts, about
+}
+
+/// Preference tabs: General, Sync & Backup, Menu, Type, Action, Shortcuts, About.
+/// There is no separate Updates pane: the auto-update controls live in the General
+/// pane (direct build only), next to Launch on Login. The selected tab is remembered
+/// across opens; "About <App>" opens straight to the About tab.
 struct SettingsView: View {
+    @AppStorage(PreferenceKeys.settingsSelectedTab) private var selectedTab = SettingsTab.general
+
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             GeneralPreferencesView()
                 .tabItem { Label(L("General"), systemImage: "gearshape") }
+                .tag(SettingsTab.general)
             CloudBackupPreferencesView()
                 .tabItem { Label(L("Sync & Backup"), systemImage: "externaldrive.badge.timemachine") }
+                .tag(SettingsTab.syncBackup)
             MenuPreferencesView()
                 .tabItem { Label(L("Menu"), systemImage: "menubar.rectangle") }
+                .tag(SettingsTab.menu)
             TypePreferencesView()
                 .tabItem { Label(L("Type"), systemImage: "doc.on.doc") }
+                .tag(SettingsTab.type)
             ActionPreferencesView()
                 .tabItem { Label(L("Action"), systemImage: "bolt") }
+                .tag(SettingsTab.action)
             shortcutsPane
                 .tabItem { Label(L("Shortcuts"), systemImage: "command") }
+                .tag(SettingsTab.shortcuts)
             AboutPreferencesView()
                 .tabItem { Text(L("About")) }
+                .tag(SettingsTab.about)
             // No Updates tab: auto-update (Sparkle 2) is a toggle in the General
             // pane, shown only in the direct/Developer ID build (issue #62).
         }

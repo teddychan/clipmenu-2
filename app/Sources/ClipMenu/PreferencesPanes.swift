@@ -488,56 +488,69 @@ struct ExcludeAppsView: View {
 /// About pane: app icon, name, version, the open-source/GitHub link, license,
 /// and credits. Static product info — nothing here is persisted.
 struct AboutPreferencesView: View {
-    private static let githubURL = URL(string: "https://github.com/teddychan/clipmenu-2")!
+    /// Primary link: the app's marketing page on dragonapp.com (not GitHub).
+    private static let websiteURL = URL(string: "https://www.dragonapp.com/clipmenu")!
+    /// Support link goes straight to the GitHub issues page.
+    private static let issuesURL = URL(string: "https://github.com/teddychan/clipmenu-2/issues")!
+
+    private let rowWidth: CGFloat = 360
 
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
                 if let icon = NSApp.applicationIconImage {
-                    Image(nsImage: icon)
-                        .resizable()
-                        .frame(width: 96, height: 96)
+                    Image(nsImage: icon).resizable().frame(width: 96, height: 96)
                 }
                 VStack(spacing: 4) {
                     Text(AppInfo.displayName).font(.title2).bold()
                     Text(AppInfo.versionDescription).foregroundStyle(.secondary)
                 }
 
-                VStack(spacing: 6) {
-                    Text(L("This application is open source and can be found on GitHub:"))
-                    Link("github.com/teddychan/clipmenu-2", destination: Self.githubURL)
+                if UpdaterUI.isSupported {
+                    Button {
+                        UpdaterUI.checkNow()
+                    } label: {
+                        Label(L("Check for updates"), systemImage: "arrow.triangle.2.circlepath")
+                    }
                 }
-                .multilineTextAlignment(.center)
 
-                Text(L("Released under the MIT License."))
-                    .foregroundStyle(.secondary)
+                Divider().frame(maxWidth: rowWidth)
+
+                // Link rows (guide §5A: Website = dragonapp.com, primary; Support = GitHub issues).
+                VStack(spacing: 10) {
+                    LabeledContent {
+                        Link("dragonapp.com/clipmenu", destination: Self.websiteURL)
+                    } label: {
+                        Label(L("Website"), systemImage: "globe")
+                    }
+                    LabeledContent {
+                        Link("teddychan/clipmenu-2", destination: Self.issuesURL)
+                    } label: {
+                        Label(L("Support on GitHub"), systemImage: "lifepreserver")
+                    }
+                }
+                .frame(maxWidth: rowWidth)
+
+                Divider().frame(maxWidth: rowWidth)
+
+                VStack(spacing: 8) {
+                    LabeledContent(L("Created by")) { Text("Teddy Chan") }
+                    LabeledContent(L("Original ClipMenu")) { Text("Naotaka Morimoto") }
+                    LabeledContent(L("License")) { Text("MIT") }
+                }
+                .frame(maxWidth: rowWidth)
+
+                Text(AppInfo.copyright)
+                    .font(.caption).foregroundStyle(.secondary)
 
                 Button(L("Show Setup Guide…")) {
                     (NSApp.delegate as? AppDelegate)?.showOnboarding(reset: true)
                 }
-
-                Divider().frame(maxWidth: 260)
-
-                VStack(spacing: 12) {
-                    Text(L("Contributors")).font(.headline)
-                    credit(role: L("Creator"), name: "Teddy Chan")
-                    credit(role: L("Original ClipMenu"), name: "Naotaka Morimoto")
-                }
-
-                Text(AppInfo.copyright)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                .padding(.top, 4)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 28)
             .padding(.horizontal, 24)
-        }
-    }
-
-    private func credit(role: String, name: String) -> some View {
-        VStack(spacing: 2) {
-            Text(role).font(.subheadline).italic().foregroundStyle(.secondary)
-            Text(name)
         }
     }
 }
