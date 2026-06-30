@@ -221,6 +221,7 @@
 "No changes since the last backup." = "No changes since the last backup.";
 "iCloud backup failed. Try again later." = "iCloud backup failed. Try again later.";
 "No backups yet." = "No backups yet.";
+"items in this folder aren't ClipMenu backups (for example, exports from an older app)." = "items in this folder aren't ClipMenu backups (for example, exports from an older app).";
 "Restore this backup?" = "Restore this backup?";
 "This replaces all your current snippets and folders. Your current snippets are backed up first." = "This replaces all your current snippets and folders. Your current snippets are backed up first.";
 "folders" = "folders";

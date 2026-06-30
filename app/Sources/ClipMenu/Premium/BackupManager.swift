@@ -76,10 +76,22 @@ final class BackupManager {
         try await backUpNow(kind: .auto, now: now)
     }
 
-    /// Versions newest-first for the restore UI.
+    /// Versions newest-first for the restore UI. Also reconciles the folder down to
+    /// the retention quota: a synced folder can already exceed it (another Mac wrote
+    /// into it, or backups piled up while auto-backup was off), and pruning otherwise
+    /// only happens after a new write. Best-effort — a failed prune still lists.
     func listForUI() async throws -> [BackupVersionMeta] {
-        try await store.list().sorted { $0.effectiveDate > $1.effectiveDate }
+        let all = try await store.list()
+        let toPrune = Set(BackupRetention.recordsToPrune(all))
+        if !toPrune.isEmpty { try? await store.delete(recordNames: Array(toPrune)) }
+        return all
+            .filter { !toPrune.contains($0.recordName) }
+            .sorted { $0.effectiveDate > $1.effectiveDate }
     }
+
+    /// Count of files in the backup folder that aren't ClipMenu backups — used by
+    /// the restore UI to explain an empty list when the folder isn't actually empty.
+    func otherFolderItemCount() async -> Int { await store.otherItemCount() }
 
     // MARK: Restore (two-phase, rollback-safe)
 

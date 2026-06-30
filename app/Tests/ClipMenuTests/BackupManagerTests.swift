@@ -175,4 +175,30 @@ actor MockBackupStore: BackupStore {
         let folders = try ctx.fetch(FetchDescriptor<Folder>())
         #expect(folders.count == 1 && folders.first?.title == "Original")
     }
+
+    // A synced folder can already hold more than the retention limit (another Mac
+    // wrote into it, or backups piled up while auto-backup was off). Listing for
+    // the restore UI must reconcile it down to the quota — not only on the next
+    // write — mirroring the Ice 2.8.3 prune-on-view fix.
+    @Test func listForUIPrunesFolderOverRetentionLimit() async throws {
+        let ctx = try makeContext()
+        let base = Date(timeIntervalSince1970: 1_700_000_000)
+        var seeds: [MockBackupStore.Stored] = []
+        for i in 0..<25 {                          // 25 > keepNormal (20)
+            let date = base.addingTimeInterval(Double(i) * 60)
+            let v = BackupVersionMeta(
+                recordName: "rec-\(i)", kind: .auto, serverDate: date, clientDate: date,
+                folderCount: 1, snippetCount: 1, contentHash: "h\(i)", schemaVersion: 1,
+                deviceName: "Mac")
+            seeds.append(MockBackupStore.Stored(meta: v, payload: Data([UInt8(i)])))
+        }
+        let store = MockBackupStore(seed: seeds)
+
+        let listed = try await manager(store, ctx).listForUI()
+
+        #expect(listed.count == BackupRetention.keepNormal)     // trimmed to 20
+        #expect(listed.first?.recordName == "rec-24")           // newest first
+        #expect(try await store.list().count == BackupRetention.keepNormal)
+        #expect(await store.deleted.count == 5)                 // oldest 5 removed
+    }
 }
