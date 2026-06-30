@@ -270,6 +270,7 @@ struct RestoreVersionsView: View {
     @State private var restoring = false
     @State private var selectedID: String?
     @State private var error: String = ""
+    @State private var otherFiles = 0
 
     private static let dateFormat: DateFormatter = {
         let f = DateFormatter(); f.dateStyle = .medium; f.timeStyle = .short; return f
@@ -285,8 +286,14 @@ struct RestoreVersionsView: View {
                 HStack { ProgressView().controlSize(.small); Text(L("Restoring…")) }
             } else if loading {
                 ProgressView()
-            } else if versions.isEmpty {
-                Text(L("No backups yet.")).foregroundStyle(.secondary)
+            } else if versions.isEmpty && error.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L("No backups yet.")).foregroundStyle(.secondary)
+                    if otherFiles > 0 {
+                        Text("\(otherFiles) " + L("items in this folder aren't ClipMenu backups (for example, exports from an older app)."))
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
             } else {
                 List(selection: $selectedID) {
                     ForEach(versions) { v in
@@ -355,7 +362,10 @@ struct RestoreVersionsView: View {
 
     private func load() async {
         loading = true; defer { loading = false }
-        do { versions = try await manager.listForUI() }
+        do {
+            versions = try await manager.listForUI()
+            if versions.isEmpty { otherFiles = await manager.otherFolderItemCount() }
+        }
         catch _ { error = L("Couldn't load backups from the folder.") }
     }
 

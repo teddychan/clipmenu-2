@@ -35,11 +35,10 @@ if sparkleEnabled {
     clipMenuLinkerSettings.append(.unsafeFlags(["-Xlinker", "-rpath", "-Xlinker", "@loader_path/../Frameworks"]))
 }
 
-// iCloud sync & backup (Sources/ClipMenu/Premium/) is compiled into every build —
-// the app is free on all channels, and iCloud sync is a free feature. It only goes
-// live when the build carries iCloud entitlements + an embedded provisioning profile
-// (and the CloudKit schema is deployed); otherwise `AppStore.makeContainer` falls
-// back to a local store, so dev/unsigned builds still run.
+// Folder-based settings sync & backup (Sources/ClipMenu/Premium/) is compiled into
+// every build and works identically on all distribution channels (Homebrew, GitHub,
+// Mac App Store): the user picks a backup folder (local, Dropbox, iCloud Drive,
+// Google Drive) to sync across Macs — no iCloud entitlement or CloudKit required.
 var clipMenuTestSwiftSettings: [SwiftSetting] = [.swiftLanguageMode(.v6)]
 
 let package = Package(

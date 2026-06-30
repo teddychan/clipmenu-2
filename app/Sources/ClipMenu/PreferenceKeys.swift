@@ -57,13 +57,9 @@ enum PreferenceKeys {
     static let hotKeys = "hotKeys"
     static let excludeApps = "excludeApps"
 
-    // Machine-local (intentionally NOT synced across Macs — see SettingsSync)
+    // Machine-local (intentionally NOT synced across Macs).
     static let loginItem = "loginItem"
     static let suppressAlertForLoginItem = "suppressAlertForLoginItem"
-    static let iCloudSyncEnabled = "iCloudSyncEnabled"
-    /// End date of the last successful CloudKit import/export (a `Date`). Written by
-    /// `CloudSyncMonitor`; shown in the Backup pane. Per-device, so not synced.
-    static let lastCloudSyncDate = "lastCloudSyncDate"
     /// Security-scoped bookmark (Data) of the user-chosen backup folder, and a
     /// display path for the UI. The folder can live in Dropbox / iCloud Drive /
     /// Google Drive to sync backups across Macs (no iCloud entitlement needed).

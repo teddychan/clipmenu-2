@@ -40,8 +40,9 @@ struct BackupSaveMeta: Sendable {
     var schemaVersion: Int
 }
 
-/// Storage boundary for backups. The concrete impl is CloudKit; tests inject a
-/// mock so all orchestration logic is verifiable without a network.
+/// Storage boundary for backups. The concrete impl is `FolderBackupStore` (files
+/// on disk in the user's chosen folder); tests inject a mock so all orchestration
+/// logic is verifiable without touching the filesystem.
 protocol BackupStore: Sendable {
     /// Idempotently ensure the backing zone exists.
     func ensureZone() async throws
@@ -53,6 +54,13 @@ protocol BackupStore: Sendable {
     func fetchPayload(recordName: String) async throws -> Data
     /// Delete versions by record name.
     func delete(recordNames: [String]) async throws
+    /// Count of items in the backing location that are not ClipMenu backups — used
+    /// to tell the user a non-empty folder holds no backups. Defaults to 0.
+    func otherItemCount() async -> Int
+}
+
+extension BackupStore {
+    func otherItemCount() async -> Int { 0 }
 }
 
 /// Typed failures surfaced to the restore UI.

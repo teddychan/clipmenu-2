@@ -21,11 +21,10 @@ struct ClipMenuApp: App {
 }
 
 /// Process-wide SwiftData container, shared by the SwiftUI scene and the AppKit
-/// menu layer. Two configurations under one container: Snippets (`Folder`/`Snippet`)
-/// in a CloudKit-mirrored store, History (`ClipRecord`/`ClipImage`) in a local store,
-/// each in its own file. CloudKit activates only when the build carries iCloud
-/// entitlements + an embedded provisioning profile; otherwise the cloud build attempt
-/// throws and we fall back to a fully-local container so dev/unsigned builds run fine.
+/// menu layer. Two configurations under one container, each in its own file:
+/// Snippets (`Folder`/`Snippet`) and History (`ClipRecord`/`ClipImage`). Both are
+/// fully local — snippets are protected by folder-based backups (FolderBackupStore
+/// + the Sync/Backup pane), and history is a regenerable cache; no CloudKit.
 @MainActor
 enum AppStore {
     /// Application Support directory holding the SwiftData stores. A local debug

@@ -77,6 +77,42 @@ import Foundation
         }
     }
 
+    // A folder that hasn't been created yet is genuinely empty, not an error.
+    @Test func listReturnsEmptyWhenFolderDoesNotExist() async throws {
+        let folder = tempFolder()   // never created
+        let store = FolderBackupStore(folder: folder)
+        #expect(try await store.list().isEmpty)
+    }
+
+    // A folder that exists but can't be enumerated as a directory must surface an
+    // error instead of silently reporting "no backups" (the bug: a stale bookmark
+    // or unreadable synced folder looked identical to an empty one).
+    @Test func listThrowsWhenPathIsNotADirectory() async throws {
+        let path = URL.temporaryDirectory.appending(path: "FolderBackupNotDir-\(UUID().uuidString)")
+        try Data("x".utf8).write(to: path)   // a regular file, not a directory
+        defer { try? FileManager.default.removeItem(at: path) }
+        let store = FolderBackupStore(folder: path)
+        await #expect(throws: (any Error).self) {
+            _ = try await store.list()
+        }
+    }
+
+    // Tells the restore UI a non-empty folder holds no ClipMenu backups (e.g. it
+    // still has exports from an older app). Excludes ClipMenu's own files.
+    @Test func otherItemCountCountsOnlyForeignVisibleFiles() async throws {
+        let folder = tempFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let store = FolderBackupStore(folder: folder)
+        try await store.ensureZone()
+        _ = try await store.save(payload: Data([1]),
+                                 meta: meta(.manual, date: Date(timeIntervalSince1970: 1_700_000_000), hash: "h"))
+        try Data("settings".utf8).write(to: folder.appending(path: SettingsSidecar.fileName)) // ClipMenu's own
+        try Data("<xml/>".utf8).write(to: folder.appending(path: "2019-05-21_MacBookPro.xml")) // foreign
+        try Data("note".utf8).write(to: folder.appending(path: "README.txt"))                  // foreign
+
+        #expect(await store.otherItemCount() == 2)
+    }
+
     // MARK: Settings sidecar
 
     @Test func settingsSidecarRoundTripsWhitelistedKeysOnly() throws {

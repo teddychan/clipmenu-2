@@ -45,11 +45,35 @@ struct FolderBackupStore: BackupStore {
     }
 
     func list() async throws -> [BackupVersionMeta] {
-        withAccess {
-            let urls = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
+        try withAccess {
+            let urls: [URL]
+            do {
+                urls = try FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
+            } catch let error as CocoaError where error.code == .fileReadNoSuchFile {
+                return []   // folder not created yet → genuinely no backups, not a failure
+            }
+            // Any other error (unreadable folder, stale bookmark, security-scope
+            // denied) propagates so the UI can say "couldn't read" instead of
+            // silently showing "no backups".
             return urls
                 .filter { $0.pathExtension == Self.fileExtension }
                 .compactMap { Self.readMeta(at: $0) }
+        }
+    }
+
+    /// Count of items in the folder that are not ClipMenu backups — i.e. not a
+    /// `.clipbackup` version or the settings sidecar (hidden files excluded). Lets
+    /// the restore UI tell the user a non-empty folder holds no ClipMenu backups
+    /// (e.g. it still has clipboard-history exports from an older app). Best-effort:
+    /// returns 0 if the folder can't be read.
+    func otherItemCount() async -> Int {
+        withAccess {
+            let urls = (try? FileManager.default.contentsOfDirectory(
+                at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
+            return urls.filter {
+                $0.pathExtension != Self.fileExtension
+                    && $0.lastPathComponent != SettingsSidecar.fileName
+            }.count
         }
     }
 
