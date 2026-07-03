@@ -36,6 +36,10 @@ pb=/usr/libexec/PlistBuddy
 "$pb" -c "Add :CFBundleDisplayName string ${APP_NAME}" "$APP/Contents/Info.plist" 2>/dev/null \
   || "$pb" -c "Set :CFBundleDisplayName ${APP_NAME}" "$APP/Contents/Info.plist"
 
+# Build number = git commit count (monotonic); About shows "Version X (build)".
+BUILD="$(git rev-list --count HEAD 2>/dev/null || echo "$VERSION")"
+"$pb" -c "Set :CFBundleVersion ${BUILD}" "$APP/Contents/Info.plist"
+
 cp AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 
 RESOURCE_BUNDLE="ClipMenu_ClipMenu.bundle"
