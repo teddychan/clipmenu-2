@@ -44,6 +44,12 @@ cp Info.plist "$APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string ${APP_NAME}" "$APP/Contents/Info.plist" 2>/dev/null \
   || /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName ${APP_NAME}" "$APP/Contents/Info.plist"
 
+# Build number = git commit count (monotonic). The About pane shows it as
+# "Version X (build)" whenever it differs from the marketing version. Falls back
+# to the marketing version when git height is unavailable (e.g. shallow checkout).
+BUILD="$(git rev-list --count HEAD 2>/dev/null || echo "$VERSION")"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD}" "$APP/Contents/Info.plist"
+
 # App icon. CFBundleIconFile in Info.plist names "AppIcon"; macOS looks for
 # Contents/Resources/AppIcon.icns. Without this the .app shows a generic icon
 # in Finder, System Settings ▸ Login Items, the Gatekeeper prompt and the About box.
