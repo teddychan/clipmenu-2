@@ -7,8 +7,12 @@ import ImageIO
 //
 // Per CLAUDE.md §4: never keep full-size images alive for the menu. At capture
 // we store a small downsampled PNG thumbnail (makeThumbnailData) on the clip and
-// the menu renders from that. The original TIFF lives in a separate row
-// (ClipRecord.image / ClipImage) and is loaded only when pasted (§D row 69).
+// small menu thumbnails render from that. The original TIFF lives in a separate
+// row (ClipRecord.image / ClipImage) and is loaded only when pasted (§D row 69) —
+// or, when the user picks a large thumbnail size, streamed once through ImageIO
+// to decode a crisp thumbnail at the real pixel size (the stored 256px PNG would
+// otherwise be upscaled, hence blurry). Even then the original is never kept
+// alive: it's downsampled and released, and only the small result is cached.
 // Decoded thumbnails are cached (contentHash + box) like legacy's per-Clip cache.
 
 @MainActor
@@ -26,16 +30,36 @@ final class Thumbnailer {
     /// KB, vs. the multi-MB original.
     nonisolated static let storedMaxPixelSize = 256
 
-    /// Thumbnail for a clip's image, fit into `box`, or nil if the clip has none.
-    /// Renders from the small stored `thumbnailData` so the full `imageData` is
-    /// never faulted into memory for the menu (CLAUDE.md §4).
+    /// Thumbnail for a clip's image, fit into `box` (points), or nil if the clip
+    /// has none. The stored 256px PNG renders small thumbnails crisply, but a large
+    /// thumbnail size needs more real pixels than it holds (a `box` of 200 pt on a
+    /// 2× display asks for ~400 px), so for those we decode from the ORIGINAL image
+    /// instead of upscaling the stored PNG. Small/default thumbnails keep using the
+    /// cheap stored PNG, so the common menu open never faults the originals
+    /// (CLAUDE.md §4).
     func thumbnail(for clip: ClipRecord, fitting box: NSSize) -> NSImage? {
-        guard let data = clip.thumbnailData else { return nil }
-        let key = "\(clip.contentHash)-\(Int(box.width))x\(Int(box.height))" as NSString
+        let scale = Self.displayScale()
+        let neededPixels = max(box.width, box.height) * scale
+        let data: Data?
+        if neededPixels > Double(Self.storedMaxPixelSize) {
+            // Prefer the original for a crisp large thumbnail; fall back to the
+            // stored PNG if it's somehow missing.
+            data = clip.image?.data ?? clip.thumbnailData
+        } else {
+            data = clip.thumbnailData
+        }
+        guard let data else { return nil }
+        let key = "\(clip.contentHash)-\(Int(box.width))x\(Int(box.height))@\(scale)" as NSString
         if let cached = cache.object(forKey: key) { return cached }
-        guard let image = Self.makeThumbnail(from: data, fitting: box) else { return nil }
+        guard let image = Self.makeThumbnail(from: data, fitting: box, scale: scale) else { return nil }
         cache.setObject(image, forKey: key)
         return image
+    }
+
+    /// Largest backing scale across attached screens, so a thumbnail is decoded at
+    /// enough pixels to stay crisp on a Retina display (2× ⇒ decode 2× the points).
+    static func displayScale() -> CGFloat {
+        NSScreen.screens.map(\.backingScaleFactor).max() ?? 2.0
     }
 
     /// Downsampled PNG thumbnail bytes for storage, derived from full image data
@@ -61,9 +85,12 @@ final class Thumbnailer {
         return out as Data
     }
 
-    /// Decode a downsampled thumbnail (longest side ≤ the box's larger dimension)
-    /// and present it at the aspect-fit display size (never upscaled).
-    nonisolated static func makeThumbnail(from data: Data, fitting box: NSSize) -> NSImage? {
+    /// Decode a downsampled thumbnail and present it at the aspect-fit display size
+    /// (points, never upscaled). `scale` is the display's backing scale: the bitmap
+    /// is decoded at `box × scale` pixels so it stays crisp on Retina, while the
+    /// NSImage's point size stays `box`-bounded. Bounded by the source resolution —
+    /// a small source is never upscaled.
+    nonisolated static func makeThumbnail(from data: Data, fitting box: NSSize, scale: CGFloat = 1) -> NSImage? {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
               let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
               let pixelWidth = (properties[kCGImagePropertyPixelWidth] as? NSNumber)?.doubleValue,
@@ -71,7 +98,7 @@ final class Thumbnailer {
               pixelWidth > 0, pixelHeight > 0
         else { return nil }
 
-        let maxPixelSize = Int(max(box.width, box.height))
+        let maxPixelSize = Int((max(box.width, box.height) * scale).rounded())
         let options: [CFString: Any] = [
             kCGImageSourceCreateThumbnailFromImageAlways: true,
             kCGImageSourceThumbnailMaxPixelSize: maxPixelSize,

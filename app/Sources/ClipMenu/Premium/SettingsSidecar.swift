@@ -23,7 +23,7 @@ enum SettingsSidecar {
         PreferenceKeys.menuItemsAreMarkedWithNumbers, PreferenceKeys.addNumericKeyEquivalents, PreferenceKeys.showLabelsInMenu,
         PreferenceKeys.addClearHistoryMenuItem, PreferenceKeys.showAlertBeforeClearHistory, PreferenceKeys.showToolTipOnMenuItem,
         PreferenceKeys.maxLengthOfToolTipKey, PreferenceKeys.changeFontSize, PreferenceKeys.howToChangeFontSize, PreferenceKeys.selectedFontSize,
-        PreferenceKeys.showImageInTheMenu, PreferenceKeys.thumbnailWidth, PreferenceKeys.thumbnailHeight, PreferenceKeys.showIconInTheMenu,
+        PreferenceKeys.showImageInTheMenu, PreferenceKeys.thumbnailMaxSize, PreferenceKeys.showIconInTheMenu,
         PreferenceKeys.menuIconSize, PreferenceKeys.positionOfSnippets, PreferenceKeys.groupSnippetsInFolder,
         // Type
         PreferenceKeys.storeTypes,

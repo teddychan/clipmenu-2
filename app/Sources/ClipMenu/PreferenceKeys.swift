@@ -35,8 +35,11 @@ enum PreferenceKeys {
     static let howToChangeFontSize = "howToChangeFontSize"
     static let selectedFontSize = "selectedFontSize"
     static let showImageInTheMenu = "showImageInTheMenu"
-    static let thumbnailWidth = "thumbnailWidth"
-    static let thumbnailHeight = "thumbnailHeight"
+    /// Longest side (px) the image thumbnail is fit into in the menu; the user
+    /// picks how big thumbnails are. Aspect-preserving, never upscaled, clamped
+    /// to 16…256 (256 = the stored thumbnail's resolution, Thumbnailer).
+    /// Replaces the legacy separate `thumbnailWidth`/`thumbnailHeight` box.
+    static let thumbnailMaxSize = "thumbnailMaxSize"
     static let showIconInTheMenu = "showIconInTheMenu"
     static let menuIconSize = "menuIconSize"
     static let positionOfSnippets = "positionOfSnippets"
