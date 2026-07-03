@@ -582,8 +582,7 @@ struct MenuPreferencesView: View {
     @AppStorage(PreferenceKeys.howToChangeFontSize) private var howToChangeFontSize = 0
     @AppStorage(PreferenceKeys.selectedFontSize) private var selectedFontSize = 14
     @AppStorage(PreferenceKeys.showImageInTheMenu) private var showImage = true
-    @AppStorage(PreferenceKeys.thumbnailWidth) private var thumbnailWidth = 100
-    @AppStorage(PreferenceKeys.thumbnailHeight) private var thumbnailHeight = 32
+    @AppStorage(PreferenceKeys.thumbnailMaxSize) private var thumbnailMaxSize = 64
     @AppStorage(PreferenceKeys.showIconInTheMenu) private var showIcon = true
     @AppStorage(PreferenceKeys.menuIconSize) private var menuIconSize = 16
     @AppStorage(PreferenceKeys.positionOfSnippets) private var positionOfSnippets = 2
@@ -636,12 +635,14 @@ struct MenuPreferencesView: View {
                 }
                 .disabled(!showIcon)
                 Toggle(L("Show Image"), isOn: $showImage)
-                LabeledContent(L("Width:")) {
-                    TextField("", value: $thumbnailWidth, format: .number).frame(width: 60)
+                LabeledContent(L("Maximum thumbnail size:")) {
+                    HStack(spacing: 6) {
+                        TextField("", value: $thumbnailMaxSize, format: .number).frame(width: 60)
+                        Stepper("", value: $thumbnailMaxSize, in: 16...256, step: 8).labelsHidden()
+                        Text(L("px")).foregroundStyle(.secondary)
+                    }
                 }
-                LabeledContent(L("Height:")) {
-                    TextField("", value: $thumbnailHeight, format: .number).frame(width: 60)
-                }
+                .disabled(!showImage)
             }
 
             Section {

@@ -90,8 +90,7 @@ final class MainMenuController: NSObject, NSMenuDelegate {
         var showImages = true
         var showToolTips = true
         var addNumericKeyEquivalents = false
-        var thumbnailWidth = 100
-        var thumbnailHeight = 32
+        var thumbnailMaxSize = 64
         var maxToolTipLength = 200
         var maxTitleLength = 20
         var groupSnippetsInFolder = true
@@ -105,8 +104,11 @@ final class MainMenuController: NSObject, NSMenuDelegate {
             p.showImages = d.object(forKey: PreferenceKeys.showImageInTheMenu) as? Bool ?? true
             p.showToolTips = d.object(forKey: PreferenceKeys.showToolTipOnMenuItem) as? Bool ?? true
             p.addNumericKeyEquivalents = d.object(forKey: PreferenceKeys.addNumericKeyEquivalents) as? Bool ?? false
-            p.thumbnailWidth = d.object(forKey: PreferenceKeys.thumbnailWidth) as? Int ?? 100
-            p.thumbnailHeight = d.object(forKey: PreferenceKeys.thumbnailHeight) as? Int ?? 32
+            // Clamp to the stored thumbnail's usable range (16…256); a wild
+            // UserDefaults value can't blow up menu row heights or exceed the
+            // stored resolution.
+            let rawThumb = d.object(forKey: PreferenceKeys.thumbnailMaxSize) as? Int ?? 64
+            p.thumbnailMaxSize = min(256, max(16, rawThumb))
             p.maxToolTipLength = d.object(forKey: PreferenceKeys.maxLengthOfToolTipKey) as? Int ?? 200
             p.maxTitleLength = d.object(forKey: PreferenceKeys.maxMenuItemTitleLength) as? Int ?? 20
             p.groupSnippetsInFolder = d.object(forKey: PreferenceKeys.groupSnippetsInFolder) as? Bool ?? true
@@ -529,13 +531,14 @@ final class MainMenuController: NSObject, NSMenuDelegate {
 
     /// Downsampled thumbnail for an image clip, or nil — MenuController.m:828-840.
     /// Shown when showImageInTheMenu (default YES) and the clip carries image data
-    /// and isn't a Filenames clip; box = thumbnailWidth × thumbnailHeight (100×32).
+    /// and isn't a Filenames clip. Fit into a square box whose side is the user's
+    /// thumbnailMaxSize (longest side, aspect-preserved, never upscaled).
     private func clipThumbnail(_ clip: ClipRecord) -> NSImage? {
         guard menuPrefs.showImages,
               clip.typeIdentifiers.first != "Filenames" else { return nil }
+        let side = CGFloat(menuPrefs.thumbnailMaxSize)
         return thumbnailer.thumbnail(for: clip,
-                                     fitting: NSSize(width: menuPrefs.thumbnailWidth,
-                                                     height: menuPrefs.thumbnailHeight))
+                                     fitting: NSSize(width: side, height: side))
     }
 
     /// Clip tool tip: the full string truncated to maxLengthOfToolTip (default
