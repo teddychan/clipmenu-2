@@ -56,17 +56,19 @@ BUILD="$(git rev-list --count HEAD 2>/dev/null || echo "$VERSION")"
 mkdir -p "$APP/Contents/Resources"
 cp AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 
-# Copy the SwiftPM resource bundle (JS action scripts, menu-bar icon) into
-# Contents/Resources so the .app is self-contained and can be moved/signed.
-# AppResources looks for it there (Bundle.main.resourceURL/ClipMenu_ClipMenu.bundle);
-# without this copy it only resolves via an absolute build path. SwiftPM marks
-# the copied files read-only, so make them writable or the next run's rm fails.
-RESOURCE_BUNDLE="ClipMenu_ClipMenu.bundle"
-if [ -d "$BIN_PATH/$RESOURCE_BUNDLE" ]; then
+# Copy every SwiftPM resource bundle into Contents/Resources so the .app is
+# self-contained and can be moved/signed: ClipMenu_ClipMenu.bundle (JS action
+# scripts, menu-bar icon, Localizable.strings — AppResources looks for it at
+# Bundle.main.resourceURL) and DragonKit_DragonKit.bundle (the kit's localized
+# strings, resolved via its Bundle.module). SwiftPM marks the copied files
+# read-only, so make them writable or the next run's rm fails.
+for BUNDLE_PATH in "$BIN_PATH"/*.bundle; do
+    [ -d "$BUNDLE_PATH" ] || continue
+    BUNDLE_NAME="$(basename "$BUNDLE_PATH")"
     mkdir -p "$APP/Contents/Resources"
-    cp -R "$BIN_PATH/$RESOURCE_BUNDLE" "$APP/Contents/Resources/$RESOURCE_BUNDLE"
-    chmod -R u+w "$APP/Contents/Resources/$RESOURCE_BUNDLE"
-fi
+    cp -R "$BUNDLE_PATH" "$APP/Contents/Resources/$BUNDLE_NAME"
+    chmod -R u+w "$APP/Contents/Resources/$BUNDLE_NAME"
+done
 
 # Embed Sparkle.framework (auto-update). The SPARKLE build copies it into BIN_PATH;
 # the executable finds it via the @loader_path/../Frameworks rpath (Package.swift).

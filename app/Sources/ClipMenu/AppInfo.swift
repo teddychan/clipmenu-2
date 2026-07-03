@@ -1,4 +1,5 @@
 import Foundation
+import DragonKit
 
 /// User-visible product name, e.g. "ClipMenu 2".
 ///
@@ -29,7 +30,9 @@ enum AppInfo {
     }
 
     /// "Version 2.2.1", or "Version 2.2.1 (123)" when the build differs from the
-    /// marketing version. Shown in the About pane.
+    /// marketing version. Shown in the About pane. MainActor because DragonKit's
+    /// L() (which localizes the "Version" prefix) is MainActor-isolated.
+    @MainActor
     static var versionDescription: String {
         build.isEmpty || build == version
             ? String(format: L("Version %@"), version)

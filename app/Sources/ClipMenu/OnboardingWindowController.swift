@@ -61,9 +61,6 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
     private let onClosed: () -> Void
 
     private var finished = false
-    /// Set when we ourselves trigger a relaunch (language change): the imminent
-    /// window close must not count as completion, regardless of termination timing.
-    private var suppressCompleteOnClose = false
 
     init(isTerminating: @escaping () -> Bool, onClosed: @escaping () -> Void) {
         self.isTerminating = isTerminating
@@ -74,8 +71,7 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
         if window == nil {
             let host = NSHostingController(rootView: OnboardingView(
                 permissions: permissions,
-                onFinish: { [weak self] in self?.userFinished() },
-                onLanguageChange: { [weak self] in self?.relaunchForLanguageChange() }))
+                onFinish: { [weak self] in self?.userFinished() }))
             let newWindow = NSWindow(contentViewController: host)
             newWindow.styleMask = [.titled, .closable, .fullSizeContentView]
             newWindow.titlebarAppearsTransparent = true
@@ -103,17 +99,9 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
         window?.close()
     }
 
-    /// Language picker changed: relaunch so `L()` re-resolves in the new language.
-    /// The persisted `onboardingStep` makes the fresh launch resume on this step.
-    private func relaunchForLanguageChange() {
-        suppressCompleteOnClose = true
-        AppRelaunch.relaunch()
-    }
-
     func windowWillClose(_ notification: Notification) {
         permissions.stop()
         defer { onClosed() }
-        if suppressCompleteOnClose { return }
         if OnboardingGate.shouldMarkCompleteOnClose(
             isTerminating: isTerminating(), alreadyFinished: finished) {
             markComplete()

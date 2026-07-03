@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import AppKit
 import UniformTypeIdentifiers
+import DragonKit
 
 // Snippet editor (issue #31). Three columns hosted in a plain NSWindow, each
 // filling the window top-to-bottom (header pinned top, list expands, footer
@@ -260,7 +261,7 @@ struct SnippetEditorView: View {
 
     private func addFolder() {
         let nextIndex = (folders.map(\.index).max() ?? -1) + 1
-        let folder = Folder(index: nextIndex)
+        let folder = Folder(title: L("untitled folder"), index: nextIndex)
         context.insert(folder)
         try? context.save()
         selectedFolderID = folder.persistentModelID
@@ -282,7 +283,7 @@ struct SnippetEditorView: View {
     private func addSnippet() {
         guard let folder = selectedFolder else { return }
         let nextIndex = ((folder.snippets ?? []).map(\.index).max() ?? -1) + 1
-        let snippet = Snippet(index: nextIndex, folder: folder)
+        let snippet = Snippet(title: L("untitled snippet"), index: nextIndex, folder: folder)
         context.insert(snippet)
         try? context.save()
         selectedSnippetID = snippet.persistentModelID
@@ -307,29 +308,33 @@ struct SnippetEditorView: View {
             set: { if !$0.isEmpty { folder.title = $0; try? context.save() } })
     }
     private func snippetTitle(_ snippet: Snippet) -> Binding<String> {
-        Binding(
+        // Resolved outside the closure: DragonKit's L() is @MainActor and the
+        // Binding setter is not isolated.
+        let untitled = L("untitled snippet")
+        return Binding(
             get: { snippet.title },
             set: { newTitle in
                 guard !newTitle.isEmpty else { return }
                 snippet.title = newTitle
-                if snippet.content.isEmpty, newTitle != L("untitled snippet") {
+                if snippet.content.isEmpty, newTitle != untitled {
                     snippet.content = newTitle
                 }
                 try? context.save()
             })
     }
     private func snippetContent(_ snippet: Snippet) -> Binding<String> {
-        Binding(
+        let untitled = L("untitled snippet")
+        return Binding(
             get: { snippet.content },
             set: { newContent in
                 // Auto-fill the label from the first line of content while the
                 // label is still the untitled default or was itself auto-derived,
                 // so a label the user typed is never clobbered.
                 let labelIsAuto = snippet.title.isEmpty
-                    || snippet.title == L("untitled snippet")
+                    || snippet.title == untitled
                     || snippet.title == Snippet.derivedTitle(fromContent: snippet.content)
                 if labelIsAuto {
-                    snippet.title = Snippet.derivedTitle(fromContent: newContent) ?? L("untitled snippet")
+                    snippet.title = Snippet.derivedTitle(fromContent: newContent) ?? untitled
                 }
                 snippet.content = newContent
                 try? context.save()

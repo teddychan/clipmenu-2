@@ -76,17 +76,21 @@ jobs:
           echo "Build number (CFBundleVersion): ${BUILD_NUMBER}  (marketing ${VERSION})"
           cp AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 
-          RB="ClipMenu_ClipMenu.bundle"
-          if [ -d "$BIN_PATH/$RB" ]; then
-            cp -R "$BIN_PATH/$RB" "$APP/Contents/Resources/$RB"
+          # Every SwiftPM resource bundle: ClipMenu's own + DragonKit's localized
+          # strings (DragonKit_DragonKit.bundle, resolved via its Bundle.module).
+          for BUNDLE_PATH in "$BIN_PATH"/*.bundle; do
+            [ -d "$BUNDLE_PATH" ] || continue
+            RB="$(basename "$BUNDLE_PATH")"
+            cp -R "$BUNDLE_PATH" "$APP/Contents/Resources/$RB"
             chmod -R u+w "$APP/Contents/Resources/$RB"
             # The App Store validator rejects nested bundles without a bundle id (90276).
+            SUFFIX="$(echo "${RB%.bundle}" | tr '[:upper:]_' '[:lower:].' )"
             RBP="$APP/Contents/Resources/$RB/Info.plist"
-            /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.dragonapp.clipmenu-2.resources" "$RBP" 2>/dev/null \
-              || /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.dragonapp.clipmenu-2.resources" "$RBP"
-            /usr/libexec/PlistBuddy -c "Add :CFBundleName string ClipMenu Resources" "$RBP" 2>/dev/null || true
+            /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.dragonapp.clipmenu-2.${SUFFIX}" "$RBP" 2>/dev/null \
+              || /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.dragonapp.clipmenu-2.${SUFFIX}" "$RBP"
+            /usr/libexec/PlistBuddy -c "Add :CFBundleName string ${RB%.bundle}" "$RBP" 2>/dev/null || true
             /usr/libexec/PlistBuddy -c "Add :CFBundlePackageType string BNDL" "$RBP" 2>/dev/null || true
-          fi
+          done
 
           # The App Store build must NOT contain a self-updater.
           if [ -d "$APP/Contents/Frameworks/Sparkle.framework" ]; then
@@ -163,10 +167,10 @@ jobs:
           # Sign nested bundles inside-out, then seal the app with entitlements.
           # --timestamp=none: App Store uploads don't need a secure timestamp (App
           # Store Connect processes the build) and requesting one adds a flaky TSA dependency.
-          RB="$APP/Contents/Resources/ClipMenu_ClipMenu.bundle"
-          if [ -d "$RB" ]; then
+          for RB in "$APP"/Contents/Resources/*.bundle; do
+            [ -d "$RB" ] || continue
             codesign --force --timestamp=none --sign "$APP_ID" --keychain "$KC" "$RB"
-          fi
+          done
           codesign --force --timestamp=none --entitlements "$ENT" \
             --sign "$APP_ID" --keychain "$KC" "$APP"
           codesign --verify --strict --verbose=2 "$APP"

@@ -262,3 +262,27 @@
 /* History menu search (⌘⌃V) */
 "Search…" = "搜尋…";
 "No matches" = "無相符項目";
+
+/* App menu (§5A), About pane, Uninstall pane, What's New (2.17.0) */
+"About %@" = "關於 %@";
+"Check for updates…" = "檢查更新…";
+"Settings…" = "設定…";
+"Uninstall %@…" = "解除安裝 %@…";
+"Quit %@" = "結束 %@";
+"Website" = "網站";
+"Support on GitHub" = "GitHub 支援";
+"Created by" = "作者";
+"License" = "授權";
+"Uninstall" = "解除安裝";
+"Uninstall %@?" = "解除安裝 %@？";
+"%@ will quit and remove itself completely. This will delete:" = "%@ 將結束並徹底移除自身。將刪除以下內容：";
+"The app and its login item" = "App 與其登入項目";
+"All preferences and actions" = "所有偏好設定與動作";
+"Caches and support files" = "快取與支援檔案";
+"Also delete clipboard history and snippets" = "同時刪除剪貼簿歷史與片段";
+"Accessibility and clipboard permissions are removed by macOS in System Settings, not by this app. This cannot be undone." = "輔助使用與剪貼簿權限由 macOS 系統設定移除，而非本 App。此操作無法復原。";
+"ClipMenu now shares the Dragon apps' settings foundation." = "ClipMenu 現已採用 Dragon 系列 App 共用的設定基礎。";
+"A sidebar settings window shared with the other Dragon apps." = "與其他 Dragon App 一致的側邊欄設定視窗。";
+"Permissions, What's New, and Software Update panes." = "新增權限、新功能與軟體更新面板。";
+"Switch language instantly — no restart needed." = "即時切換語言，無需重新啟動。";
+"Uninstall now confirms right inside Settings instead of a separate window." = "解除安裝現在直接在設定內確認，不再彈出獨立視窗。";

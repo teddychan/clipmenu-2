@@ -55,7 +55,10 @@ final class Folder {
         set { snippetSortRaw = newValue.rawValue }
     }
 
-    init(title: String = L("untitled folder"), index: Int = 0) {
+    // Default title is the English source string: DragonKit's L() is @MainActor
+    // and can't run in a nonisolated init's default argument, so MainActor call
+    // sites (the snippet editor) pass a localized title explicitly.
+    init(title: String = "untitled folder", index: Int = 0) {
         self.title = title
         self.index = index
         self.snippets = []
@@ -70,7 +73,7 @@ final class Snippet {
     var folder: Folder?
 
     init(
-        title: String = L("untitled snippet"),
+        title: String = "untitled snippet",
         content: String = "",
         index: Int = 0,
         folder: Folder? = nil

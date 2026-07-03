@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import AppKit
+import DragonKit
 
 // App entry. Agent / menu-bar app: no Dock icon, no main window — only a
 // status-bar item (AppKit) plus a SwiftUI Settings scene. LSUIElement is set
@@ -12,11 +13,12 @@ struct ClipMenuApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
+        // Vestigial: an LSUIElement agent can't open the SwiftUI Settings scene
+        // (no main-menu responder). The real Settings window is DragonKit's
+        // `DragonSettingsWindowController` (see SettingsWindowController.swift).
         Settings {
-            SettingsView()
+            EmptyView()
         }
-        // Shared SwiftData store for snippets + clipboard history.
-        .modelContainer(AppStore.container)
     }
 }
 
@@ -98,12 +100,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Agent app: no Dock icon (mirrors legacy LSUIElement, Info.plist:40-41).
         NSApp.setActivationPolicy(.accessory)
 
-        // Hard-default the UI language to English; the Language picker in General
-        // prefs overrides it via the "appLanguage" key. Our L() resolves from that
-        // key; mirror it to AppleLanguages so system-provided UI (save/open panels,
-        // standard menu items) matches. Effective this launch onward.
-        UserDefaults.standard.set(
-            [UserDefaults.standard.string(forKey: "appLanguage") ?? "en"], forKey: "AppleLanguages")
+        // DragonKit localization: the app's Localizable.strings live in the SwiftPM
+        // resource bundle, and the language choice is owned by LocalizationManager
+        // (switches live — no relaunch). One-time migration: carry the legacy
+        // "appLanguage" choice into DragonKit's key, defaulting to English (the
+        // historical hard default) rather than .system so existing installs keep
+        // their language. Mirror the choice to AppleLanguages so system-provided
+        // UI (save/open panels) matches from the next launch.
+        LocalizationManager.shared.appStringsBundle = AppResources.bundle
+        if UserDefaults.standard.string(forKey: "DragonKit.language") == nil {
+            let legacy = UserDefaults.standard.string(forKey: PreferenceKeys.appLanguage) ?? "en"
+            LocalizationManager.shared.setLanguage(DragonLanguage(rawValue: legacy) ?? .en)
+        }
+        mirrorAppleLanguages(LocalizationManager.shared.language)
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(languageChanged(_:)),
+            name: .dragonLanguageChanged, object: nil)
 
         // Start Sparkle's auto-updater (direct / Developer ID build only). No-op in
         // the Mac App Store build, where Sparkle is not compiled in and the App Store
@@ -181,6 +193,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         BackupScheduler.runIfEligible()
+    }
+
+    /// Mirror the in-app language choice to the OS-level override so
+    /// system-provided UI (save/open panels, standard menu items) matches after
+    /// the next launch. `.system` clears the override.
+    private func mirrorAppleLanguages(_ language: DragonLanguage) {
+        if let code = language.localeCode {
+            UserDefaults.standard.set([code], forKey: "AppleLanguages")
+        } else {
+            UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+        }
+    }
+
+    /// Language switched (DragonKit LanguagePicker): SwiftUI re-localizes itself
+    /// via `.dragonLocalized()`, but AppKit menus hold copied titles — rebuild
+    /// the status-item menu and the app main menu so they switch live too.
+    @objc private func languageChanged(_ note: Notification) {
+        if let language = note.object as? DragonLanguage {
+            mirrorAppleLanguages(language)
+        }
+        statusItemController.update(menu: mainMenuController.buildMainMenu())
+        installMainMenu()
     }
 
     /// Minimal main menu (App + Edit). The Edit ▸ Undo/Redo items route through
@@ -290,64 +324,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-// MARK: - Settings scene
-
-/// The Settings tabs. Raw values persist the last-selected tab
-/// (`PreferenceKeys.settingsSelectedTab`); the "About <App>" menu item forces `.about`.
-enum SettingsTab: String {
-    case general, syncBackup, menu, type, action, shortcuts, about
-}
-
-/// Preference tabs: General, Sync & Backup, Menu, Type, Action, Shortcuts, About.
-/// There is no separate Updates pane: the auto-update controls live in the General
-/// pane (direct build only), next to Launch on Login. The selected tab is remembered
-/// across opens; "About <App>" opens straight to the About tab.
-struct SettingsView: View {
-    @AppStorage(PreferenceKeys.settingsSelectedTab) private var selectedTab = SettingsTab.general
-
-    var body: some View {
-        TabView(selection: $selectedTab) {
-            GeneralPreferencesView()
-                .tabItem { Label(L("General"), systemImage: "gearshape") }
-                .tag(SettingsTab.general)
-            CloudBackupPreferencesView()
-                .tabItem { Label(L("Sync & Backup"), systemImage: "externaldrive.badge.timemachine") }
-                .tag(SettingsTab.syncBackup)
-            MenuPreferencesView()
-                .tabItem { Label(L("Menu"), systemImage: "menubar.rectangle") }
-                .tag(SettingsTab.menu)
-            TypePreferencesView()
-                .tabItem { Label(L("Type"), systemImage: "doc.on.doc") }
-                .tag(SettingsTab.type)
-            ActionPreferencesView()
-                .tabItem { Label(L("Action"), systemImage: "bolt") }
-                .tag(SettingsTab.action)
-            shortcutsPane
-                .tabItem { Label(L("Shortcuts"), systemImage: "command") }
-                .tag(SettingsTab.shortcuts)
-            AboutPreferencesView()
-                .tabItem { Text(L("About")) }
-                .tag(SettingsTab.about)
-            // No Updates tab: auto-update (Sparkle 2) is a toggle in the General
-            // pane, shown only in the direct/Developer ID build (issue #62).
-        }
-        .frame(minWidth: 520, minHeight: 420)
-    }
-
-    /// Shortcuts pane — three hot-key recorders (PrefsWindowController.m:556-613;
-    /// labels from English.lproj/Preferences.strings:407-411, 488-489).
-    private var shortcutsPane: some View {
-        Form {
-            LabeledContent(L("Main Menu:")) {
-                ShortcutRecorder(hotKey: .main).frame(width: 150, height: 24)
-            }
-            LabeledContent(L("History Menu:")) {
-                ShortcutRecorder(hotKey: .history).frame(width: 150, height: 24)
-            }
-            LabeledContent(L("Snippets Menu:")) {
-                ShortcutRecorder(hotKey: .snippets).frame(width: 150, height: 24)
-            }
-        }
-        .formStyle(.grouped)
-    }
-}
+// The Settings UI lives in SettingsWindowController.swift (DragonKit
+// SettingsShell + SettingsPane conformers in PreferencesPanes.swift).
