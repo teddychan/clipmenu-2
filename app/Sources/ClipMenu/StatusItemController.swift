@@ -13,6 +13,13 @@ final class StatusItemController {
         guard statusItem == nil else { return }
 
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        // Give the item a stable, named autosave identity (Apple's recommendation)
+        // rather than AppKit's auto-generated "Item-0". macOS persists a status
+        // item's menu-bar position under "NSStatusItem Preferred Position <name>";
+        // the anonymous "Item-0" slot can be left corrupted/off-screen by a
+        // menu-bar manager (e.g. Ice) and then survives restarts, hiding the icon.
+        // A named key isolates us from that stale state.
+        item.autosaveName = "ClipMenuMainStatusItem"
         if let button = item.button {
             // Fall back to a text title if the icon can't be loaded, so the
             // status item never renders zero-width / invisible.
