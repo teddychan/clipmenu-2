@@ -10,24 +10,29 @@ import Foundation
 // a target resource, so it lives outside Sources and is applied when the .app
 // bundle / Xcode project is produced later).
 //
-// Sparkle 2 (auto-update) is the one justified external dependency, and it is
-// compiled in ONLY for the direct / Developer ID build. The Mac App Store build
-// must not contain a self-updater (App Store policy + sandbox), so Sparkle is
-// excluded at the manifest level: the dependency, the `SPARKLE` compile flag,
-// and the framework-embedding rpath are added only when the build sets
-// CLIPMENU_SPARKLE=1 (scripts/run.sh and .github/workflows/release.yml do;
-// scripts/build-appstore.sh does not). With the flag off nothing links Sparkle,
-// so the default / MAS / test builds stay Sparkle-free and resolve offline.
+// DragonKit is the shared foundation of every Dragon menu-bar app (settings
+// shell, About / What's New / Permissions / Uninstall panes, localization).
+// Depended on at a version tag — never vendored. Its Sparkle-backed updates
+// live in a separate product, DragonKitUpdates, linked ONLY for the direct /
+// Developer ID build: the Mac App Store build must not contain a self-updater
+// (App Store policy + sandbox), so with CLIPMENU_SPARKLE unset nothing links
+// Sparkle and the MAS / test builds stay Sparkle-free. The `SPARKLE` compile
+// flag gates the app's update UI (scripts/run.sh and
+// .github/workflows/release.yml set CLIPMENU_SPARKLE=1; the MAS workflow does
+// not).
 let sparkleEnabled = ProcessInfo.processInfo.environment["CLIPMENU_SPARKLE"] == "1"
 
-var packageDependencies: [Package.Dependency] = []
-var clipMenuDependencies: [Target.Dependency] = []
+var packageDependencies: [Package.Dependency] = [
+    .package(url: "https://github.com/teddychan/dragon-kit", from: "1.1.0"),
+]
+var clipMenuDependencies: [Target.Dependency] = [
+    .product(name: "DragonKit", package: "dragon-kit"),
+]
 var clipMenuSwiftSettings: [SwiftSetting] = [.swiftLanguageMode(.v6)]
 var clipMenuLinkerSettings: [LinkerSetting] = []
 
 if sparkleEnabled {
-    packageDependencies.append(.package(url: "https://github.com/sparkle-project/Sparkle", from: "2.9.0"))
-    clipMenuDependencies.append(.product(name: "Sparkle", package: "Sparkle"))
+    clipMenuDependencies.append(.product(name: "DragonKitUpdates", package: "dragon-kit"))
     clipMenuSwiftSettings.append(.define("SPARKLE"))
     // Sparkle.framework is embedded in Contents/Frameworks by the bundle-assembly
     // step; this rpath lets the executable find it at runtime. Passed via -Xlinker

@@ -1,4 +1,5 @@
 import AppKit
+import DragonKit
 
 /// The search field shown as the top item of the History menu (⌘⌃V), letting the
 /// user type to filter the clipboard history live. It lives in its own NSView so

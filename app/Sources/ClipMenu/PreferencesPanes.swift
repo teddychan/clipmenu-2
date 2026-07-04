@@ -2,12 +2,11 @@ import SwiftUI
 import SwiftData
 import AppKit
 import UniformTypeIdentifiers
+import DragonKit
 
 // MARK: - General pane
 
 struct GeneralPreferencesView: View {
-    @AppStorage(PreferenceKeys.appLanguage) private var appLanguage = "en"
-    @State private var appLanguageAtAppear = "en"
     @AppStorage(PreferenceKeys.loginItem) private var loginItem = false
     @AppStorage(PreferenceKeys.inputPasteCommand) private var inputPasteCommand = true
     @AppStorage(PreferenceKeys.reorderClipsAfterPasting) private var reorderAfterPasting = true
@@ -17,40 +16,17 @@ struct GeneralPreferencesView: View {
     @AppStorage(PreferenceKeys.showStatusItem) private var showStatusItem = 1
     @State private var showExcludeSheet = false
     @State private var showAutoPasteInfo = false
-    // Mirrors Sparkle's automatic-check preference (direct build only). Synced from
-    // UpdaterUI on appear and written back on change; Sparkle owns the stored value.
-    @State private var autoCheckForUpdates = false
 
     var body: some View {
-        Form {
-            Section {
-                Picker(L("Language"), selection: $appLanguage) {
-                    Text("English").tag("en")
-                    Text("Español").tag("es")
-                    Text("Français").tag("fr")
-                    Text("日本語").tag("ja")
-                    Text("한국어").tag("ko")
-                    Text("简体中文").tag("zh-Hans")
-                    Text("繁體中文").tag("zh-Hant")
-                }
-                if appLanguage != appLanguageAtAppear {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(L("Restart ClipMenu to apply the language change."))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Button(L("Restart Now")) { AppRelaunch.relaunch() }
-                    }
-                }
+        DragonForm {
+            DragonSection {
+                // DragonKit's shared 7-language switcher — switches live, no restart.
+                LanguagePicker()
             }
-            Section {
+            DragonSection {
                 Toggle(L("Launch on Login"), isOn: $loginItem)
-                // Auto-update (Sparkle) — direct/Developer ID build only. The Mac App
-                // Store build delivers updates through the Store, so these rows are
-                // absent there (UpdaterUI.isSupported == false). Issue #62.
-                if UpdaterUI.isSupported {
-                    Toggle(L("Automatically check for updates"), isOn: $autoCheckForUpdates)
-                    Button(L("Check for Updates Now…")) { UpdaterUI.checkNow() }
-                }
+                // No update rows here: the Sparkle build has a dedicated Updates
+                // pane (DragonKitUpdates); the Mac App Store build has neither.
                 if DistributionChannel.current == .appStore {
                     // Sandboxed App Store build can't auto-paste: show the toggle
                     // disabled and off, with an ⓘ popover explaining why and where
@@ -74,7 +50,7 @@ struct GeneralPreferencesView: View {
                     Toggle(L("Input \"⌘ + V\" after menu item selection"), isOn: $inputPasteCommand)
                 }
             }
-            Section {
+            DragonSection {
                 Picker(L("Sort history order by:"), selection: $reorderAfterPasting) {
                     Text(L("Date created")).tag(false)
                     Text(L("Date last used")).tag(true)
@@ -93,31 +69,27 @@ struct GeneralPreferencesView: View {
                 }
                 Toggle(L("Save clipboard history on quit"), isOn: $saveHistoryOnQuit)
             }
-            Section {
+            DragonSection {
                 Picker(L("Status Bar icon style:"), selection: $showStatusItem) {
                     Text(L("None")).tag(0)
                     Text(L("Show")).tag(1)
                 }
             }
-            Section(L("Exclude Applications")) {
+            DragonSection(LocalizedStringKey(L("Exclude Applications"))) {
                 Button(L("Define Exclude Options…")) { showExcludeSheet = true }
             }
+            DragonSection {
+                // Moved from the old bespoke About pane (About is now DragonKit's
+                // shared pane, which carries no custom buttons).
+                Button(L("Show Setup Guide…")) {
+                    (NSApp.delegate as? AppDelegate)?.showOnboarding(reset: true)
+                }
+            }
         }
-        .formStyle(.grouped)
         .onAppear {
             loginItem = LoginItem.isEnabled   // reconcile with actual state
-            appLanguageAtAppear = appLanguage
-            autoCheckForUpdates = UpdaterUI.automaticallyChecksForUpdates
         }
         .onChange(of: loginItem) { _, newValue in LoginItem.setEnabled(newValue) }
-        .onChange(of: autoCheckForUpdates) { _, newValue in
-            UpdaterUI.automaticallyChecksForUpdates = newValue
-        }
-        .onChange(of: appLanguage) { _, newValue in
-            // Mirror the in-app choice to the OS-level override so system-provided UI
-            // (save/open panels, standard menu items) matches after the next launch.
-            UserDefaults.standard.set([newValue], forKey: "AppleLanguages")
-        }
         .sheet(isPresented: $showExcludeSheet) { ExcludeAppsView() }
     }
 }
@@ -141,7 +113,7 @@ struct BackupPreferencesView: View {
 
     var body: some View {
         Group {
-            Section(L("Sync & Backup")) {
+            DragonSection(LocalizedStringKey(L("Sync & Backup"))) {
                 LabeledContent(L("Backup folder")) {
                     Button(folderPath.isEmpty ? L("Choose…") : L("Change…"), action: chooseFolder)
                 }
@@ -165,7 +137,7 @@ struct BackupPreferencesView: View {
                 }
             }
 
-            Section(L("Clipboard History Export")) {
+            DragonSection(LocalizedStringKey(L("Clipboard History Export"))) {
                 Picker("", selection: $exportAsSingleFile) {
                     Text(L("Single file")).tag(true)
                     Text(L("Multiple files")).tag(false)
@@ -394,10 +366,9 @@ struct RestoreVersionsView: View {
 /// and restore, plus the one-shot clipboard-history export, in one grouped `Form`.
 struct CloudBackupPreferencesView: View {
     var body: some View {
-        Form {
+        DragonForm {
             BackupPreferencesView()
         }
-        .formStyle(.grouped)
     }
 }
 
@@ -493,74 +464,71 @@ struct ExcludeAppsView: View {
     private func persist() { UserDefaults.standard.set(apps, forKey: Self.key) }
 }
 
-// MARK: - About pane
+// MARK: - Pane registry (DragonKit SettingsShell)
 
-/// About pane: app icon, name, version, the open-source/GitHub link, license,
-/// and credits. Static product info — nothing here is persisted.
-struct AboutPreferencesView: View {
-    /// Primary link: the app's marketing page on dragonapp.com (not GitHub).
-    private static let websiteURL = URL(string: "https://www.dragonapp.com/clipmenu")!
-    /// Support link goes straight to the GitHub issues page.
-    private static let issuesURL = URL(string: "https://github.com/teddychan/clipmenu-2/issues")!
+// The app's screens as `SettingsPane` conformers, listed by
+// `SettingsWindowController.settingsPanes` in sidebar order. `title` is a
+// localization key resolved by the shell via `L()`, so the sidebar switches
+// language live. DragonKit's own panes (Permissions, Updates, What's New,
+// About) are appended there — no bespoke About pane remains (its Setup Guide
+// button moved to General; Check for Updates lives in the Updates pane).
 
-    private let rowWidth: CGFloat = 360
+struct GeneralPane: SettingsPane {
+    let id = "general"
+    let title = "General"
+    let systemImage = "gearshape"
+    var paneBody: some View { GeneralPreferencesView() }
+}
 
+struct SyncBackupPane: SettingsPane {
+    let id = "syncBackup"
+    let title = "Sync & Backup"
+    let systemImage = "externaldrive.badge.timemachine"
+    var paneBody: some View { CloudBackupPreferencesView() }
+}
+
+struct MenuPane: SettingsPane {
+    let id = "menu"
+    let title = "Menu"
+    let systemImage = "menubar.rectangle"
+    var paneBody: some View { MenuPreferencesView() }
+}
+
+struct TypePane: SettingsPane {
+    let id = "type"
+    let title = "Type"
+    let systemImage = "doc.on.doc"
+    var paneBody: some View { TypePreferencesView() }
+}
+
+struct ActionPane: SettingsPane {
+    let id = "action"
+    let title = "Action"
+    let systemImage = "bolt"
+    var paneBody: some View { ActionPreferencesView() }
+}
+
+struct ShortcutsPane: SettingsPane {
+    let id = "shortcuts"
+    let title = "Shortcuts"
+    let systemImage = "command"
+    var paneBody: some View { ShortcutsPreferencesView() }
+}
+
+/// Shortcuts pane — three hot-key recorders (PrefsWindowController.m:556-613;
+/// labels from English.lproj/Preferences.strings:407-411, 488-489).
+struct ShortcutsPreferencesView: View {
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                if let icon = NSApp.applicationIconImage {
-                    Image(nsImage: icon).resizable().frame(width: 96, height: 96)
-                }
-                VStack(spacing: 4) {
-                    Text(AppInfo.displayName).font(.title2).bold()
-                    Text(AppInfo.versionDescription).foregroundStyle(.secondary)
-                }
-
-                if UpdaterUI.isSupported {
-                    Button {
-                        UpdaterUI.checkNow()
-                    } label: {
-                        Label(L("Check for updates"), systemImage: "arrow.triangle.2.circlepath")
-                    }
-                }
-
-                Divider().frame(maxWidth: rowWidth)
-
-                // Link rows (guide §5A: Website = dragonapp.com, primary; Support = GitHub issues).
-                VStack(spacing: 10) {
-                    LabeledContent {
-                        Link("dragonapp.com/clipmenu", destination: Self.websiteURL)
-                    } label: {
-                        Label(L("Website"), systemImage: "globe")
-                    }
-                    LabeledContent {
-                        Link("teddychan/clipmenu-2", destination: Self.issuesURL)
-                    } label: {
-                        Label(L("Support on GitHub"), systemImage: "lifepreserver")
-                    }
-                }
-                .frame(maxWidth: rowWidth)
-
-                Divider().frame(maxWidth: rowWidth)
-
-                VStack(spacing: 8) {
-                    LabeledContent(L("Created by")) { Text("Teddy Chan") }
-                    LabeledContent(L("Original ClipMenu")) { Text("Naotaka Morimoto") }
-                    LabeledContent(L("License")) { Text("MIT") }
-                }
-                .frame(maxWidth: rowWidth)
-
-                Text(AppInfo.copyright)
-                    .font(.caption).foregroundStyle(.secondary)
-
-                Button(L("Show Setup Guide…")) {
-                    (NSApp.delegate as? AppDelegate)?.showOnboarding(reset: true)
-                }
-                .padding(.top, 4)
+        DragonForm {
+            LabeledContent(L("Main Menu:")) {
+                ShortcutRecorder(hotKey: .main).frame(width: 150, height: 24)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 28)
-            .padding(.horizontal, 24)
+            LabeledContent(L("History Menu:")) {
+                ShortcutRecorder(hotKey: .history).frame(width: 150, height: 24)
+            }
+            LabeledContent(L("Snippets Menu:")) {
+                ShortcutRecorder(hotKey: .snippets).frame(width: 150, height: 24)
+            }
         }
     }
 }
@@ -591,8 +559,8 @@ struct MenuPreferencesView: View {
     private static let fontSizes = Array(9...24) + [36, 48, 64, 72, 96]
 
     var body: some View {
-        Form {
-            Section(L("Clipboard History")) {
+        DragonForm {
+            DragonSection(LocalizedStringKey(L("Clipboard History"))) {
                 LabeledContent(L("Number of items place inline:")) {
                     TextField("", value: $inlineCount, format: .number).frame(width: 60)
                 }
@@ -613,7 +581,7 @@ struct MenuPreferencesView: View {
                 }
             }
 
-            Section(L("Appearance")) {
+            DragonSection(LocalizedStringKey(L("Appearance"))) {
                 Toggle(L("Change font size in the menu"), isOn: $changeFontSize)
                 Picker(L("Font size:"), selection: $howToChangeFontSize) {
                     Text(L("Fit to the icon size")).tag(0)
@@ -626,7 +594,7 @@ struct MenuPreferencesView: View {
                 .disabled(!changeFontSize || howToChangeFontSize != 1)
             }
 
-            Section(L("Icon")) {
+            DragonSection(LocalizedStringKey(L("Icon"))) {
                 Toggle(L("Show Icon in the Menu"), isOn: $showIcon)
                 Picker(L("Icon size:"), selection: $menuIconSize) {
                     Text("16").tag(16)
@@ -645,7 +613,7 @@ struct MenuPreferencesView: View {
                 .disabled(!showImage)
             }
 
-            Section {
+            DragonSection {
                 Picker(L("Snippets' position:"), selection: $positionOfSnippets) {
                     Text(L("None")).tag(0)
                     Text(L("Above the clipboard history")).tag(1)
@@ -654,7 +622,6 @@ struct MenuPreferencesView: View {
                 Toggle(L("Group snippets under one menu"), isOn: $groupSnippetsInFolder)
             }
         }
-        .formStyle(.grouped)
     }
 }
 
@@ -687,8 +654,8 @@ struct TypePreferencesView: View {
     }
 
     var body: some View {
-        Form {
-            Section(L("Select clipboard types to store:")) {
+        DragonForm {
+            DragonSection(LocalizedStringKey(L("Select clipboard types to store:"))) {
                 ForEach(Self.types, id: \.name) { type in
                     Toggle(L(type.label), isOn: Binding(
                         get: { store[type.name] ?? true },
@@ -697,7 +664,6 @@ struct TypePreferencesView: View {
                 }
             }
         }
-        .formStyle(.grouped)
     }
 
     /// Persist the whole dict (all 7 keys) so PasteboardReader.storeTypes() reads
@@ -724,13 +690,13 @@ struct ActionPreferencesView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Form {
-                Section {
+            DragonForm {
+                DragonSection {
                     Toggle(L("Enable Action"), isOn: $enableAction)
                     Toggle(L("Invoke the first action immediately if there is only one action"),
                            isOn: $invokeImmediately)
                 }
-                Section(L("Click behavior")) {
+                DragonSection(LocalizedStringKey(L("Click behavior"))) {
                     behaviorPicker(L("Control-click / right-click:"), $controlBehavior)
                     behaviorPicker(L("Shift-click:"), $shiftBehavior)
                     behaviorPicker(L("Option-click:"), $optionBehavior)
@@ -738,7 +704,6 @@ struct ActionPreferencesView: View {
                 }
                 .disabled(!enableAction)
             }
-            .formStyle(.grouped)
             .frame(height: 230)
 
             Divider()

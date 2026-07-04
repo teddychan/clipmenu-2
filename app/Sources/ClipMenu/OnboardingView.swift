@@ -1,10 +1,12 @@
 import SwiftUI
+import DragonKit
 
 // The first-run setup wizard UI (dark, centered-card style). Hosted in a plain
 // NSWindow by `OnboardingWindowController`; the flow's only persisted state is the
-// `onboardingStep` index, so a relaunch mid-wizard (e.g. a language change)
-// rebuilds straight onto the same step. Pure decisions live in `OnboardingGate`
-// (OnboardingFlow.swift); this file is presentation + live preference binding.
+// `onboardingStep` index, so a relaunch mid-wizard rebuilds straight onto the
+// same step. Pure decisions live in `OnboardingGate` (OnboardingFlow.swift);
+// this file is presentation + live preference binding. Language switches live
+// (DragonKit `.dragonLocalized()`), so no relaunch is needed for it.
 
 // MARK: - Palette
 
@@ -82,8 +84,6 @@ struct OnboardingView: View {
     @ObservedObject var permissions: OnboardingPermissions
     /// Reached the end / user dismissed → mark complete and close.
     let onFinish: () -> Void
-    /// Language changed → relaunch to apply, resuming on the same step.
-    let onLanguageChange: () -> Void
 
     private var steps: [OnboardingStep] { OnboardingStep.allCases }
     private var current: OnboardingStep { OnboardingGate.resumeStep(savedIndex: index) }
@@ -98,6 +98,9 @@ struct OnboardingView: View {
         .frame(width: 560, height: 620)
         .background(OB.windowBG)
         .environment(\.colorScheme, .dark)
+        // Re-render the whole wizard when the language changes, so every L()
+        // re-resolves live (no relaunch).
+        .dragonLocalized()
         .onAppear {
             if !steps.indices.contains(index) { index = 0 }
         }
@@ -105,7 +108,7 @@ struct OnboardingView: View {
 
     @ViewBuilder private var content: some View {
         switch current {
-        case .welcome:     WelcomeStep(onLanguageChange: onLanguageChange)
+        case .welcome:     WelcomeStep()
         case .permissions: PermissionsStep(permissions: permissions)
         case .history:     HistoryStep()
         case .features:    FeaturesStep()
@@ -173,8 +176,7 @@ private struct PageDots: View {
 // MARK: - Step 1: Welcome & language
 
 private struct WelcomeStep: View {
-    @AppStorage(PreferenceKeys.appLanguage) private var appLanguage = "en"
-    let onLanguageChange: () -> Void
+    @ObservedObject private var localization = LocalizationManager.shared
 
     var body: some View {
         VStack(spacing: 0) {
@@ -192,23 +194,20 @@ private struct WelcomeStep: View {
             VStack(alignment: .leading, spacing: 18) {
                 HStack(spacing: 14) {
                     Text(L("Language")).foregroundStyle(.white)
-                    Picker("", selection: $appLanguage) {
-                        Text("English").tag("en")
-                        Text("Español").tag("es")
-                        Text("Français").tag("fr")
-                        Text("日本語").tag("ja")
-                        Text("한국어").tag("ko")
-                        Text("简体中文").tag("zh-Hans")
-                        Text("繁體中文").tag("zh-Hant")
+                    // DragonKit's LocalizationManager: switching re-renders the
+                    // wizard live (root `.dragonLocalized()`); the AppDelegate
+                    // mirrors the choice to AppleLanguages for system panels.
+                    Picker("", selection: Binding(
+                        get: { localization.language },
+                        set: { localization.setLanguage($0) }
+                    )) {
+                        Text(L("DragonKit.language.system")).tag(DragonLanguage.system)
+                        Divider()
+                        ForEach(DragonLanguage.selectable) { language in
+                            Text(language.displayName).tag(language)
+                        }
                     }
                     .labelsHidden().fixedSize()
-                    .onChange(of: appLanguage) { _, newValue in
-                        // Apply immediately: L() is resolved once per process, so re-render
-                        // the rest of the wizard in the chosen language by relaunching. The
-                        // saved step makes it resume here. Mirror to the OS override too.
-                        UserDefaults.standard.set([newValue], forKey: "AppleLanguages")
-                        onLanguageChange()
-                    }
                 }
                 feature("clock.arrow.circlepath", L("History at your fingertips"),
                         L("Everything you copy, ready to paste from the menu bar."))

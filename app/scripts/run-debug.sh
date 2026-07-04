@@ -42,11 +42,13 @@ BUILD="$(git rev-list --count HEAD 2>/dev/null || echo "$VERSION")"
 
 cp AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 
-RESOURCE_BUNDLE="ClipMenu_ClipMenu.bundle"
-if [ -d "$BIN_PATH/$RESOURCE_BUNDLE" ]; then
-    cp -R "$BIN_PATH/$RESOURCE_BUNDLE" "$APP/Contents/Resources/$RESOURCE_BUNDLE"
-    chmod -R u+w "$APP/Contents/Resources/$RESOURCE_BUNDLE"
-fi
+# All SwiftPM resource bundles: the app's own + DragonKit's localized strings.
+for BUNDLE_PATH in "$BIN_PATH"/*.bundle; do
+    [ -d "$BUNDLE_PATH" ] || continue
+    BUNDLE_NAME="$(basename "$BUNDLE_PATH")"
+    cp -R "$BUNDLE_PATH" "$APP/Contents/Resources/$BUNDLE_NAME"
+    chmod -R u+w "$APP/Contents/Resources/$BUNDLE_NAME"
+done
 if [ -d "$BIN_PATH/Sparkle.framework" ]; then
     mkdir -p "$APP/Contents/Frameworks"
     cp -R "$BIN_PATH/Sparkle.framework" "$APP/Contents/Frameworks/Sparkle.framework"

@@ -34,6 +34,12 @@ final class StatusItemController {
         statusItem = item
     }
 
+    /// Swap the installed item's menu (e.g. rebuilt with new localized titles
+    /// after a live language change). No-op when the item isn't installed.
+    func update(menu: NSMenu) {
+        statusItem?.menu = menu
+    }
+
     /// The bundled menu-bar icon (paperlist clipboard): a vector PDF template
     /// drawn at the standard 18pt status-bar height. A PDF keeps the glyph crisp
     /// at any display scale (Apple's recommendation for status items); template

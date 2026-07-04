@@ -1,57 +1,154 @@
 import AppKit
 import SwiftUI
+import DragonKit
+#if SPARKLE
+import DragonKitUpdates
+#endif
 
-// Self-managed Settings window.
+// The Settings window, on DragonKit's shared shell.
 //
-// ClipMenu is an LSUIElement agent, so SwiftUI does not install an app main
-// menu and `NSApp.sendAction("showSettingsWindow:")` has no responder in the
-// chain — the SwiftUI `Settings` scene can't be opened programmatically. We
-// host the same `SettingsView` in an ordinary NSWindow instead, which works
-// regardless of activation policy. (Maps to the legacy DBPrefsWindowController
-// preferences window; PrefsWindowController.m:505-517 showWindow + activate.)
+// ClipMenu is an LSUIElement agent, so the SwiftUI `Settings` scene can't be
+// opened programmatically; DragonKit's `DragonSettingsWindowController` owns a
+// reliable self-managed window instead (flips the app to `.regular` while it's
+// open so it can become key, back to `.accessory` on close). The pane list is
+// data-driven (`SettingsPane` conformers → `SettingsShell`), selection is
+// host-owned so menu items can open a specific pane ("About ClipMenu 2" →
+// About; "Uninstall…" → Uninstall), and the root re-localizes live via
+// `.dragonLocalized()` — mirroring dragon-kit's Example app wiring.
 
 @MainActor
-final class SettingsWindowController: NSObject, NSWindowDelegate {
+final class SettingsWindowController: NSObject {
     static let shared = SettingsWindowController()
 
-    private var window: NSWindow?
-
-    /// True while the Settings window is on screen.
-    var isWindowVisible: Bool { window?.isVisible ?? false }
-
-    func show() {
-        if window == nil {
-            let hosting = NSHostingController(
-                rootView: SettingsView().modelContainer(AppStore.container)
-            )
-            let newWindow = NSWindow(contentViewController: hosting)
-            newWindow.title = String(format: L("%@ Settings"), AppInfo.displayName)
-            // Resizable so panes that don't fit can be enlarged; the grouped
-            // Forms scroll when the window is smaller than their content.
-            newWindow.styleMask = [.titled, .closable, .miniaturizable, .resizable]
-            newWindow.isReleasedWhenClosed = false
-            newWindow.delegate = self
-
-            // Open large enough for the tallest pane (Menu), but never taller
-            // than the screen's usable height (leave a margin for the menu bar).
-            let desired = NSSize(width: 560, height: 640)
-            let visibleHeight = (newWindow.screen ?? NSScreen.main)?.visibleFrame.height ?? desired.height
-            let height = max(420, min(desired.height, visibleHeight - 40))
-            newWindow.setContentSize(NSSize(width: desired.width, height: height))
-            newWindow.center()
-            window = newWindow
+    /// Host-owned pane selection. Persisted so reopening Settings returns to the
+    /// last-used pane; set before `show()` to land on a specific pane.
+    @Observable
+    final class Selection {
+        var paneID: String? {
+            didSet {
+                if let paneID {
+                    UserDefaults.standard.set(paneID, forKey: PreferenceKeys.settingsSelectedTab)
+                }
+            }
         }
 
-        NSApp.activate(ignoringOtherApps: true)
-        window?.makeKeyAndOrderFront(nil)
+        init() {
+            paneID = UserDefaults.standard.string(forKey: PreferenceKeys.settingsSelectedTab) ?? "general"
+        }
     }
 
-    /// If the Snippet editor promoted the app to `.regular` and is now closed,
-    /// closing Settings must hand the menu-bar-agent policy back — otherwise
-    /// the app would keep a Dock icon after both windows are gone.
-    func windowWillClose(_ notification: Notification) {
-        if !SnippetEditorWindowController.shared.isWindowVisible {
-            NSApp.setActivationPolicy(.accessory)
+    private let selection = Selection()
+
+    private lazy var controller: DragonSettingsWindowController = {
+        let controller = DragonSettingsWindowController(
+            title: String(format: L("%@ Settings"), AppInfo.displayName),
+            rootView: SettingsRoot(
+                appName: AppInfo.displayName,
+                panesBuilder: { [weak self] in self?.settingsPanes ?? [] },
+                selection: selection
+            )
+            .modelContainer(AppStore.container)
+        )
+        // Selector-based observers (both notifications post on the main thread).
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(settingsWindowWillClose(_:)),
+            name: NSWindow.willCloseNotification, object: controller.window)
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(languageChanged(_:)),
+            name: .dragonLanguageChanged, object: nil)
+        return controller
+    }()
+
+    /// DragonKit's controller hands the activation policy back to `.accessory`
+    /// when the window closes. If the Snippet editor (which also promotes the app
+    /// to `.regular`) is still open, re-assert `.regular` so it keeps its Dock
+    /// presence. Async so it runs after DragonKit's own willClose handler.
+    @objc private func settingsWindowWillClose(_ notification: Notification) {
+        Task { @MainActor in
+            if SnippetEditorWindowController.shared.isWindowVisible {
+                NSApp.setActivationPolicy(.regular)
+            }
         }
+    }
+
+    /// The window title is AppKit-owned (not inside the SwiftUI tree), so
+    /// re-title it when the language changes.
+    @objc private func languageChanged(_ notification: Notification) {
+        controller.window?.title = String(format: L("%@ Settings"), AppInfo.displayName)
+    }
+
+    /// The pane list, rebuilt whenever the language changes (so injected content
+    /// like About / What's New re-localizes). Order = sidebar order.
+    private var settingsPanes: [AnySettingsPane] {
+        var panes: [AnySettingsPane] = [
+            AnySettingsPane(GeneralPane()),
+            AnySettingsPane(SyncBackupPane()),
+            AnySettingsPane(MenuPane()),
+            AnySettingsPane(TypePane()),
+            AnySettingsPane(ActionPane()),
+            AnySettingsPane(ShortcutsPane()),
+        ]
+        // The sandboxed App Store build can't use Accessibility (no auto-paste),
+        // so it gets no Permissions pane — matching its onboarding.
+        if DistributionChannel.current == .direct {
+            panes.append(AnySettingsPane(PermissionsSettingsPane(
+                permissions: [.accessibility(isRequired: false)])))
+        }
+        #if SPARKLE
+        panes.append(AnySettingsPane(UpdatesSettingsPane(updater: UpdaterUI.updater)))
+        #endif
+        panes.append(AnySettingsPane(WhatsNewSettingsPane(content: WhatsNewConfig.content)))
+        panes.append(AnySettingsPane(AboutSettingsPane(content: AboutConfig.content)))
+        panes.append(AnySettingsPane(UninstallPane(onCancel: { [weak self] in
+            self?.selection.paneID = "general"
+        })))
+        return panes
+    }
+
+    /// True while the Settings window is on screen.
+    var isWindowVisible: Bool { controller.window?.isVisible ?? false }
+
+    func show() {
+        // A stale persisted selection (e.g. a pane this build doesn't have, like
+        // Updates on the App Store channel) would render an empty detail pane.
+        if !settingsPanes.contains(where: { $0.id == selection.paneID }) {
+            selection.paneID = "general"
+        }
+        controller.show()
+    }
+
+    /// Open Settings directly on a specific pane (e.g. "about", "uninstall").
+    func show(paneID: String) {
+        selection.paneID = paneID
+        show()
+    }
+}
+
+/// Settings root wired to the host-owned selection. Observes `LocalizationManager`
+/// and rebuilds the panes on a language change, then applies `.dragonLocalized()`
+/// so the whole window switches language live — without a restart.
+private struct SettingsRoot: View {
+    @ObservedObject private var localization = LocalizationManager.shared
+    let appName: String
+    let panesBuilder: () -> [AnySettingsPane]
+    let selection: SettingsWindowController.Selection
+
+    var body: some View {
+        // This view observes only the language, so `panesBuilder()` re-runs on a
+        // language change — not on every pane selection (SettingsPaneList's job).
+        SettingsPaneList(appName: appName, panes: panesBuilder(), selection: selection)
+            .dragonLocalized()
+    }
+}
+
+/// Holds the (language-stable) pane list and binds selection, so switching panes
+/// re-renders the sidebar/detail without rebuilding every pane.
+private struct SettingsPaneList: View {
+    let appName: String
+    let panes: [AnySettingsPane]
+    @Bindable var selection: SettingsWindowController.Selection
+
+    var body: some View {
+        SettingsShell(appName: appName, panes: panes, selection: $selection.paneID)
     }
 }

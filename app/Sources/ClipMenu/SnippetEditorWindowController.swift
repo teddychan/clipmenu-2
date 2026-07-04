@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import SwiftData
+import DragonKit
 
 // Self-managed Snippet Editor window. Same rationale as SettingsWindowController:
 // an LSUIElement agent can't open a SwiftUI scene programmatically, so the
