@@ -19,7 +19,14 @@ final class StatusItemController {
         // the anonymous "Item-0" slot can be left corrupted/off-screen by a
         // menu-bar manager (e.g. Ice) and then survives restarts, hiding the icon.
         // A named key isolates us from that stale state.
-        item.autosaveName = "ClipMenuMainStatusItem"
+        //
+        // The name is versioned: on macOS 26 the WindowServer's own menu-bar layout
+        // memory (separate from the app's prefs, and NOT cleared by deleting the
+        // "NSStatusItem Preferred Position" default, quitting menu-bar managers, or
+        // restarting ControlCenter/SystemUIServer) can pin a name to an off-screen
+        // slot that no reset recovers. Bumping the identity is the only reliable way
+        // to force macOS to place the item fresh in the normal zone.
+        item.autosaveName = "ClipMenuMainStatusItemV2"
         if let button = item.button {
             // Fall back to a text title if the icon can't be loaded, so the
             // status item never renders zero-width / invisible.
