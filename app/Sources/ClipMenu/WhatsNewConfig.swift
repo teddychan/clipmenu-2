@@ -8,16 +8,11 @@ enum WhatsNewConfig {
     static var content: WhatsNewContent {
         WhatsNewContent(
             version: "v\(AppInfo.version)",
-            date: "2026-07-04",
-            summary: L("ClipMenu now shares the Dragon apps' settings foundation."),
+            date: "2026-07-05",
+            summary: L("ClipMenu's Settings now line up with the other Dragon apps."),
             sections: [
-                ChangeSection(kind: .added, entries: [
-                    L("A sidebar settings window shared with the other Dragon apps."),
-                    L("Permissions, What's New, and Software Update panes."),
-                    L("Switch language instantly — no restart needed."),
-                ]),
                 ChangeSection(kind: .changed, entries: [
-                    L("Uninstall now confirms right inside Settings instead of a separate window."),
+                    L("Settings sidebar reordered to match the other Dragon apps: What's New now sits just before Software Update, and Sync & Backup follows Permissions."),
                 ]),
             ]
         )
