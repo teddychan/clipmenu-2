@@ -90,6 +90,9 @@ struct GeneralPreferencesView: View {
             loginItem = LoginItem.isEnabled   // reconcile with actual state
         }
         .onChange(of: loginItem) { _, newValue in LoginItem.setEnabled(newValue) }
+        .onChange(of: showStatusItem) { _, newValue in
+            (NSApp.delegate as? AppDelegate)?.setStatusItemVisible(newValue != 0)
+        }
         .sheet(isPresented: $showExcludeSheet) { ExcludeAppsView() }
     }
 }

@@ -148,10 +148,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Status-bar item shows the Main menu (MenuController.m:1314). Honor
         // showStatusItem: 0 = none — still reachable via the Main-menu
-        // hot-key. Applied at launch (live toggle deferred).
-        if UserDefaults.standard.object(forKey: PreferenceKeys.showStatusItem) as? Int ?? 1 != 0 {
-            statusItemController.install(menu: mainMenuController.buildMainMenu())
-        }
+        // hot-key. The Settings picker also applies this live.
+        applyStatusItemPreference()
 
         // Global hot-keys → pop up the matching menu at the cursor, from stored
         // or default combos (AppController.m:601-633): ⌘⇧V Main, ⌘⌃V History,
@@ -215,6 +213,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         statusItemController.update(menu: mainMenuController.buildMainMenu())
         installMainMenu()
+    }
+
+    func setStatusItemVisible(_ visible: Bool) {
+        if visible {
+            statusItemController.install(menu: mainMenuController.buildMainMenu())
+        } else {
+            statusItemController.remove()
+        }
+    }
+
+    private func applyStatusItemPreference() {
+        let shouldShow = UserDefaults.standard.object(forKey: PreferenceKeys.showStatusItem) as? Int ?? 1
+        setStatusItemVisible(shouldShow != 0)
     }
 
     /// Minimal main menu (App + Edit). The Edit ▸ Undo/Redo items route through
