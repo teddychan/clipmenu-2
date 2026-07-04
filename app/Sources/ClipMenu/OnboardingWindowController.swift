@@ -87,8 +87,18 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
             window = newWindow
         }
         permissions.start()
-        NSApp.activate(ignoringOtherApps: true)
+        // Only activate when the app isn't already frontmost. When the wizard is
+        // opened from the Settings window (the app is already `.regular`/active and
+        // that window is key), a second `activate(ignoringOtherApps:)` races the
+        // ordering: AppKit re-fronts the previously-key Settings window *after* our
+        // `makeKeyAndOrderFront`, burying the wizard behind it ("Show Setup Guide…"
+        // appeared to do nothing). Skipping the redundant activate, plus an explicit
+        // `orderFrontRegardless()`, guarantees the wizard lands on top either way.
+        if !NSApp.isActive {
+            NSApp.activate(ignoringOtherApps: true)
+        }
         window?.makeKeyAndOrderFront(nil)
+        window?.orderFrontRegardless()
     }
 
     /// Reached the end ("Open ClipMenu"): mark complete and close.
