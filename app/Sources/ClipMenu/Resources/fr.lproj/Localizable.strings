@@ -272,13 +272,10 @@
 "Created by" = "Créé par";
 "License" = "Licence";
 "Uninstall" = "Désinstaller";
-"Uninstall %@?" = "Désinstaller %@ ?";
-"%@ will quit and remove itself completely. This will delete:" = "%@ va quitter et se supprimer complètement. Cela supprimera :";
 "The app and its login item" = "L'app et son élément d'ouverture de session";
 "All preferences and actions" = "Toutes les préférences et actions";
 "Caches and support files" = "Les caches et fichiers de support";
 "Also delete clipboard history and snippets" = "Supprimer aussi l'historique du presse-papiers et les fragments";
-"Accessibility and clipboard permissions are removed by macOS in System Settings, not by this app. This cannot be undone." = "Les autorisations Accessibilité et presse-papiers se retirent dans Réglages Système de macOS, pas depuis cette app. Cette action est irréversible.";
 "ClipMenu now shares the Dragon apps' settings foundation." = "ClipMenu partage désormais la base de réglages des apps Dragon.";
 "A sidebar settings window shared with the other Dragon apps." = "Une fenêtre de réglages à barre latérale, commune aux autres apps Dragon.";
 "Permissions, What's New, and Software Update panes." = "Des panneaux Autorisations, Nouveautés et Mise à jour logicielle.";

@@ -272,13 +272,10 @@
 "Created by" = "제작자";
 "License" = "라이선스";
 "Uninstall" = "제거";
-"Uninstall %@?" = "%@을(를) 제거하겠습니까?";
-"%@ will quit and remove itself completely. This will delete:" = "%@이(가) 종료되고 완전히 제거됩니다. 다음 항목이 삭제됩니다:";
 "The app and its login item" = "앱과 로그인 항목";
 "All preferences and actions" = "모든 환경설정과 동작";
 "Caches and support files" = "캐시 및 지원 파일";
 "Also delete clipboard history and snippets" = "클립보드 기록과 스니펫도 삭제";
-"Accessibility and clipboard permissions are removed by macOS in System Settings, not by this app. This cannot be undone." = "손쉬운 사용 및 클립보드 권한은 이 앱이 아닌 macOS 시스템 설정에서 제거됩니다. 이 작업은 되돌릴 수 없습니다.";
 "ClipMenu now shares the Dragon apps' settings foundation." = "ClipMenu가 이제 Dragon 앱 공통 설정 기반을 사용합니다.";
 "A sidebar settings window shared with the other Dragon apps." = "다른 Dragon 앱과 공유하는 사이드바 설정 윈도우.";
 "Permissions, What's New, and Software Update panes." = "권한, 새로운 기능, 소프트웨어 업데이트 패널.";

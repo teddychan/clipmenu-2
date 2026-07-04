@@ -272,13 +272,10 @@
 "Created by" = "作者";
 "License" = "许可证";
 "Uninstall" = "卸载";
-"Uninstall %@?" = "卸载 %@？";
-"%@ will quit and remove itself completely. This will delete:" = "%@ 将退出并彻底移除自身。将删除以下内容：";
 "The app and its login item" = "App 及其登录项";
 "All preferences and actions" = "所有偏好设置与动作";
 "Caches and support files" = "缓存与支持文件";
 "Also delete clipboard history and snippets" = "同时删除剪贴板历史与片段";
-"Accessibility and clipboard permissions are removed by macOS in System Settings, not by this app. This cannot be undone." = "辅助功能与剪贴板权限由 macOS 系统设置移除，而非本 App。此操作无法撤销。";
 "ClipMenu now shares the Dragon apps' settings foundation." = "ClipMenu 现已采用 Dragon 系列 App 共享的设置基础。";
 "A sidebar settings window shared with the other Dragon apps." = "与其他 Dragon App 一致的边栏式设置窗口。";
 "Permissions, What's New, and Software Update panes." = "新增权限、新功能与软件更新面板。";

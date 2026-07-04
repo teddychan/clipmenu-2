@@ -99,10 +99,33 @@ final class SettingsWindowController: NSObject {
         #endif
         panes.append(AnySettingsPane(WhatsNewSettingsPane(content: WhatsNewConfig.content)))
         panes.append(AnySettingsPane(AboutSettingsPane(content: AboutConfig.content)))
-        panes.append(AnySettingsPane(UninstallPane(onCancel: { [weak self] in
+        panes.append(AnySettingsPane(UninstallSettingsPane(config: uninstallConfig, onCancel: { [weak self] in
             self?.selection.paneID = "general"
         })))
         return panes
+    }
+
+    /// What uninstalling removes. The optional toggle (default off) covers the
+    /// user's clipboard history + snippets (the whole Application Support folder);
+    /// without it only support files (actions.plist, user scripts) and caches go.
+    private var uninstallConfig: UninstallConfig {
+        let bundleID = Bundle.main.bundleIdentifier ?? "com.dragonapp.clipmenu-2"
+        let library = FileManager.default.homeDirectoryForCurrentUser.appending(path: "Library")
+        return UninstallConfig(
+            appName: MainMenuController.canonicalName,
+            checklistItems: [
+                L("The app and its login item"),
+                L("All preferences and actions"),
+                L("Caches and support files"),
+            ],
+            optionalDataToggle: (label: L("Also delete clipboard history and snippets"),
+                                 paths: [AppStore.folder]),
+            extraCleanupPaths: [
+                AppStore.folder.appending(path: "actions.plist"),
+                AppStore.folder.appending(path: "script"),
+                library.appending(path: "Caches/\(bundleID)"),
+                library.appending(path: "HTTPStorages/\(bundleID)"),
+            ])
     }
 
     /// True while the Settings window is on screen.

@@ -1060,9 +1060,9 @@ final class MainMenuController: NSObject, NSMenuDelegate {
         UpdaterUI.checkNow()
     }
 
-    /// "Uninstall ClipMenu 2…" — opens Settings on the Uninstall pane, which
-    /// confirms inline (checklist + user-data toggle) and performs the teardown
-    /// (see UninstallPane.swift).
+    /// "Uninstall ClipMenu 2…" — opens Settings on the Uninstall pane (DragonKit's
+    /// `UninstallSettingsPane`), which confirms inline (checklist + user-data
+    /// toggle) and performs the teardown (config in SettingsWindowController.swift).
     @objc private func uninstall(_ sender: Any?) {
         SettingsWindowController.shared.show(paneID: "uninstall")
     }
