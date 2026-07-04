@@ -23,7 +23,7 @@ import Foundation
 let sparkleEnabled = ProcessInfo.processInfo.environment["CLIPMENU_SPARKLE"] == "1"
 
 var packageDependencies: [Package.Dependency] = [
-    .package(url: "https://github.com/teddychan/dragon-kit", from: "1.1.0"),
+    .package(url: "https://github.com/teddychan/dragon-kit", from: "1.2.0"),
 ]
 var clipMenuDependencies: [Target.Dependency] = [
     .product(name: "DragonKit", package: "dragon-kit"),

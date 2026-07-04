@@ -1,13 +1,13 @@
 {
-  "originHash" : "2cf5f4f915deb23908b2d7024ee6dfe883b82135d3b78617cfc72c0aa4af5644",
+  "originHash" : "ebc0841abf886c3996edee87ebaa0fc566dcb2d0f88ae8f6b21c8713c3de96eb",
   "pins" : [
     {
       "identity" : "dragon-kit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/teddychan/dragon-kit",
       "state" : {
-        "revision" : "3765ceab9df732fe884553fae91e30126aad1bf2",
-        "version" : "1.1.0"
+        "revision" : "6dace7298fe1228d3a97ce35e488a438777ebfc2",
+        "version" : "1.2.0"
       }
     },
     {
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sparkle-project/Sparkle",
       "state" : {
-        "revision" : "d46d456107feacc80711b21847b82b07bd9fb46e",
-        "version" : "2.9.3"
+        "revision" : "b6496a74a087257ef5e6da1c5b29a447a60f5bd7",
+        "version" : "2.9.4"
       }
     }
   ],
