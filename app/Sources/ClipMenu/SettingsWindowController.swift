@@ -82,7 +82,6 @@ final class SettingsWindowController: NSObject {
     private var settingsPanes: [AnySettingsPane] {
         var panes: [AnySettingsPane] = [
             AnySettingsPane(GeneralPane()),
-            AnySettingsPane(SyncBackupPane()),
             AnySettingsPane(MenuPane()),
             AnySettingsPane(TypePane()),
             AnySettingsPane(ActionPane()),
@@ -94,10 +93,11 @@ final class SettingsWindowController: NSObject {
             panes.append(AnySettingsPane(PermissionsSettingsPane(
                 permissions: [.accessibility(isRequired: false)])))
         }
+        panes.append(AnySettingsPane(SyncBackupPane()))
+        panes.append(AnySettingsPane(WhatsNewSettingsPane(content: WhatsNewConfig.content)))
         #if SPARKLE
         panes.append(AnySettingsPane(UpdatesSettingsPane(updater: UpdaterUI.updater)))
         #endif
-        panes.append(AnySettingsPane(WhatsNewSettingsPane(content: WhatsNewConfig.content)))
         panes.append(AnySettingsPane(AboutSettingsPane(content: AboutConfig.content)))
         panes.append(AnySettingsPane(UninstallSettingsPane(config: uninstallConfig, onCancel: { [weak self] in
             self?.selection.paneID = "general"

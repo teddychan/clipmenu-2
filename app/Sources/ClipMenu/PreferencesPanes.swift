@@ -469,7 +469,7 @@ struct ExcludeAppsView: View {
 // The app's screens as `SettingsPane` conformers, listed by
 // `SettingsWindowController.settingsPanes` in sidebar order. `title` is a
 // localization key resolved by the shell via `L()`, so the sidebar switches
-// language live. DragonKit's own panes (Permissions, Updates, What's New,
+// language live. DragonKit's own panes (Permissions, What's New, Updates,
 // About) are appended there — no bespoke About pane remains (its Setup Guide
 // button moved to General; Check for Updates lives in the Updates pane).
 
