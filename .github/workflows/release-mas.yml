@@ -36,7 +36,7 @@ jobs:
     # ClipMenu targets the macOS 26 SDK — build on the macos-26 hosted image.
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Select newest Xcode
         run: |
