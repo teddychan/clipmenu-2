@@ -14,7 +14,7 @@ enum AboutConfig {
     static var content: AboutContent {
         AboutContent(
             appName: AppInfo.displayName,
-            versionString: AppInfo.versionDescription,
+            versionString: DragonAbout.versionString(),
             copyright: AppInfo.copyright,
             links: [
                 AboutLink(title: L("Website"), detail: "dragonapp.com/clipmenu",
