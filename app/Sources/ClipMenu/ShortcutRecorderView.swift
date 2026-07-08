@@ -74,10 +74,14 @@ enum KeyComboFormatter {
 @MainActor
 final class ShortcutRecorderControl: NSView {
     var combo: HotKeyCenter.Combo { didSet { needsDisplay = true } }
-    /// Returns whether the rebind was accepted (false: combo already bound to
-    /// another menu, or Carbon refused it). On false the control keeps the
-    /// previous combo and beeps.
-    var onCapture: ((HotKeyCenter.Combo) -> Bool)?
+    /// Applies the rebind and reports the outcome. On a rejection the control keeps
+    /// the previous combo, beeps, and briefly shows why (see `keyDown`).
+    var onCapture: ((HotKeyCenter.Combo) -> MainMenuController.RebindOutcome)?
+
+    /// Transient rejection message shown in place of the combo for a moment after
+    /// a failed capture (e.g. "Already used by History menu"), then cleared.
+    private var feedback: String? { didSet { needsDisplay = true } }
+    private var feedbackTask: Task<Void, Never>?
 
     private var isRecording = false {
         didSet {
@@ -135,10 +139,28 @@ final class ShortcutRecorderControl: NSView {
 
         let newCombo = HotKeyCenter.Combo(keyCode: UInt32(event.keyCode), modifiers: modifiers)
         isRecording = false
-        if onCapture?(newCombo) == true {
+        switch onCapture?(newCombo) ?? .registrationFailed {
+        case .bound:
+            feedback = nil
             combo = newCombo
-        } else {
-            NSSound.beep() // rejected: duplicate of another menu's combo, or Carbon refused it
+        case .conflict(let other):
+            NSSound.beep()
+            showFeedback(String(format: L("Already used by %@"), other.localizedName))
+        case .registrationFailed:
+            NSSound.beep()
+            showFeedback(L("Shortcut unavailable"))
+        }
+    }
+
+    /// Show `message` in place of the combo, then clear it after a short delay so
+    /// the control returns to displaying the (unchanged) current shortcut.
+    private func showFeedback(_ message: String) {
+        feedback = message
+        feedbackTask?.cancel()
+        feedbackTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            self?.feedback = nil
         }
     }
 
@@ -151,10 +173,10 @@ final class ShortcutRecorderControl: NSView {
 
         let text = isRecording
             ? L("Type shortcut…")
-            : KeyComboFormatter.displayString(for: combo)
+            : (feedback ?? KeyComboFormatter.displayString(for: combo))
         let attrs: [NSAttributedString.Key: Any] = [
             .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize),
-            .foregroundColor: NSColor.labelColor,
+            .foregroundColor: feedback == nil ? NSColor.labelColor : NSColor.systemRed,
         ]
         let size = (text as NSString).size(withAttributes: attrs)
         let point = NSPoint(x: (bounds.width - size.width) / 2,

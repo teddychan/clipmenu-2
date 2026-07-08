@@ -56,6 +56,24 @@ final class MainMenuController: NSObject, NSMenuDelegate {
             case .snippets: return .init(keyCode: UInt32(kVK_ANSI_B), modifiers: UInt32(cmdKey | shiftKey))
             }
         }
+
+        /// Localized menu name, shown in the shortcut recorder's conflict feedback.
+        /// `L()` is main-actor isolated; the only caller (the recorder) is too.
+        @MainActor var localizedName: String {
+            switch self {
+            case .main:     return L("Main menu")
+            case .history:  return L("History menu")
+            case .snippets: return L("Snippets menu")
+            }
+        }
+    }
+
+    /// Result of a live rebind, so the shortcut recorder can explain a rejection
+    /// instead of only beeping (see ShortcutRecorderControl).
+    enum RebindOutcome: Equatable {
+        case bound                       // registered live
+        case conflict(MenuHotKey)        // already assigned to another menu hot-key
+        case registrationFailed          // Carbon refused it (e.g. system-owned combo)
     }
 
     /// Live Carbon hot-key id per identifier, so we can unregister on rebind.
@@ -174,23 +192,24 @@ final class MainMenuController: NSObject, NSMenuDelegate {
 
     /// Rebind from the recorder: persist the new combo and re-register live —
     /// PrefsWindowController.m:582-613 (change handler) + the KVO-driven
-    /// re-register at AppController.m:601-633. Returns false (binding
+    /// re-register at AppController.m:601-633. Returns `.conflict` (binding
     /// unchanged) when the combo is already assigned to another menu — Carbon
     /// registers non-exclusively, so one keystroke would pop both menus — or
-    /// when Carbon refuses the registration.
+    /// `.registrationFailed` when Carbon refuses the registration (the previous
+    /// binding is restored). `.bound` on success.
     @discardableResult
-    func rebind(_ hotKey: MenuHotKey, to combo: HotKeyCenter.Combo) -> Bool {
-        if Self.conflictingHotKey(for: combo, excluding: hotKey, current: { currentCombo(for: $0) }) != nil {
-            return false
+    func rebind(_ hotKey: MenuHotKey, to combo: HotKeyCenter.Combo) -> RebindOutcome {
+        if let other = Self.conflictingHotKey(for: combo, excluding: hotKey, current: { currentCombo(for: $0) }) {
+            return .conflict(other)
         }
         let previous = currentCombo(for: hotKey)
         storeCombo(combo, for: hotKey)
-        if register(hotKey) { return true }
+        if register(hotKey) { return .bound }
         // Registration failed (e.g. a system-owned combo): restore the
         // previous working binding instead of silently losing it.
         storeCombo(previous, for: hotKey)
         register(hotKey)
-        return false
+        return .registrationFailed
     }
 
     /// The other menu hot-key already bound to `combo`, or nil. Pure + injected
@@ -343,9 +362,13 @@ final class MainMenuController: NSObject, NSMenuDelegate {
         guard let menu = historyMenu else { return }
         while menu.numberOfItems > 2 { menu.removeItem(at: menu.numberOfItems - 1) }
         menuPrefs = .current()
-        addClipsSection(to: menu)
+        // Fetch + filter once per keystroke and reuse it for both the rows and the
+        // "No matches" check — the previous code ran the bounded fetch and the
+        // Swift filter twice on every keystroke (the search hot path).
+        let clips = fetchClips()
+        addClipsSection(to: menu, clips: clips)
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmed.isEmpty, fetchClips().isEmpty {
+        if !trimmed.isEmpty, clips.isEmpty {
             let none = NSMenuItem(title: L("No matches"), action: nil, keyEquivalent: "")
             none.isEnabled = false
             menu.addItem(none)
@@ -449,7 +472,7 @@ final class MainMenuController: NSObject, NSMenuDelegate {
     /// (default), a disabled "History" label is shown even with zero clips
     /// (MenuController.m:574-582). Clip items are added once clipboard capture
     /// (§D) is implemented.
-    private func addClipsSection(to menu: NSMenu) {
+    private func addClipsSection(to menu: NSMenu, clips preloaded: [ClipRecord]? = nil) {
         let showLabelsInMenu = menuPrefs.showLabels
         if showLabelsInMenu {
             let label = NSMenuItem(title: L("History"),
@@ -469,7 +492,7 @@ final class MainMenuController: NSObject, NSMenuDelegate {
         // Display numbering: clips are marked "N. " when menuItemsAreMarkedWithNumbers
         // (default YES), as a CONTINUOUS running number 1,2,…,N across overflow
         // folders.
-        let clips = fetchClips()
+        let clips = preloaded ?? fetchClips()
         let total = clips.count
         for (i, clip) in clips.enumerated() {
             let listNumber = i + 1

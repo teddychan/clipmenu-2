@@ -153,16 +153,26 @@ enum PasteboardReader {
     /// True if the frontmost app's bundle id is in the exclude list
     /// (ClipsController.m:768-793, `_frontProcessIsInExcludeList`).
     private static func frontAppIsExcluded() -> Bool {
-        let excluded = excludedBundleIdentifiers()
-        guard !excluded.isEmpty,
-              let bundleID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-        else { return false }
+        isExcluded(currentFrontBundleID(), in: excludedBundleIdentifiers())
+    }
+
+    /// The frontmost app's bundle id, or nil. Read on the caller's (off-main)
+    /// executor, matching the rest of the snapshot read; NSWorkspace's frontmost
+    /// query is safe from any thread.
+    static func currentFrontBundleID() -> String? {
+        NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+    }
+
+    /// Whether `bundleID` is excluded. Pure so the exclusion rule — and the
+    /// monitor's copy-then-switch guard (PasteboardMonitor) — is unit-testable.
+    static func isExcluded(_ bundleID: String?, in excluded: Set<String>) -> Bool {
+        guard let bundleID, !excluded.isEmpty else { return false }
         return excluded.contains(bundleID)
     }
 
     /// Excluded app bundle identifiers from the `excludeApps` default; falls back
     /// to the legacy default of OpenOffice.org (AppController.m:103-118).
-    private static func excludedBundleIdentifiers() -> Set<String> {
+    static func excludedBundleIdentifiers() -> Set<String> {
         if let list = UserDefaults.standard.array(forKey: PreferenceKeys.excludeApps) as? [[String: String]] {
             return Set(list.compactMap { $0["bundleIdentifier"] })
         }
@@ -264,16 +274,15 @@ actor ClipStore {
         }
     }
 
-    /// Drop oldest clips beyond maxHistorySize (ClipsController.m:795-813).
+    /// Drop oldest clips beyond maxHistorySize (ClipsController.m:795-813). Runs on
+    /// every capture, so it fetches only the overflow (offset past the cap), not the
+    /// whole sorted history — with the `lastUsedDate`/`createdDate` index this stays
+    /// cheap even under rapid copies and a large history (CLAUDE.md §2).
     private func trim() {
-        let maxHistory = Self.maxHistorySize()
-        var descriptor = FetchDescriptor<ClipRecord>(sortBy: [Self.sortDescriptor])
-        // Only need the rows to delete the oldest — don't fault their image
-        // payloads into the store actor's context on every capture.
-        descriptor.propertiesToFetch = [\.contentHash]
-        guard let all = try? modelContext.fetch(descriptor),
-              all.count > maxHistory else { return }
-        for record in all[maxHistory...] {
+        let count = (try? modelContext.fetchCount(FetchDescriptor<ClipRecord>())) ?? 0
+        guard count > Self.maxHistorySize() else { return }
+        guard let overflow = try? modelContext.fetch(Self.trimOverflowDescriptor()) else { return }
+        for record in overflow {
             modelContext.delete(record)
         }
     }
@@ -302,6 +311,18 @@ actor ClipStore {
     static func boundedHistoryDescriptor(_ defaults: UserDefaults = .standard) -> FetchDescriptor<ClipRecord> {
         var descriptor = FetchDescriptor<ClipRecord>(sortBy: [sortDescriptor])
         descriptor.fetchLimit = maxHistorySize(defaults)
+        return descriptor
+    }
+
+    /// The overflow to drop in `trim()`: the clips PAST `maxHistorySize` in the
+    /// same newest-first order, selected with the cap as a fetch offset. Symmetric
+    /// with `boundedHistoryDescriptor` — what that keeps, this deletes — so the
+    /// on-disk history matches the in-view cap. Only the `contentHash` column is
+    /// faulted, never the image payloads.
+    static func trimOverflowDescriptor(_ defaults: UserDefaults = .standard) -> FetchDescriptor<ClipRecord> {
+        var descriptor = FetchDescriptor<ClipRecord>(sortBy: [sortDescriptor])
+        descriptor.fetchOffset = maxHistorySize(defaults)
+        descriptor.propertiesToFetch = [\.contentHash]
         return descriptor
     }
 }
