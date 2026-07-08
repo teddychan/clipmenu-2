@@ -107,6 +107,13 @@ extension Snippet {
 /// once; `typeIdentifiers` records them in priority order (legacy `Clip.types`).
 @Model
 final class ClipRecord {
+    // Indexes for the queries run on every capture and menu open: dedup looks up
+    // by `contentHash` (capture, StoreMigration), and the history is always sorted
+    // by `lastUsedDate`/`createdDate` (bounded fetch, trim). Without these the
+    // dedup lookup and the sort are full scans that grow with the store; the
+    // index keeps them flat. History-store only — snippets are unindexed.
+    #Index<ClipRecord>([\.contentHash], [\.lastUsedDate], [\.createdDate])
+
     var createdDate: Date
     var lastUsedDate: Date
 

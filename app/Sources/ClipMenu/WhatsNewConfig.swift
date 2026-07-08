@@ -8,11 +8,17 @@ enum WhatsNewConfig {
     static var content: WhatsNewContent {
         WhatsNewContent(
             version: "v\(AppInfo.version)",
-            date: "2026-07-05",
-            summary: L("ClipMenu's Settings now line up with the other Dragon apps."),
+            date: "2026-07-08",
+            summary: L("Under-the-hood performance and reliability improvements."),
             sections: [
-                ChangeSection(kind: .changed, entries: [
-                    L("Settings sidebar reordered to match the other Dragon apps: What's New now sits just before Software Update, and Sync & Backup follows Permissions."),
+                ChangeSection(kind: .improved, entries: [
+                    L("Lower background energy use — the clipboard watch now lets macOS batch its wake-ups."),
+                    L("Faster history menu and clipboard capture, especially with a large history, thanks to database indexes and a lighter history trim."),
+                    L("Snappier type-to-filter in the History menu."),
+                ]),
+                ChangeSection(kind: .fixed, entries: [
+                    L("Copies from an excluded app are no longer recorded if you switch away before the clipboard is read."),
+                    L("The shortcut recorder now tells you when a shortcut is already in use or unavailable, instead of only beeping."),
                 ]),
             ]
         )

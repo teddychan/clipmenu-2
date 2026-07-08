@@ -24,6 +24,35 @@ import Foundation
         // nil (key never set) → the default interval.
         #expect(PasteboardMonitor.effectiveInterval(fromSeconds: nil) == PasteboardMonitor.defaultInterval)
     }
+
+    @Test func pollToleranceIsAQuarterOfTheInterval() {
+        // Coalescing tolerance lets macOS batch our recurring wake-up with other
+        // timers, cutting distinct wake events (energy) without changing cadence.
+        #expect(PasteboardMonitor.pollTolerance(for: .milliseconds(800)) == .milliseconds(200))
+        #expect(PasteboardMonitor.pollTolerance(for: PasteboardMonitor.defaultInterval)
+                == PasteboardMonitor.defaultInterval / 4)
+    }
+}
+
+// The frontmost-app exclusion rule (used both at snapshot time and by the
+// monitor's copy-then-switch guard) must skip excluded bundle ids and no others.
+@Suite struct ExcludedAppTests {
+
+    @Test func bundleInExcludeListIsExcluded() {
+        #expect(PasteboardReader.isExcluded("org.openoffice.script", in: ["org.openoffice.script"]))
+    }
+
+    @Test func bundleNotInExcludeListIsNotExcluded() {
+        #expect(!PasteboardReader.isExcluded("com.apple.Safari", in: ["org.openoffice.script"]))
+    }
+
+    @Test func nilFrontmostBundleIsNotExcluded() {
+        #expect(!PasteboardReader.isExcluded(nil, in: ["org.openoffice.script"]))
+    }
+
+    @Test func emptyExcludeListExcludesNothing() {
+        #expect(!PasteboardReader.isExcluded("org.openoffice.script", in: []))
+    }
 }
 
 // Password managers (1Password, Bitwarden, KeePassXC, Dashlane, …) mark

@@ -20,6 +20,13 @@ actor PasteboardMonitor {
     private var lastChangeCount: Int = 0
     private var pollTask: Task<Void, Never>?
     private var clipStore: ClipStore?
+    /// The frontmost app's bundle id observed at the PREVIOUS poll tick. Used to
+    /// close the copy-then-switch exclusion race: a copy is detected up to one
+    /// interval after it happened, by which time the user may have switched away
+    /// from an excluded app, so the current frontmost no longer reveals the
+    /// origin. If the app frontmost just before the change is excluded, we skip
+    /// — erring toward not recording (privacy-safe). See ClipCapture.isExcluded.
+    private var previousFrontBundleID: String?
 
     /// Polling interval bounds: clamped to the legacy maximum of 1.0s, and to a
     /// 0.25s floor so the slider's 0 value can't turn the poll into a busy loop.
@@ -36,6 +43,16 @@ actor PasteboardMonitor {
         return min(max(requested, minInterval), maxInterval)
     }
 
+    /// Wake-up tolerance for the poll timer: a quarter of the interval. Letting the
+    /// OS defer each wake up to this much lets it coalesce our recurring wake with
+    /// other timers, cutting the number of distinct wake events (and so the energy
+    /// cost) of an always-on agent — without changing the nominal cadence. Capture
+    /// latency stays bounded by interval + tolerance (≤ ~0.94s at the default).
+    /// Pure, so it is unit-testable.
+    static func pollTolerance(for interval: Duration) -> Duration {
+        interval / 4
+    }
+
     func start(clipStore: ClipStore, interval: Duration? = nil) async {
         guard pollTask == nil else { return }
         self.clipStore = clipStore
@@ -44,9 +61,10 @@ actor PasteboardMonitor {
 
         lastChangeCount = NSPasteboard.general.changeCount
 
+        let tolerance = Self.pollTolerance(for: effective)
         pollTask = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(for: effective)
+                try? await Task.sleep(for: effective, tolerance: tolerance)
                 await self?.poll()
             }
         }
@@ -58,9 +76,24 @@ actor PasteboardMonitor {
     }
 
     private func poll() async {
+        // Sample the frontmost app every tick so `previousFrontBundleID` holds the
+        // app that was frontmost just BEFORE this one — the likely origin of a copy
+        // detected this tick. Update it before every early return.
+        let front = PasteboardReader.currentFrontBundleID()
+        let previousFront = previousFrontBundleID
+        previousFrontBundleID = front
+
         let current = NSPasteboard.general.changeCount
         guard current != lastChangeCount else { return }
         lastChangeCount = current
+
+        // Copy-then-switch guard: if the app frontmost immediately before this
+        // change is excluded, the copy most likely came from it even though the
+        // user has since switched away — skip. PasteboardReader.snapshot() still
+        // applies the current-front exclusion and the privacy markers.
+        if PasteboardReader.isExcluded(previousFront, in: PasteboardReader.excludedBundleIdentifiers()) {
+            return
+        }
 
         // Read and persist off the main actor (ClipsController.m:610-643).
         guard let snapshot = PasteboardReader.snapshot() else { return }
