@@ -243,7 +243,13 @@ actor ClipStore {
             thumbnailData: thumbnailData,
             contentHash: hash
         )
+        // Persist the new clip BEFORE trimming. trim() selects the overflow with a
+        // fetchOffset descriptor, and an unsaved (pending) insert is not ordered by
+        // that fetch the way a saved row is — so trimming first lets a full history
+        // (count == maxHistorySize) pick the just-inserted clip as the "overflow"
+        // and delete it, silently dropping every new copy once the store fills up.
         modelContext.insert(record)
+        try? modelContext.save()
         trim()
         try? modelContext.save()
     }
