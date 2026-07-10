@@ -284,8 +284,11 @@ actor ClipStore {
     /// whole sorted history — with the `lastUsedDate`/`createdDate` index this stays
     /// cheap even under rapid copies and a large history (CLAUDE.md §2).
     private func trim() {
-        let count = (try? modelContext.fetchCount(FetchDescriptor<ClipRecord>())) ?? 0
-        guard count > Self.maxHistorySize() else { return }
+        // Fetch the overflow directly: the offset descriptor already returns []
+        // when the store is at or under the cap, so the previous explicit
+        // fetchCount guard was a redundant extra query on every capture. Dropping
+        // it still trims correctly in bulk when the user LOWERS the cap — the
+        // offset fetch then returns every clip beyond the new, smaller cap.
         guard let overflow = try? modelContext.fetch(Self.trimOverflowDescriptor()) else { return }
         for record in overflow {
             modelContext.delete(record)
@@ -317,6 +320,19 @@ actor ClipStore {
         var descriptor = FetchDescriptor<ClipRecord>(sortBy: [sortDescriptor])
         descriptor.fetchLimit = maxHistorySize(defaults)
         return descriptor
+    }
+
+    /// Case/diacritic-insensitive "contains" match over a clip's text, used by the
+    /// History-menu search (⌘⌃V) to filter in the store rather than fetching every
+    /// row and filtering in Swift on each keystroke. Clips without text (image-only)
+    /// never match. Kept beside the bounded-history descriptors so the whole
+    /// history-fetch policy lives in one place and stays unit-testable.
+    /// `localizedStandardContains` is the Finder-style match SwiftData pushes into
+    /// SQLite (CONTAINS[cd]).
+    static func searchPredicate(_ query: String) -> Predicate<ClipRecord> {
+        #Predicate<ClipRecord> { clip in
+            clip.stringValue?.localizedStandardContains(query) ?? false
+        }
     }
 
     /// The overflow to drop in `trim()`: the clips PAST `maxHistorySize` in the
