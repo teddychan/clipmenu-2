@@ -674,16 +674,21 @@ final class MainMenuController: NSObject, NSMenuDelegate {
         // image lives in the faulted `ClipRecord.image` relationship, so fetching
         // for the menu never loads the multi-MB bytes; only paste does (CLAUDE.md
         // §4). The menu renders from the small `thumbnailData` column on the row.
-        let clips = (try? AppStore.container.mainContext.fetch(ClipStore.boundedHistoryDescriptor())) ?? []
-        // History-menu search (⌘⌃V): keep only clips whose text matches the typed
-        // query, case- and diacritic-insensitively. The query is empty for the
-        // Main/Snippets menus, so this is a no-op there. Image-only clips (no
-        // stringValue) never match a text query, as expected. Storage is trimmed
-        // to maxHistorySize on every capture, so this bounded fetch already holds
-        // the entire stored history — filtering it searches all of it.
+        var descriptor = ClipStore.boundedHistoryDescriptor()
+        // History-menu search (⌘⌃V): filter in the store instead of fetching every
+        // row and filtering in Swift on each keystroke — the search hot path. The
+        // query is empty for the Main/Snippets menus, so this is a no-op there.
+        // Storage is trimmed to maxHistorySize on every capture, so the store
+        // already holds the whole history the user chose to keep; the predicate
+        // therefore searches all of it while materializing only the matches, which
+        // stays fast even with a large history (CLAUDE.md §2). `localizedStandardContains`
+        // is the case/diacritic-insensitive, Finder-style match SwiftData can push
+        // into SQLite. Image-only clips (no stringValue) never match, as expected.
         let query = historySearchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return clips }
-        return clips.filter { ($0.stringValue ?? "").localizedCaseInsensitiveContains(query) }
+        if !query.isEmpty {
+            descriptor.predicate = ClipStore.searchPredicate(query)
+        }
+        return (try? AppStore.container.mainContext.fetch(descriptor)) ?? []
     }
 
     /// Menu title for a clip: trimmed first line, or a type placeholder
