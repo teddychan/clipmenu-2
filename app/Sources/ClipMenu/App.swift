@@ -63,6 +63,12 @@ enum AppStore {
                 configurations: snippetsConfig, historyConfig)
         }
 
+        // Add ClipRecord's #Index indexes to a pre-existing history store — SwiftData
+        // creates them on fresh stores but not on ones migrated up to the indexed
+        // schema (v2.17.7). Best-effort, before the store opens; a no-op on fresh
+        // installs and where the indexes already exist.
+        HistoryIndexRepair.ensureIndexes(at: historyURL)
+
         do {
             return try make()
         } catch {

@@ -20,13 +20,6 @@ actor PasteboardMonitor {
     private var lastChangeCount: Int = 0
     private var pollTask: Task<Void, Never>?
     private var clipStore: ClipStore?
-    /// The frontmost app's bundle id observed at the PREVIOUS poll tick. Used to
-    /// close the copy-then-switch exclusion race: a copy is detected up to one
-    /// interval after it happened, by which time the user may have switched away
-    /// from an excluded app, so the current frontmost no longer reveals the
-    /// origin. If the app frontmost just before the change is excluded, we skip
-    /// — erring toward not recording (privacy-safe). See ClipCapture.isExcluded.
-    private var previousFrontBundleID: String?
 
     /// Polling interval bounds: clamped to the legacy maximum of 1.0s, and to a
     /// 0.25s floor so the slider's 0 value can't turn the poll into a busy loop.
@@ -76,26 +69,18 @@ actor PasteboardMonitor {
     }
 
     private func poll() async {
-        // Sample the frontmost app every tick so `previousFrontBundleID` holds the
-        // app that was frontmost just BEFORE this one — the likely origin of a copy
-        // detected this tick. Update it before every early return.
-        let front = PasteboardReader.currentFrontBundleID()
-        let previousFront = previousFrontBundleID
-        previousFrontBundleID = front
-
         let current = NSPasteboard.general.changeCount
         guard current != lastChangeCount else { return }
         lastChangeCount = current
 
-        // Copy-then-switch guard: if the app frontmost immediately before this
-        // change is excluded, the copy most likely came from it even though the
-        // user has since switched away — skip. PasteboardReader.snapshot() still
-        // applies the current-front exclusion and the privacy markers.
-        if PasteboardReader.isExcluded(previousFront, in: PasteboardReader.excludedBundleIdentifiers()) {
-            return
-        }
-
-        // Read and persist off the main actor (ClipsController.m:610-643).
+        // Read and persist off the main actor (ClipsController.m:610-643). Per-app
+        // exclusion — and the nspasteboard.org privacy markers — are applied in
+        // snapshot() against the CURRENT frontmost app, i.e. the app the copy was
+        // made in. We deliberately do NOT also skip based on the previously
+        // frontmost app: that "copy-then-switch" guard dropped legitimate copies
+        // made in a non-excluded app whenever an excluded app happened to be
+        // frontmost at the prior tick (a clipboard manager silently losing clips
+        // is worse than the narrow race it closed).
         guard let snapshot = PasteboardReader.snapshot() else { return }
         await clipStore?.capture(snapshot)
     }
