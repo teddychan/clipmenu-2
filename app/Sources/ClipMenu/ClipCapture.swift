@@ -163,8 +163,7 @@ enum PasteboardReader {
         NSWorkspace.shared.frontmostApplication?.bundleIdentifier
     }
 
-    /// Whether `bundleID` is excluded. Pure so the exclusion rule — and the
-    /// monitor's copy-then-switch guard (PasteboardMonitor) — is unit-testable.
+    /// Whether `bundleID` is excluded. Pure so the exclusion rule is unit-testable.
     static func isExcluded(_ bundleID: String?, in excluded: Set<String>) -> Bool {
         guard let bundleID, !excluded.isEmpty else { return false }
         return excluded.contains(bundleID)
