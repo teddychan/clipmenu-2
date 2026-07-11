@@ -260,8 +260,8 @@ struct SnippetEditorView: View {
     // MARK: Folder CRUD
 
     private func addFolder() {
-        let nextIndex = (folders.map(\.index).max() ?? -1) + 1
-        let folder = Folder(title: L("untitled folder"), index: nextIndex)
+        let folder = Folder(title: L("untitled folder"),
+                            index: ManualReorder.nextIndex(in: folders, index: \.index))
         context.insert(folder)
         try? context.save()
         selectedFolderID = folder.persistentModelID
@@ -271,9 +271,9 @@ struct SnippetEditorView: View {
     private func deleteFolder() {
         guard let folder = selectedFolder else { return }
         context.delete(folder)
-        for (i, f) in folders
-            .filter({ $0.persistentModelID != folder.persistentModelID })
-            .sorted(by: { $0.index < $1.index }).enumerated() { f.index = i }
+        let survivors = ManualReorder.afterRemoving(
+            folder.persistentModelID, from: folders, id: \.persistentModelID, index: \.index)
+        for (i, f) in survivors.enumerated() { f.index = i }
         try? context.save()
         selectedFolderID = orderedFolders.first?.persistentModelID
     }
@@ -282,8 +282,9 @@ struct SnippetEditorView: View {
 
     private func addSnippet() {
         guard let folder = selectedFolder else { return }
-        let nextIndex = ((folder.snippets ?? []).map(\.index).max() ?? -1) + 1
-        let snippet = Snippet(title: L("untitled snippet"), index: nextIndex, folder: folder)
+        let snippet = Snippet(title: L("untitled snippet"),
+                              index: ManualReorder.nextIndex(in: folder.snippets ?? [], index: \.index),
+                              folder: folder)
         context.insert(snippet)
         try? context.save()
         selectedSnippetID = snippet.persistentModelID
@@ -291,9 +292,8 @@ struct SnippetEditorView: View {
 
     private func deleteSnippet() {
         guard let snippet = selectedSnippet, let folder = snippet.folder else { return }
-        let remaining = (folder.snippets ?? [])
-            .filter { $0.persistentModelID != snippet.persistentModelID }
-            .sorted { $0.index < $1.index }
+        let remaining = ManualReorder.afterRemoving(
+            snippet.persistentModelID, from: folder.snippets ?? [], id: \.persistentModelID, index: \.index)
         context.delete(snippet)
         for (i, s) in remaining.enumerated() { s.index = i }
         try? context.save()
@@ -345,28 +345,26 @@ struct SnippetEditorView: View {
 
     private func moveFolders(from source: IndexSet, to destination: Int) {
         guard folderSort == .manual else { return }
-        var ordered = folders.sorted { $0.index < $1.index }
-        ordered.move(fromOffsets: source, toOffset: destination)
+        let ordered = ManualReorder.moved(folders, from: source, to: destination, index: \.index)
         for (i, folder) in ordered.enumerated() { folder.index = i }
         try? context.save()
     }
     private func moveSnippets(in folder: Folder, from source: IndexSet, to destination: Int) {
         guard folder.snippetSort == .manual else { return }
-        var ordered = (folder.snippets ?? []).sorted { $0.index < $1.index }
-        ordered.move(fromOffsets: source, toOffset: destination)
+        let ordered = ManualReorder.moved(folder.snippets ?? [], from: source, to: destination, index: \.index)
         for (i, s) in ordered.enumerated() { s.index = i }
         try? context.save()
     }
     private func moveSnippets(_ refs: [SnippetRef], to folder: Folder) -> Bool {
-        var nextIndex = (folder.snippets ?? []).map(\.index).max() ?? -1
+        var nextIndex = ManualReorder.nextIndex(in: folder.snippets ?? [], index: \.index)
         var moved = false
         for ref in refs {
             guard let snippet = context.model(for: ref.id) as? Snippet,
                   snippet.folder?.persistentModelID != folder.persistentModelID
             else { continue }
             snippet.folder = folder
-            nextIndex += 1
             snippet.index = nextIndex
+            nextIndex += 1
             moved = true
         }
         if moved { try? context.save() }

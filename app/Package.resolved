@@ -1,5 +1,5 @@
 {
-  "originHash" : "671fca981c0a03a4580c08a13b0576c4c459c2214b274d2eaa296f7432aa53c7",
+  "originHash" : "7766d77c66c0a72b5e86b67c8ce8a3b2bc1a6063899d186384cce655b3629b68",
   "pins" : [
     {
       "identity" : "dragon-kit",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "b6496a74a087257ef5e6da1c5b29a447a60f5bd7",
         "version" : "2.9.4"
+      }
+    },
+    {
+      "identity" : "viewinspector",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nalexn/ViewInspector",
+      "state" : {
+        "revision" : "e9a06346499a3a889165647e3f23f8a7b2609a1c",
+        "version" : "0.10.3"
       }
     }
   ],
