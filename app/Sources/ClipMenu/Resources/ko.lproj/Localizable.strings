@@ -141,7 +141,6 @@
 "untitled folder" = "제목 없는 폴더";
 "untitled snippet" = "제목 없는 스니펫";
 
-
 "Last synced: %@" = "마지막 동기화: %@";
 "Waiting for first sync…" = "첫 동기화를 기다리는 중…";
 "%d snippet" = "스니펫 %d개";
@@ -185,13 +184,6 @@
 "When you pick a clip, this version copies it to the clipboard. Mac App Store apps run in a sandbox and aren't allowed to paste into other apps for you, so you press ⌘V yourself." = "항목을 선택하면 이 버전은 클립보드에 복사합니다. Mac App Store 앱은 샌드박스에서 실행되어 다른 앱에 대신 붙여넣을 수 없으므로 ⌘V를 직접 누르세요.";
 "To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "항목을 선택한 후 자동으로 붙여넣으려면 GitHub에서 ClipMenu를 다운로드하거나 Homebrew로 설치하세요.";
 "Download ClipMenu" = "ClipMenu 다운로드";
-
-"%@ one-time purchase" = "%@ 일회성 구매";
-"Buy" = "구입";
-"Restore Purchases" = "구입 복원";
-"No previous purchase found for this Apple ID." = "이 Apple ID에 대한 이전 구매를 찾을 수 없습니다.";
-"Couldn't restore purchases. Check your connection and try again." = "구매를 복원할 수 없습니다. 연결을 확인한 후 다시 시도하세요.";
-"Try Again" = "다시 시도";
 
 "Clipboard History Export" = "클립보드 기록 내보내기";
 "Back up now" = "지금 백업";

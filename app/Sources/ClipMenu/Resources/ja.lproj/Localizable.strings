@@ -141,7 +141,6 @@
 "untitled folder" = "名称未設定フォルダ";
 "untitled snippet" = "名称未設定スニペット";
 
-
 "Last synced: %@" = "最終同期: %@";
 "Waiting for first sync…" = "最初の同期を待っています…";
 "%d snippet" = "%d 個のスニペット";
@@ -185,13 +184,6 @@
 "When you pick a clip, this version copies it to the clipboard. Mac App Store apps run in a sandbox and aren't allowed to paste into other apps for you, so you press ⌘V yourself." = "クリップを選ぶと、このバージョンはそれをクリップボードにコピーします。Mac App Store のアプリはサンドボックスで動作し、他のアプリへ代わりにペーストすることが許可されていないため、⌘V はご自身で押してください。";
 "To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "クリップを選択した後に自動でペーストするには、GitHub から ClipMenu をダウンロードするか、Homebrew でインストールしてください。";
 "Download ClipMenu" = "ClipMenu をダウンロード";
-
-"Restore Purchases" = "購入を復元";
-"%@ one-time purchase" = "%@ 買い切り";
-"Buy" = "購入";
-"No previous purchase found for this Apple ID." = "この Apple ID では以前の購入が見つかりませんでした。";
-"Couldn't restore purchases. Check your connection and try again." = "購入を復元できませんでした。接続を確認してもう一度お試しください。";
-"Try Again" = "もう一度試す";
 
 "Clipboard History Export" = "クリップボード履歴の書き出し";
 "Back up now" = "今すぐバックアップ";

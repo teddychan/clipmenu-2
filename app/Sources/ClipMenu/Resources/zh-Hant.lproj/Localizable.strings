@@ -141,7 +141,6 @@
 "untitled folder" = "未命名資料夾";
 "untitled snippet" = "未命名片段";
 
-
 "Last synced: %@" = "上次同步：%@";
 "Waiting for first sync…" = "正在等待首次同步…";
 "%d snippet" = "%d 個片段";
@@ -185,15 +184,6 @@
 "When you pick a clip, this version copies it to the clipboard. Mac App Store apps run in a sandbox and aren't allowed to paste into other apps for you, so you press ⌘V yourself." = "選擇一個項目時，此版本會將其複製到剪貼簿。Mac App Store 應用程式在沙盒中執行，無法替你貼上到其他應用程式，因此請自行按 ⌘V。";
 "To paste automatically after selecting a clip, download ClipMenu from GitHub or install it with Homebrew." = "若要在選擇項目後自動貼上，請從 GitHub 下載 ClipMenu 或使用 Homebrew 安裝。";
 "Download ClipMenu" = "下載 ClipMenu";
-
-"%@ one-time purchase" = "%@ 一次性購買";
-"Buy" = "購買";
-"Restore Purchases" = "回復購買項目";
-
-/* Paywall gate (App Store build) */
-"No previous purchase found for this Apple ID." = "找不到此 Apple ID 的先前購買項目。";
-"Couldn't restore purchases. Check your connection and try again." = "無法恢復購買。請檢查網路連線後重試。";
-"Try Again" = "重試";
 
 "Clipboard History Export" = "剪貼簿歷史匯出";
 "Back up now" = "立即備份";
