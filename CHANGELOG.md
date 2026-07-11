@@ -5,6 +5,11 @@ Developer-facing notes for ClipMenu. User-facing release notes live in
 
 ## Unreleased
 
+## 2.17.11 — 2026-07-11
+
+Maintenance release: test-coverage and internal quality only — no user-facing
+behavior changes (the app is functionally identical to 2.17.10).
+
 ### Tests & coverage — phase 2 (SwiftUI + reorder + backup/restore)
 
 Pushed coverage from the logic layer into the SwiftUI/UI layer and the
