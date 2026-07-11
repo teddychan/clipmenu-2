@@ -24,6 +24,10 @@ let sparkleEnabled = ProcessInfo.processInfo.environment["CLIPMENU_SPARKLE"] == 
 
 var packageDependencies: [Package.Dependency] = [
     .package(url: "https://github.com/teddychan/dragon-kit", from: "1.3.0"),
+    // Test-only: SwiftUI view-tree inspection so the app's SwiftUI panes/views can
+    // be asserted in unit tests. Linked ONLY by the ClipMenuTests target — never by
+    // the app product — so it ships in no build.
+    .package(url: "https://github.com/nalexn/ViewInspector", from: "0.10.0"),
 ]
 var clipMenuDependencies: [Target.Dependency] = [
     .product(name: "DragonKit", package: "dragon-kit"),
@@ -89,7 +93,10 @@ let package = Package(
         ),
         .testTarget(
             name: "ClipMenuTests",
-            dependencies: ["ClipMenu"],
+            dependencies: [
+                "ClipMenu",
+                .product(name: "ViewInspector", package: "ViewInspector"),
+            ],
             path: "Tests/ClipMenuTests",
             swiftSettings: clipMenuTestSwiftSettings
         )

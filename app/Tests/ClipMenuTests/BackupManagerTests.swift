@@ -49,7 +49,11 @@ actor MockBackupStore: BackupStore {
 }
 
 @MainActor
-@Suite struct BackupManagerTests {
+// Serialized: backUpNow()/runDailyCheck() call BackupManager.cacheBaseline(), which
+// writes the process-wide UserDefaults.standard lastSnippetBackupDate/Hash keys. With
+// the suite's tests running in parallel they clobber each other's baseline, so a
+// dailyCheck could see a foreign "unchanged" hash and skip the backup it expects.
+@Suite(.serialized) struct BackupManagerTests {
 
     private func makeContext() throws -> ModelContext {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
